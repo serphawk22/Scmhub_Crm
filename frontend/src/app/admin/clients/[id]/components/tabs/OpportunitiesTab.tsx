@@ -112,7 +112,7 @@ function ProbabilityBar({ stage, language }: { stage: string, language: string }
   );
 }
 
-export default function OpportunitiesTab({ client, timeline, serviceRequests, research: initialResearch, emails = [] }: OpportunitiesTabProps) {
+export default function OpportunitiesTab({ client, timeline, serviceRequests, research, emails = [] }: OpportunitiesTabProps) {
   const { language } = useLanguage();
   // Derive current stage from client status + service requests
   const hasAcceptedProposal = serviceRequests.some(r => r.status === 'Accepted');
@@ -177,62 +177,9 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
   }
 
   const [isAutoResearching, setIsAutoResearching] = React.useState(false);
-  const [researchPending, setResearchPending] = React.useState<boolean>(() => {
-    try { return localStorage.getItem(`research_pending_client_${client?.id}`) === 'true'; } catch { return false; }
-  });
-
-  // Live research state — starts from prop, updated by polling
-  const [liveResearch, setLiveResearch] = React.useState<any>(initialResearch || null);
-
-  // Sync from parent prop changes (on first load)
-  React.useEffect(() => {
-    if (initialResearch && !liveResearch) setLiveResearch(initialResearch);
-  }, [initialResearch]);
-
-  // Always read from liveResearch (which includes both prop and polled data)
-  const research = liveResearch;
-
-  // Auto-poll for results when research is pending
-  React.useEffect(() => {
-    if (!researchPending || !client?.id) return;
-    let cancelled = false;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 30; // 30 × 8s = 4 min max
-    const poll = async () => {
-      if (cancelled || attempts >= MAX_ATTEMPTS) return;
-      attempts++;
-      try {
-        const res = await fetch(`${API_BASE_URL}/clients/${client.id}/research`);
-        if (res.ok) {
-          const data = await res.json();
-          const r = data.research;
-          if (r && (r.company_overview || r.email_agent_data)) {
-            if (!cancelled) {
-              setLiveResearch(r);
-              setResearchPending(false);
-              try { localStorage.removeItem(`research_pending_client_${client.id}`); } catch {}
-            }
-            return; // stop polling
-          }
-        }
-      } catch (e) {}
-      if (!cancelled) setTimeout(poll, 8000);
-    };
-    const timer = setTimeout(poll, 8000); // first check after 8s
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [researchPending, client?.id]);
-
   const [isExtracting, setIsExtracting] = React.useState(false);
   const [extractResult, setExtractResult] = React.useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = React.useState<string | null>(null);
-
-  // Clear pending flag if research is now available (from parent prop)
-  React.useEffect(() => {
-    if (initialResearch?.company_overview || initialResearch?.email_agent_data) {
-      try { localStorage.removeItem(`research_pending_client_${client?.id}`); } catch {}
-      setResearchPending(false);
-    }
-  }, [initialResearch, client?.id]);
 
   const toErrorMessage = (data: any, fallback: string): string => {
     const d = data?.detail ?? data?.message ?? data?.error ?? data;
@@ -323,13 +270,9 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
       const res = await fetch(`${API_BASE_URL}/clients/${client?.id}/auto-research`, {
         method: 'POST'
       });
-      if (res.ok) {
-        try { localStorage.setItem(`research_pending_client_${client?.id}`, 'true'); } catch {}
-        setResearchPending(true);
-      }
+      // Research fires in background — no auto-refresh
+      setIsAutoResearching(false);
     } catch (e) {
-      // silent
-    } finally {
       setIsAutoResearching(false);
     }
   };
@@ -386,6 +329,8 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-700 dark:border-slate-800 pb-4 overflow-x-auto">
         {[
           { id: 'presales', label: language === 'es' ? 'Análisis del Agente IA' : 'AI Agent Analysis', icon: Brain },
+          ...(hasEmailAgentData ? [{ id: 'emails', label: language === 'es' ? 'Correos Salientes' : 'Outbound Emails', icon: Mail }] : []),
+
         ].map(t => (
           <button
             key={t.id}
@@ -434,21 +379,6 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
                 {isExtracting ? 'Extracting Services...' : 'Extract Services from Website'}
               </button>
             </div>
-
-            {researchPending && (
-              <div className="mb-4 flex items-center justify-between gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Loader2 size={14} className="animate-spin text-indigo-600 shrink-0" />
-                  <p className="text-xs font-bold text-indigo-700">⏳ AI research is running in the background (~2 min). Reload the page to see results.</p>
-                </div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors"
-                >
-                  Check Results
-                </button>
-              </div>
-            )}
 
             {extractResult && (
               <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">

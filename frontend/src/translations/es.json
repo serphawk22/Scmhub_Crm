@@ -1798,6 +1798,8 @@
     "send_failed": "Error al enviar",
     "pdf_sent_to": "PDF enviado a",
     "pdf": "PDF",
+    "csv": "CSV",
+    "xlsx": "Excel",
     "email": "Email",
     "select_items": "Seleccionar Elementos",
     "select_items_title": "Seleccionar Elementos",

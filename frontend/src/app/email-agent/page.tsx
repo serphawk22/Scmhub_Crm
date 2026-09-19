@@ -222,6 +222,19 @@ export default function EmailAgentPage() {
       }
       
       const data = await res.json();
+
+      // If N8N is down or returned error, don't show a broken ResultCard — show chat error instead
+      if (data._n8n_error) {
+        setMessages(prev => {
+          const filtered = prev.filter(m => m.type !== "loading");
+          return [
+            ...filtered,
+            { id: `msg-${Date.now()}`, role: "ai", type: "text", content: data._error_message || t("email_agent.research_error") }
+          ];
+        });
+        setChatStep("website_url");
+        return;
+      }
       
       setMessages(prev => {
         const filtered = prev.filter(m => m.type !== "loading");

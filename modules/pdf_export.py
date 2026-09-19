@@ -370,18 +370,26 @@ def catalog_pdf(products, currency="MXN"):
 
 
 def send_pdf_email(to_email, subject, body, pdf_bytes, filename):
-    """Send a PDF attachment via the configured SMTP. Best-effort."""
-    from modules.email_sender import send_email_outlook
+    """Send a PDF attachment via the configured SMTP. Best-effort.
+    The body is automatically wrapped in the branded SerpHawk email template
+    with the logo in the header and the attachment clearly called out."""
+    from modules.email_sender import send_email_outlook, branded_email, _attachment_note
     sender = os.environ.get("EMAIL_SENDER") or os.environ.get("OUTLOOK_EMAIL") or ""
     password = os.environ.get("EMAIL_PASSWORD") or os.environ.get("OUTLOOK_PASSWORD") or ""
     if not sender or not password:
         raise RuntimeError("SMTP not configured (missing EMAIL_SENDER/EMAIL_PASSWORD)")
+    smtp_server = os.environ.get("SMTP_SERVER") or os.environ.get("EMAIL_HOST") or "mail.serphawk.in"
+    smtp_port = int(os.environ.get("SMTP_PORT") or os.environ.get("EMAIL_PORT") or 587)
+    content = body if isinstance(body, str) and body.lstrip().startswith("<") else f"<p>{body}</p>"
+    full_body = branded_email(title=subject, body_html=content + _attachment_note(filename))
     send_email_outlook(
         to_email=to_email,
         subject=subject,
-        body=body,
+        body=full_body,
         sender_email=sender,
         sender_password=password,
+        smtp_server=smtp_server,
+        smtp_port=smtp_port,
         attachments=[(filename, pdf_bytes, "application/pdf")],
     )
 
@@ -448,31 +456,218 @@ def _single_order_card_story(label, fields, doc):
     return story
 
 
-def single_sales_order_pdf(order, client_name=None, lead_name=None):
-    """Generate a single sales order PDF card."""
+def single_sales_order_pdf(order, client_name=None, lead_name=None, party=None):
+    """Generate a branded, good-looking single Sales Order PDF (A4 portrait).
+
+    ``order`` is a dict (e.g. ``SalesOrder.model_dump()``). ``party`` is an
+    optional dict with keys: name, company, email, phone, address.
+    """
+    from datetime import datetime as _dt
+
+    party = party or {}
+    currency = str(order.get("currency") or "USD")
+    qty_total = float(order.get("grand_total") or 0)
+    qn = order.get("order_number") or str(order.get("id") or "")
+
+    created = order.get("created_at") or ""
+    try:
+        if hasattr(created, "strftime"):
+            created = created.strftime("%b %d, %Y")
+        else:
+            created = _dt.fromisoformat(str(created).replace("Z", "+00:00")).strftime("%b %d, %Y")
+    except Exception:
+        created = str(created)[:10] or ""
+
+    delivery = order.get("delivery_date") or "—"
+    if hasattr(delivery, "strftime"):
+        delivery = delivery.strftime("%b %d, %Y")
+
+    status = (order.get("status") or "—").strip()
+    if not status:
+        status = "—"
+    status_color = {
+        "Draft": colors.HexColor("#64748b"),
+        "Pending": colors.HexColor("#d97706"),
+        "Sent": colors.HexColor("#059669"),
+        "Received": colors.HexColor("#2563eb"),
+        "Canceled": colors.HexColor("#dc2626"),
+        "Cancelled": colors.HexColor("#dc2626"),
+    }.get(status, colors.HexColor("#64748b"))
+
+    def P(text, style):
+        return Paragraph(str(text or "") if text is not None else "", style)
+
+    def cell(fs=9, ls=12, color=_RECEIPT_INK, align=TA_LEFT, bold=False, wrap=True):
+        return ParagraphStyle(
+            "soP", fontName="Helvetica-Bold" if bold else "Helvetica",
+            fontSize=fs, leading=ls, textColor=color, alignment=align,
+            spaceBefore=0, spaceAfter=0, wordWrap="CJK" if wrap else None,
+        )
+
+    def zero_pad_style():
+        return TableStyle([
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ])
+
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
-                            topMargin=15 * mm, bottomMargin=15 * mm)
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=15 * mm, rightMargin=15 * mm,
+        topMargin=16 * mm, bottomMargin=20 * mm,
+        title=f"SERPHAWK — Sales Order {qn}", author="SERPHAWK",
+    )
+    story = []
 
-    party = client_name or lead_name or "—"
-    created = ""
-    if order.get("created_at"):
-        try:
-            created = order["created_at"][:10]
-        except Exception:
-            created = str(order["created_at"])[:10]
-
-    fields = [
-        ("Order Number", order.get("order_number") or "—"),
-        ("Status", order.get("status") or "—"),
-        ("Client / Lead", party),
-        ("Grand Total", f"{order.get('currency', 'USD')} {order.get('grand_total', 0):,.2f}"),
-        ("Delivery Date", order.get("delivery_date") or "—"),
-        ("Notes", order.get("notes") or "—"),
-        ("Created", created),
+    # ── 1) Header ────────────────────────────────────────────────────────
+    left_parts = [
+        Paragraph("SERPHAWK", ParagraphStyle(
+            "soBrand", fontName="Helvetica-Bold", fontSize=17, leading=20,
+            textColor=_RECEIPT_INK, wordWrap="CJK")),
+        Paragraph("Sales Order", ParagraphStyle(
+            "soSub", fontName="Helvetica", fontSize=9.5, leading=12,
+            textColor=_RECEIPT_SUBTLE, wordWrap="CJK", spaceBefore=3)),
     ]
-    story = _brand_header(doc, "Sales Order")
-    story += _single_order_card_story(f"Sales Order — {order.get('order_number') or order.get('id', '')}", fields, doc)
+    left_cell = Table([[p] for p in left_parts], colWidths=[None])
+    left_cell.setStyle(zero_pad_style())
+
+    meta = []
+    if qn:
+        meta.append(P(f"<b>Order:</b>&nbsp;&nbsp;{qn}", ParagraphStyle(
+            "soMeta0", fontSize=11, leading=14, textColor=_RECEIPT_INK,
+            alignment=TA_RIGHT, wordWrap="CJK")))
+    if created:
+        meta.append(P(f"<b>Date:</b>&nbsp;&nbsp;{created}", ParagraphStyle(
+            "soMeta1", fontSize=8.5, leading=12, textColor=_RECEIPT_FAINT,
+            alignment=TA_RIGHT, wordWrap="CJK")))
+    if meta:
+        right_cell = Table([[p] for p in meta], colWidths=[None])
+        meta_style = [
+            ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]
+        for mi in range(len(meta)):
+            meta_style.append(("TOPPADDING", (0, mi), (0, mi), 6 if mi else 2))
+        right_cell.setStyle(TableStyle(meta_style))
+        header_table = Table([[left_cell, right_cell]], colWidths=[100 * mm, 80 * mm])
+    else:
+        header_table = Table([[left_cell]], colWidths=[180 * mm])
+    header_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header_table)
+    story.append(Spacer(1, 5 * mm))
+    story.append(HRFlowable(width="100%", thickness=0.6, color=_RECEIPT_LINE, spaceBefore=0, spaceAfter=0))
+    story.append(Spacer(1, 6 * mm))
+
+    # ── 2) ORDER FOR ─────────────────────────────────────────────────────
+    handle = party.get("name") or order.get("recipient_name") or client_name or lead_name or "—"
+    bill_lines = [P(handle, cell(11, 14, _RECEIPT_INK, bold=True, wrap=True))]
+    for label, value in [("Company", party.get("company")), ("Email", party.get("email")),
+                         ("Phone", party.get("phone")), ("Address", party.get("address"))]:
+        if value:
+            bill_lines.append(P(f"<b>{label}:</b> {value}", cell(8.5, 12, _RECEIPT_SUBTLE)))
+    bill_heading = Table([[P("ORDER FOR", cell(7.5, 9, _RECEIPT_FAINT, bold=True))]], colWidths=[70 * mm])
+    bill_heading.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    info_cell = Table([[p] for p in bill_lines], colWidths=[None])
+    info_cell.setStyle(zero_pad_style())
+    story.append(Table([[bill_heading, info_cell]], colWidths=[70 * mm, 110 * mm], style=TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ])))
+    story.append(Spacer(1, 8 * mm))
+
+    # ── 3) Details grid ──────────────────────────────────────────────────
+    def info_box(label, value, value_color=_RECEIPT_INK):
+        inner = Table([
+            [P(label.upper(), cell(6.5, 8, _RECEIPT_FAINT, bold=True))],
+            [P(str(value), cell(10, 13, value_color, bold=True, wrap=True))],
+        ], colWidths=[None])
+        inner.setStyle(TableStyle([
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (0, 0), 0),
+            ("TOPPADDING", (0, 1), (0, 1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        box = Table([[inner]], colWidths=[None])
+        box.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+            ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#e2e8f0")),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 8),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ]))
+        return box
+
+    grid = Table([
+        [info_box("Amount", f"{currency} {qty_total:,.2f}"),
+         info_box("Delivery Date", delivery),
+         info_box("Status", status, value_color=status_color)],
+        [info_box("Order #", qn or "—"),
+         info_box("Created", created or "—"),
+         info_box("Currency", currency)],
+    ], colWidths=[60 * mm, 60 * mm, 60 * mm])
+    grid.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story.append(grid)
+
+    notes = order.get("notes")
+    if notes:
+        story.append(Spacer(1, 5 * mm))
+        story.append(info_box("Notes", notes))
+
+    # ── 4) Grand total panel ─────────────────────────────────────────────
+    total_inner = Table([
+        [P("GRAND TOTAL", cell(8, 10, colors.HexColor("#b9c6f9"), bold=True))],
+        [P(f"{currency} {qty_total:,.2f}", cell(17, 22, colors.white, bold=True, wrap=True))],
+    ], colWidths=[None])
+    total_inner.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (0, 0), 0),
+        ("TOPPADDING", (0, 1), (0, 1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    total_panel = Table([[total_inner]], colWidths=[None])
+    total_panel.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#1d4ed8")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 14),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 14),
+        ("TOPPADDING", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ]))
+    story.append(Spacer(1, 8 * mm))
+    story.append(Table([[Spacer(1, 1), total_panel]], colWidths=[110 * mm, 70 * mm], style=TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ])))
+
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
     return buf.getvalue()
 

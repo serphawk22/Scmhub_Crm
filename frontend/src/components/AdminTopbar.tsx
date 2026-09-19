@@ -322,64 +322,6 @@ export function AdminTopbar() {
           </div>
         </motion.button>
 
-        {/* Notifications */}
-        <div className="relative" ref={notifRef}>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleOpenNotifs}
-            className="relative p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:bg-zinc-800 transition-all"
-          >
-            <Bell className="w-4.5 h-4.5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-1">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </motion.button>
-
-          <AnimatePresence>
-            {notifOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-xl overflow-hidden z-50"
-                style={{ background: "var(--bg-card)", border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)" }}
-              >
-                <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border)" }}>
-                  <p className="text-[13px] font-black" style={{ color: "var(--text-primary)" }}>{t("navigation.notifications")}</p>
-                  <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{unreadCount > 0 ? `${unreadCount} ${t("notifications.unread")}` : t("notifications.allCaughtUp")}</p>
-                </div>
-                {recentNotifs.length > 0 ? recentNotifs.map((n: any) => (
-                  <div key={n.id} className="flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors th-hover">
-                    <span className="text-lg mt-0.5">
-                      {n.type === "success" ? "✅" : n.type === "warning" ? "⚠️" : n.type === "error" ? "❌" : "🔔"}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-bold" style={{ color: "var(--text-primary)" }}>{n.title}</p>
-                      <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>{n.message}</p>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0 text-[10px] text-slate-400">
-                      <Clock className="w-2.5 h-2.5" />
-                      {new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
-                )) : (
-                  <div className="px-4 py-6 text-center text-[12px] text-slate-400">{t("notifications.noNotifications")}</div>
-                )}
-                <div className="px-4 py-2.5" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
-                  <Link href="/notifications" onClick={() => setNotifOpen(false)}
-                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 w-full text-center block transition-colors">
-                    {t("notifications.viewAll")}
-                  </Link>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
         {/* Global Activity Feed Toggle */}
         <motion.button
           whileHover={{ scale: 1.05 }}

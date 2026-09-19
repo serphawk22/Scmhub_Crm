@@ -1806,6 +1806,8 @@
     "send_failed": "Send failed",
     "pdf_sent_to": "PDF sent to",
     "pdf": "PDF",
+    "csv": "CSV",
+    "xlsx": "Excel",
     "email": "Email",
     "select_items": "Select Items",
     "select_items_title": "Select Items",

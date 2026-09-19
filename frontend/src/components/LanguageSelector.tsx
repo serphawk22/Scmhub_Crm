@@ -13,10 +13,13 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ className }: LanguageSelectorProps = {}) {
-  const { t, i18n } = useTranslation();
-  const { setLanguage } = useLanguage();
+  const { i18n } = useTranslation();
+  const { setLanguage, language } = useLanguage();
 
-  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
+  // The active state follows LanguageContext, the same source that actually
+  // translates the app. Tracking react-i18next's `i18n.language` here drifts
+  // out of sync (content switches but the highlighted button does not).
+  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
   // Limit to English and Spanish only
   const displayedLanguages = SUPPORTED_LANGUAGES.filter(l => l.code === 'en' || l.code === 'es');
 

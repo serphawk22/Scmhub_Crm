@@ -11,6 +11,12 @@ interface Toast {
   text: string;
 }
 
+interface ExportFormat {
+  format: string;
+  ext: string;
+  label: string;
+}
+
 interface ExportActionsProps {
   downloadUrl: string;
   emailUrl: string;
@@ -19,9 +25,10 @@ interface ExportActionsProps {
   items?: { id: number; name: string; code?: string | null }[];
   itemDownloadUrl?: (id: number) => string;
   multiDownloadUrl?: string;
+  formats?: ExportFormat[];
 }
 
-export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export", items = [], itemDownloadUrl, multiDownloadUrl }: ExportActionsProps) {
+export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export", items = [], itemDownloadUrl, multiDownloadUrl, formats: customFormats }: ExportActionsProps) {
   const { t } = useLanguage();
   const [showEmail, setShowEmail] = useState(false);
   const [email, setEmail] = useState("");
@@ -29,6 +36,10 @@ export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export
   const [showPicker, setShowPicker] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [toast, setToast] = useState<Toast | null>(null);
+
+  const formats: ExportFormat[] = customFormats ?? [
+    { format: "pdf", ext: "pdf", label: t("export_actions.pdf") },
+  ];
 
   const notify = (type: "ok" | "err", text: unknown) => {
     setToast({ type, text: typeof text === "string" ? text : errorText(text, t("export_actions.download_failed")) });
@@ -51,10 +62,14 @@ export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export
     return fallback;
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (fmt: ExportFormat) => {
     setBusy("download");
     try {
-      const res = await fetch(downloadUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const res = await fetch(downloadUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: customFormats ? JSON.stringify({ format: fmt.format }) : "{}",
+      });
       if (!res.ok) {
         const d = await res.json().catch(() => ({}));
         notify("err", errorText(d.detail, t("export_actions.download_failed")));
@@ -64,7 +79,7 @@ export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
+      a.download = filename.replace(/\.pdf$/i, `.${fmt.ext}`);
       a.click();
       URL.revokeObjectURL(url);
       notify("ok", t("export_actions.pdf_downloaded"));
@@ -130,11 +145,13 @@ export function ExportActions({ downloadUrl, emailUrl, filename, label = "Export
 
   return (
     <div className="relative flex items-center gap-2">
-      <button onClick={handleDownload} disabled={busy === "download" || busy === "email"}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-zinc-200 hover:border-blue-500 disabled:opacity-60 transition-all">
-        {busy === "download" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-        {t("export_actions.pdf")}
-      </button>
+      {formats.map(fmt => (
+        <button key={fmt.format} onClick={() => handleDownload(fmt)} disabled={busy === "download" || busy === "email"}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-zinc-200 hover:border-blue-500 disabled:opacity-60 transition-all">
+          {busy === "download" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {fmt.label}
+        </button>
+      ))}
       <button onClick={() => setShowEmail(true)} disabled={busy === "download" || busy === "email"}
         className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-zinc-200 hover:border-blue-500 disabled:opacity-60 transition-all">
         <Mail className="w-4 h-4" /> {t("export_actions.email")}

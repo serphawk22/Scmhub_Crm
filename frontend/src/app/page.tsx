@@ -40,6 +40,14 @@ interface AdminStats {
   totalCalls: number; totalEmployees: number; totalInterns: number;
   totalMarketplaceServices: number;
   chartLabels: string[]; activityChart: number[]; emailChart: number[]; callChart: number[];
+  revenueData: { name: string; revenue: number; expenses: number }[];
+  pipelineData: { stage: string; count: number }[];
+  revenue: number; pipelineValue: number;
+  totalQuotesValue: number; acceptedQuotesValue: number; totalQuotesCount: number; acceptedQuotesCount: number;
+  totalSalesOrdersValue: number; fulfilledSalesOrdersValue: number; totalSalesOrdersCount: number; fulfilledSalesOrdersCount: number;
+  totalPurchaseOrdersValue: number; receivedPurchaseOrdersValue: number; totalPurchaseOrdersCount: number; receivedPurchaseOrdersCount: number;
+  totalInvoicesValue: number; paidInvoicesValue: number; sentInvoicesValue: number;
+  overdueInvoicesValue: number; partialInvoicesValue: number; paidInvoicesCount: number; totalInvoicesCount: number;
   recentActivities: RecentActivity[];
 }
 interface ClientStats {

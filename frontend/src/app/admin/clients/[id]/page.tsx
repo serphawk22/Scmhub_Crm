@@ -546,26 +546,18 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
             </div>
             <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>Agent Analysis is pending</p>
             <p style={{ fontSize: 13, marginTop: 4, maxWidth: 400, margin: '8px auto 24px' }}>Click below to manually trigger a deep, comprehensive AI investigation of this client. This will analyze their website, discover their core ICPs, find competitors, and write a detailed GTM markdown report.</p>
-            {analysisResearchPending && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '10px 16px', background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 10, marginBottom: 16, maxWidth: 480, margin: '0 auto 16px' }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#4338ca' }}>⏳ AI research is running in the background (~2 min).</span>
-                <button onClick={() => window.location.reload()} style={{ padding: '6px 14px', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                  Check Results
-                </button>
-              </div>
-            )}
             <button 
               onClick={handleGenerateAnalysis}
-              disabled={isGeneratingResearch || analysisResearchPending}
+              disabled={isGeneratingResearch}
               style={{
                 padding: '10px 24px',
-                background: (isGeneratingResearch || analysisResearchPending) ? '#94a3b8' : '#4f46e5',
+                background: isGeneratingResearch ? '#94a3b8' : '#4f46e5',
                 color: '#fff',
                 border: 'none',
                 borderRadius: 8,
                 fontSize: 14,
                 fontWeight: 600,
-                cursor: (isGeneratingResearch || analysisResearchPending) ? 'not-allowed' : 'pointer',
+                cursor: isGeneratingResearch ? 'not-allowed' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
@@ -574,15 +566,12 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
             >
               {isGeneratingResearch ? (
                 <>Generating... Please wait</>
-              ) : analysisResearchPending ? (
-                <>Research in Progress...</>
               ) : (
                 <><Target size={16} /> Generate Comprehensive Analysis</>
               )}
             </button>
           </div>
           );
-
         }})()}
 
       </CollapsibleSection>
@@ -754,9 +743,6 @@ export default function AdminClientDetailPage() {
   const [files, setFiles]                 = useState<any[]>([]);
   const [research, setResearch]           = useState<any>(null);
   const [isGeneratingResearch, setIsGeneratingResearch] = useState(false);
-  const [analysisResearchPending, setAnalysisResearchPending] = useState<boolean>(() => {
-    try { return localStorage.getItem(`research_pending_client_${id}`) === 'true'; } catch { return false; }
-  });
 
   // UI state
   const [activeTab, setActiveTab]         = useState('overview');
@@ -830,14 +816,6 @@ export default function AdminClientDetailPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Clear analysis pending flag when research data is available
-  useEffect(() => {
-    if (research?.company_overview || research?.email_agent_data) {
-      try { localStorage.removeItem(`research_pending_client_${id}`); } catch {}
-      setAnalysisResearchPending(false);
-    }
-  }, [research, id]);
-
   useEffect(() => {
     const handleRefresh = () => fetchAll();
     window.addEventListener('refresh-client-data', handleRefresh);
@@ -881,11 +859,8 @@ export default function AdminClientDetailPage() {
     if (!id) return;
     setIsGeneratingResearch(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
-      if (res.ok) {
-        try { localStorage.setItem(`research_pending_client_${id}`, 'true'); } catch {}
-        setAnalysisResearchPending(true);
-      }
+      await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
+      // Research runs in background — no popup, no auto-refresh
     } catch (e) {
       // silent
     } finally {

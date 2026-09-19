@@ -1,262 +1,375 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
+import { StickyNote, Users, Plus, Search, MoreVertical, X, Check, Loader2 } from "lucide-react";
+import { API_BASE_URL } from '@/config';
+import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { FolderKanban, Plus, Search, Zap, Calendar, CheckCircle2, Clock3, Filter, ArrowUpRight } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
 import { useRole } from "@/context/RoleContext";
-
-const initialProjects = [
-  {
-    id: 1,
-    name: "Website Rebuild",
-    status: "Active",
-    progress: 72,
-    description: "Modernize the SEO site, improve conversion paths, and ship the updated content stack.",
-    updatedAt: "2026-09-15",
-    owner: "Alicia",
-  },
-  {
-    id: 2,
-    name: "International PPC Sprint",
-    status: "Planning",
-    progress: 18,
-    description: "Audit campaign structure across key regions and build a launch plan for priority markets.",
-    updatedAt: "2026-09-12",
-    owner: "Nina",
-  },
-  {
-    id: 3,
-    name: "Content Hub Refresh",
-    status: "Completed",
-    progress: 100,
-    description: "Publish the refreshed pillar and cluster content architecture with performance optimization.",
-    updatedAt: "2026-09-10",
-    owner: "Chris",
-  },
-];
+import PageGuide from '@/components/PageGuide';
+import DemoLimits from '@/components/DemoLimits';
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ProjectsPage() {
   const { t } = useLanguage();
-  const { role } = useRole();
-  const [projects, setProjects] = useState(initialProjects);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    status: "Planning",
-    progress: 20,
-  });
+  const { role, user } = useRole();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form State
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("Planning");
+  const [progress, setProgress] = useState(0);
+  const [projectType, setProjectType] = useState("Development");
+  const [clientId, setClientId] = useState("");
+  const [leadId, setLeadId] = useState("");
+  const [projectMemberIds, setProjectMemberIds] = useState<number[]>([]);
 
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const matchesSearch =
-        !query ||
-        project.name.toLowerCase().includes(query.toLowerCase()) ||
-        project.description.toLowerCase().includes(query.toLowerCase());
-      const matchesStatus = statusFilter === "All" || project.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [projects, query, statusFilter]);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [availableClients, setAvailableClients] = useState<any[]>([]);
+  const [availableLeads, setAvailableLeads] = useState<any[]>([]);
 
-  const handleCreate = () => {
-    if (!form.name.trim()) return;
-    setProjects((current) => [
-      {
-        id: Date.now(),
-        name: form.name,
-        description: form.description || "New project created in the CRM.",
-        status: form.status,
-        progress: Number(form.progress),
-        updatedAt: new Date().toISOString().slice(0, 10),
-        owner: role || "Admin",
-      },
-      ...current,
-    ]);
-    setForm({ name: "", description: "", status: "Planning", progress: 20 });
-    setShowCreate(false);
+  useEffect(() => {
+    if (showCreateModal) {
+      fetch(`${API_BASE_URL}/users`).then(r => r.json()).then(d => setAvailableUsers(d.users || []));
+      fetch(`${API_BASE_URL}/clients`).then(r => r.json()).then(d => setAvailableClients(d.clients || []));
+      fetch(`${API_BASE_URL}/leads`).then(r => r.json()).then(d => setAvailableLeads(d.leads || []));
+    }
+  }, [showCreateModal]);
+
+  const fetchProjects = async () => {
+    try {
+      const url = new URL(`${API_BASE_URL}/projects`);
+      if (role === 'Employee' && user?.id) {
+        url.searchParams.append('member_id', String(user.id));
+      }
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      setProjects(data.projects || []);
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const stats = [
-    { label: "Total", value: projects.length, color: "bg-indigo-500/10 text-indigo-600" },
-    { label: "Active", value: projects.filter((p) => p.status === "Active").length, color: "bg-blue-500/10 text-blue-600" },
-    { label: "Planning", value: projects.filter((p) => p.status === "Planning").length, color: "bg-amber-500/10 text-amber-600" },
-    { label: "Completed", value: projects.filter((p) => p.status === "Completed").length, color: "bg-emerald-500/10 text-emerald-600" },
-  ];
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/projects`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name, 
+          description, 
+          status, 
+          progress,
+          project_type: projectType,
+          clientId: clientId ? parseInt(clientId) : null,
+          leadId: leadId ? parseInt(leadId) : null,
+          projectMemberIds
+        })
+      });
+      if (res.ok) {
+        setShowCreateModal(false);
+        fetchProjects();
+        // Reset form
+        setName("");
+        setDescription("");
+        setStatus("Planning");
+        setProgress(0);
+        setProjectType("Development");
+        setClientId("");
+        setLeadId("");
+        setProjectMemberIds([]);
+      }
+    } catch (error) {
+      console.error("Failed to create project:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const updateProjectStatus = async (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newStatus = e.target.value;
+    try {
+      await fetch(`${API_BASE_URL}/projects/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      fetchProjects();
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 p-5 md:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-lg">
-              <FolderKanban className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500">Projects</p>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white">{t("projects.title")}</h1>
-            </div>
-          </div>
-
-          {(role === "Admin" || role === "Employee" || role === "Demo") && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-700 dark:bg-white dark:text-slate-900"
-            >
-              <Plus className="h-4 w-4" />
-              {t("projects.new_project")}
-            </button>
-          )}
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{t("projects.title")}</h1>
+          <p className="text-gray-500 font-medium">{t("projects.subtitle")}</p>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-              <div className={`inline-flex rounded-xl px-2.5 py-2 text-xs font-bold ${stat.color}`}>
-                {stat.label}
-              </div>
-              <div className="mt-4 text-3xl font-black text-slate-900 dark:text-white">{stat.value}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search projects"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none ring-0 placeholder:text-slate-400 focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-400" />
-              {['All', 'Active', 'Planning', 'Completed'].map((value) => (
-                <button
-                  key={value}
-                  onClick={() => setStatusFilter(value)}
-                  className={`rounded-xl px-3 py-2 text-xs font-bold transition ${statusFilter === value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300'}`}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {filteredProjects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
-              className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
-            >
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300">
-                  <FolderKanban className="h-5 w-5" />
-                </div>
-                <div className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-600 dark:bg-zinc-800 dark:text-zinc-300">
-                  {project.status}
-                </div>
-              </div>
-
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h2 className="text-xl font-black text-slate-900 dark:text-white">{project.name}</h2>
-                <ArrowUpRight className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-600" />
-              </div>
-
-              <p className="min-h-[60px] text-sm text-slate-600 dark:text-zinc-300">{project.description}</p>
-
-              <div className="mt-5 space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.18em] text-slate-400 dark:text-zinc-500">
-                  <span>Progress</span>
-                  <span>{project.progress}%</span>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
-                    style={{ width: `${project.progress}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
-                <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {project.updatedAt}</span>
-                <span className="inline-flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> {project.owner}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {role === "Admin" || role === "SuperAdmin" ? (
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            {t("projects.new_project")}
+          </button>
+        ) : null}
       </div>
 
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-[30px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-indigo-500">New project</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white">Create project</h3>
+      <DemoLimits type="projects" />
+
+      <PageGuide
+        pageKey="projects"
+        title={t("projects.guide_title")}
+        description={t("projects.guide_desc")}
+        steps={[
+          { icon: '📁', text: t("projects.guide_s1") },
+          { icon: '👥', text: t("projects.guide_s2") },
+          { icon: '📊', text: t("projects.guide_s3") },
+          { icon: '💬', text: t("projects.guide_s4") },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          [1, 2, 3].map(i => <div key={i} className="h-64 bg-gray-100 dark:bg-zinc-800 animate-pulse rounded-[2.5rem]"></div>)
+        ) : projects.length > 0 ? (
+          projects.map((project: any) => (
+            <Link 
+              href={`/projects/${project.id}`} 
+              key={project.id} 
+              className="bg-white p-8 rounded-[2.5rem] border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className={cn(
+                  "p-4 rounded-2xl",
+                  project.status === 'Planning' ? "bg-amber-50 text-amber-600" :
+                  project.status === 'Active' ? "bg-blue-50 text-blue-600" :
+                  project.status === 'Completed' ? "bg-green-50 text-green-600" : "bg-gray-50 dark:bg-zinc-950 text-gray-600 dark:text-zinc-300"
+                )}>
+                  <StickyNote className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col items-end">
+                   <select
+                     value={project.status}
+                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                     onChange={(e) => updateProjectStatus(e, project.id)}
+                     className={cn(
+                       "px-2 py-1 text-[10px] font-black uppercase rounded-lg border mb-1 outline-none cursor-pointer hover:opacity-80 transition-opacity appearance-none",
+                       project.status === 'Planning' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                       project.status === 'Active' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                       project.status === 'Completed' ? "bg-green-50 text-green-600 border-green-100" : "bg-gray-50 dark:bg-zinc-950 text-gray-400 border-gray-100 dark:border-zinc-800"
+                     )}
+                   >
+                     <option value="Planning">Planning</option>
+                     <option value="Active">Active</option>
+                     <option value="Completed">Completed</option>
+                   </select>
+                   <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none">{t("projects.status")}</p>
+                </div>
               </div>
-              <button onClick={() => setShowCreate(false)} className="rounded-xl bg-slate-100 p-2 text-slate-500 dark:bg-zinc-800 dark:text-zinc-300">✕</button>
+              
+              <h3 className="text-xl font-black text-gray-900 mb-2 truncate group-hover:text-blue-600 transition-colors uppercase tracking-tight" title={project.name}>{project.name}</h3>
+              <p className="text-sm text-gray-400 font-medium mb-6 line-clamp-2 min-h-[2.5rem]">
+                {project.description || t("projects.no_description")}
+              </p>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("projects.progress")}</p>
+                  <p className="text-sm font-black text-gray-900">{project.progress}%</p>
+                </div>
+                <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className={cn(
+                      "h-full rounded-full transition-all duration-1000",
+                      project.progress > 80 ? "bg-green-500" : project.progress > 40 ? "bg-blue-500" : "bg-amber-500"
+                    )}
+                    style={{ width: `${project.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center">
+                 <div className="flex -space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-black text-blue-600 dark:text-blue-400">
+                      +{(project.employeeIds?.length || 0) + (project.internIds?.length || 0)}
+                    </div>
+                 </div>
+                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{t("projects.team_assigned")}</p>
+              </div>
+            </Link>
+          ))
+        ) : (
+          <div className="col-span-full p-20 text-center bg-gray-50 dark:bg-zinc-950 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-zinc-700">
+            <div className="w-16 h-16 bg-white dark:bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border">
+               <StickyNote className="w-8 h-8 text-gray-300" />
             </div>
+            <p className="text-xl font-black text-gray-900 dark:text-zinc-50 mb-2">{t("projects.empty_title")}</p>
+            <p className="text-gray-500 dark:text-zinc-400 font-medium max-w-xs mx-auto mb-8">{t("projects.empty_desc")}</p>
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="px-8 py-3 bg-white dark:bg-zinc-900 border-2 border-gray-900 text-gray-900 dark:text-zinc-50 rounded-2xl font-bold text-sm hover:bg-gray-900 hover:text-white transition-all shadow-sm"
+            >
+               {t("projects.create_new_project")}
+            </button>
+          </div>
+        )}
+      </div>
 
-            <div className="space-y-4">
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-8 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center bg-gray-50 dark:bg-zinc-950/50">
               <div>
-                <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-slate-500">Project name</label>
-                <input
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                  placeholder="Client migration"
+                <h2 className="text-2xl font-black text-gray-900 dark:text-zinc-50 tracking-tight">{t("projects.create_project_title")}</h2>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("projects.create_project_sub")}</p>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} className="p-3 hover:bg-white dark:bg-zinc-900 rounded-2xl transition-all shadow-sm">
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreate} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_project_title")}</label>
+                <input 
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t("projects.project_title_placeholder")} 
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-slate-500">Description</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                  placeholder="Short summary of the work and goals"
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_objective")}</label>
+                <textarea 
+                  rows={3}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={t("projects.objective_placeholder")} 
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none resize-none"
                 />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-slate-500">Status</label>
-                  <select
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_project_type")}</label>
+                <select 
+                  value={projectType}
+                  onChange={(e) => setProjectType(e.target.value)}
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none appearance-none"
+                >
+                  <option value="Development">{t("projects.type_development")}</option>
+                  <option value="Sales">{t("projects.type_sales")}</option>
+                </select>
+              </div>
+
+              {projectType === 'Sales' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_assign_client")}</label>
+                    <select 
+                      value={clientId}
+                      onChange={(e) => setClientId(e.target.value)}
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none appearance-none"
+                    >
+                      <option value="">{t("projects.none")}</option>
+                      {availableClients.map(c => <option key={c.id} value={c.id}>{c.companyName || c.email}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_assign_lead")}</label>
+                    <select 
+                      value={leadId}
+                      onChange={(e) => setLeadId(e.target.value)}
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none appearance-none"
+                    >
+                      <option value="">{t("projects.none")}</option>
+                      {availableLeads.map(l => <option key={l.id} value={l.id}>{l.name || l.email}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_assign_members")}</label>
+                <select 
+                  multiple
+                  value={projectMemberIds.map(String)}
+                  onChange={(e) => {
+                    const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                    setProjectMemberIds(selected);
+                  }}
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                  style={{ minHeight: '100px' }}
+                >
+                  {availableUsers.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+                </select>
+                <p className="text-[10px] text-gray-400 ml-1">{t("projects.ctrl_select_hint")}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_initial_status")}</label>
+                  <select 
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none appearance-none"
                   >
                     <option>Planning</option>
                     <option>Active</option>
-                    <option>Completed</option>
+                    <option>Hold</option>
                   </select>
                 </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-slate-500">Progress</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={form.progress}
-                    onChange={(e) => setForm({ ...form, progress: Number(e.target.value) })}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t("projects.field_progress")}</label>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    max="100"
+                    value={progress}
+                    onChange={(e) => setProgress(Number(e.target.value))}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-zinc-950 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button onClick={() => setShowCreate(false)} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 dark:border-zinc-700 dark:text-zinc-200">Cancel</button>
-              <button onClick={handleCreate} className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white">Create project</button>
-            </div>
+              <div className="pt-4 flex gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 px-6 py-4 bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-all"
+                >
+                  {t("projects.cancel")}
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 px-6 py-4 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black shadow-lg shadow-gray-900/20 transition-all flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  {t("projects.create_project_btn")}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

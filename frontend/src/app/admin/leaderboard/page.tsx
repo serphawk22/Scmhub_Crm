@@ -32,8 +32,8 @@ function SalesPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-40 bg-gradient-to-t from-slate-200 to-slate-100 dark:from-zinc-800 dark:to-zinc-800/50 rounded-t-xl border border-b-0 border-slate-200 dark:border-zinc-700 flex flex-col items-center pt-8 px-4 transition-all group-hover:h-44">
               <span className="font-bold text-slate-800 dark:text-zinc-200 truncate w-full text-center">{top3[1].name}</span>
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-2">{(top3[1].clients_managed ?? 0) + (top3[1].leads_managed ?? 0)} Total</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[1].clients_managed ?? 0} Clients | {top3[1].leads_managed ?? 0} Leads</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-2">${top3[1].revenue_closed.toLocaleString()}</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[1].deals_closed} Deals</span>
             </div>
           </div>
         )}
@@ -48,8 +48,8 @@ function SalesPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-52 bg-gradient-to-t from-yellow-200 via-yellow-100 to-yellow-50 dark:from-yellow-900/40 dark:via-yellow-900/20 dark:to-transparent rounded-t-xl border border-b-0 border-yellow-300 dark:border-yellow-700/50 flex flex-col items-center pt-10 px-4 transition-all group-hover:h-56 shadow-[0_0_30px_rgba(250,204,21,0.2)]">
               <span className="font-black text-lg text-yellow-900 dark:text-yellow-500 truncate w-full text-center">{top3[0].name}</span>
-              <span className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-2">{(top3[0].clients_managed ?? 0) + (top3[0].leads_managed ?? 0)} Total</span>
-              <span className="text-xs text-yellow-700 dark:text-yellow-600 uppercase tracking-wider mt-1 font-bold">{top3[0].clients_managed ?? 0} Clients | {top3[0].leads_managed ?? 0} Leads</span>
+              <span className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-2">${top3[0].revenue_closed.toLocaleString()}</span>
+              <span className="text-xs text-yellow-700 dark:text-yellow-600 uppercase tracking-wider mt-1 font-bold">{top3[0].deals_closed} Deals Won</span>
             </div>
           </div>
         )}
@@ -60,8 +60,8 @@ function SalesPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-32 bg-gradient-to-t from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-transparent rounded-t-xl border border-b-0 border-orange-200 dark:border-orange-800/50 flex flex-col items-center pt-8 px-4 transition-all group-hover:h-36">
               <span className="font-bold text-slate-800 dark:text-zinc-200 truncate w-full text-center">{top3[2].name}</span>
-              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-2">{(top3[2].clients_managed ?? 0) + (top3[2].leads_managed ?? 0)} Total</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[2].clients_managed ?? 0} Clients | {top3[2].leads_managed ?? 0} Leads</span>
+              <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 mt-2">${top3[2].revenue_closed.toLocaleString()}</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[2].deals_closed} Deals</span>
             </div>
           </div>
         )}
@@ -81,8 +81,8 @@ function TicketsPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-40 bg-gradient-to-t from-cyan-100 to-cyan-50 dark:from-cyan-900/30 dark:to-transparent rounded-t-xl border border-b-0 border-cyan-200 dark:border-cyan-800/50 flex flex-col items-center pt-8 px-4 transition-all group-hover:h-44">
               <span className="font-bold text-slate-800 dark:text-zinc-200 truncate w-full text-center">{top3[1].name}</span>
-              <span className="text-sm font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[1].tickets_completed ?? 0} completed</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[1].tickets_assigned ?? 0} assigned</span>
+              <span className="text-sm font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[1].tickets_assigned ?? 0} tickets</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[1].tickets_in_production ?? 0} in prod</span>
             </div>
           </div>
         )}
@@ -97,8 +97,8 @@ function TicketsPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-52 bg-gradient-to-t from-cyan-200 via-cyan-100 to-cyan-50 dark:from-cyan-900/40 dark:via-cyan-900/20 dark:to-transparent rounded-t-xl border border-b-0 border-cyan-300 dark:border-cyan-700/50 flex flex-col items-center pt-10 px-4 transition-all group-hover:h-56 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
               <span className="font-black text-lg text-cyan-900 dark:text-cyan-400 truncate w-full text-center">{top3[0].name}</span>
-              <span className="text-base font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[0].tickets_completed ?? 0} completed</span>
-              <span className="text-xs text-cyan-700 dark:text-cyan-600 uppercase tracking-wider mt-1 font-bold">{top3[0].tickets_assigned ?? 0} assigned</span>
+              <span className="text-base font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[0].tickets_assigned ?? 0} tickets</span>
+              <span className="text-xs text-cyan-700 dark:text-cyan-600 uppercase tracking-wider mt-1 font-bold">{top3[0].tickets_in_production ?? 0} in production</span>
             </div>
           </div>
         )}
@@ -109,8 +109,8 @@ function TicketsPodium({ top3 }: { top3: LeaderboardEntry[] }) {
             </div>
             <div className="w-full h-32 bg-gradient-to-t from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-transparent rounded-t-xl border border-b-0 border-blue-200 dark:border-blue-800/50 flex flex-col items-center pt-8 px-4 transition-all group-hover:h-36">
               <span className="font-bold text-slate-800 dark:text-zinc-200 truncate w-full text-center">{top3[2].name}</span>
-              <span className="text-sm font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[2].tickets_completed ?? 0} completed</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[2].tickets_assigned ?? 0} assigned</span>
+              <span className="text-sm font-black text-cyan-600 dark:text-cyan-400 mt-2">{top3[2].tickets_assigned ?? 0} tickets</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider mt-1">{top3[2].tickets_in_production ?? 0} in prod</span>
             </div>
           </div>
         )}
@@ -149,9 +149,9 @@ export default function LeaderboardPage() {
     );
   }
 
-  const salesBoard = [...leaderboard].sort((a, b) => ((b.clients_managed ?? 0) + (b.leads_managed ?? 0)) - ((a.clients_managed ?? 0) + (a.leads_managed ?? 0)));
+  const salesBoard = [...leaderboard].sort((a, b) => b.revenue_closed - a.revenue_closed);
   const salesTop3 = salesBoard.slice(0, 3);
-  const ticketsBoard = [...leaderboard].sort((a, b) => ((b.tickets_completed ?? 0) + (b.tickets_assigned ?? 0)) - ((a.tickets_completed ?? 0) + (a.tickets_assigned ?? 0)));
+  const ticketsBoard = [...leaderboard].sort((a, b) => (b.tickets_assigned ?? 0) - (a.tickets_assigned ?? 0));
   const ticketsTop3 = ticketsBoard.slice(0, 3);
 
   return (
@@ -165,7 +165,7 @@ export default function LeaderboardPage() {
             <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-yellow-600 to-orange-500 bg-clip-text text-transparent">
               Sales Leaderboard
             </h2>
-            <p className="text-sm text-slate-500 dark:text-zinc-400">Ranked by clients &amp; leads managed</p>
+            <p className="text-sm text-slate-500 dark:text-zinc-400">Ranked by revenue closed &amp; deals won</p>
           </div>
         </div>
         {salesTop3.length > 0 && <SalesPodium top3={salesTop3} />}
@@ -228,7 +228,7 @@ export default function LeaderboardPage() {
             <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               Tickets Leaderboard
             </h2>
-            <p className="text-sm text-slate-500 dark:text-zinc-400">Ranked by tickets completed &amp; assigned</p>
+            <p className="text-sm text-slate-500 dark:text-zinc-400">Ranked by employee tickets assigned &amp; in production</p>
           </div>
         </div>
         {ticketsTop3.length > 0 && ticketsTop3.some(e => (e.tickets_assigned ?? 0) > 0) && (

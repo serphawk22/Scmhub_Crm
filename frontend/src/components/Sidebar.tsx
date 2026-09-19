@@ -63,59 +63,68 @@ const defaultSidebarSections = [
     id: "section-crm",
     heading: "CRM",
     items: [
-      { id: "item-leads", name: "Leads", icon: "Radar", href: "/leads", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-contacts", name: "Contacts", icon: "Users", href: "/contacts", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-clients", name: "Clients", icon: "CheckCircle", href: "/clients", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
+      { id: "item-leads", name: "Leads", icon: "Radar", href: "/leads", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-contacts", name: "Contacts", icon: "Users", href: "/contacts", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-clients", name: "Clients", icon: "CheckCircle", href: "/clients", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-projects",
     heading: "PROJECTS & ACTIVITIES",
     items: [
-      { id: "item-projects", name: "Projects", icon: "FolderOpen", href: "/projects", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-meetings", name: "Meetings", icon: "Calendar", href: "/meetings", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-calls", name: "Calls", icon: "Phone", href: "/calls", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
+      { id: "item-projects", name: "Projects", icon: "FolderOpen", href: "/projects", roles: ["Admin", "Employee", "Intern", "Demo"] },
+      { id: "item-meetings", name: "Meetings", icon: "Calendar", href: "/meetings", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-calls", name: "Calls", icon: "Phone", href: "/calls", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-teams",
     heading: "TEAMS",
     items: [
-      { id: "item-teams", name: "Team Directory", icon: "Users", href: "/teams", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-leaderboard", name: "Leaderboard", icon: "Trophy", href: "/admin/leaderboard", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
+      { id: "item-teams", name: "Team Directory", icon: "Users", href: "/teams", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-leaderboard", name: "Leaderboard", icon: "Trophy", href: "/admin/leaderboard", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-ai-agents",
     heading: "AI AGENTS",
     items: [
-      { id: "item-email-agent", name: "Email Agent", icon: "Mail", href: "/email-agent", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
+      { id: "item-email-agent", name: "Email Agent", icon: "Mail", href: "/email-agent", roles: ["Admin", "Demo"] },
     ],
   },
   {
     id: "section-inventory",
     heading: "INVENTORY",
     items: [
+      { id: "item-inventory", name: "Inventory", icon: "Package", href: "/inventory", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-products", name: "Products Catalog", icon: "Package", href: "/products", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-orders", name: "Orders", icon: "ShoppingCart", href: "/orders", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-billing", name: "Billing", icon: "FileText", href: "/billing", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-proposals", name: "Proposals", icon: "FileEdit", href: "/proposals", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-marketplace", name: "Marketplace", icon: "ShoppingBag", href: "/admin/marketplace", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-support",
     heading: "SUPPORT",
     items: [
-      { id: "item-cases", name: "Cases", icon: "HeadphonesIcon", href: "/support/cases", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
-      { id: "item-solutions", name: "Solutions", icon: "BookOpen", href: "/support/solutions", roles: ["Admin", "Employee", "SalesManager", "Intern", "Demo"] },
+      { id: "item-cases", name: "Cases", icon: "HeadphonesIcon", href: "/support/cases", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-solutions", name: "Solutions", icon: "BookOpen", href: "/support/solutions", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-system",
     heading: "SYSTEM",
     items: [
+      { id: "item-import", name: "Import Data", icon: "FileBarChart2", href: "/import", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-api-intelligence", name: "API Intelligence", icon: "Activity", href: "/admin/api-intelligence", roles: ["Admin", "SuperAdmin"] },
+      { id: "item-demo-accounts", name: "Demo Account Data", icon: "Users", href: "/admin/telemetry", roles: ["Admin", "SuperAdmin"] },
     ],
   },
 ];
 
 // --- Sortable Section Component ---
-const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT", "SYSTEM"];
+const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "INVENTORY", "SUPPORT", "SYSTEM"];
 const ITEM_KEY_OVERRIDES: Record<string, string> = {
   "item-teams": "team_directory",
   "item-products": "catalog",

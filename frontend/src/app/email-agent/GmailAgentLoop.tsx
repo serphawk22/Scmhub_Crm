@@ -105,9 +105,10 @@ export default function GmailAgentLoop() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ company_name: derivedName, company_url: cleanUrl }),
         });
-
-        if (!res.ok) throw new Error("Research failed");
+        if (!res.ok) throw new Error(`Research failed (${res.status})`);
         const data = await res.json();
+        const isN8nError = !!(data as any)._n8n_error;
+        const hasDraft = !isN8nError && !!(data.draft?.english_body || (data.draft as any)?.body || data.draft?.spanish_body);
 
         // Step 2: Determine Email
         const fallbackEmail = Array.isArray(data.company_info?.contacts) ? data.company_info.contacts[0]?.email : undefined;
@@ -117,7 +118,10 @@ export default function GmailAgentLoop() {
         const acceptedEmailFromN8N = data.email_delivery_records?.accepted_emails?.[0];
         const emailToSend = acceptedEmailFromN8N || data.contact?.email || fallbackEmail || extractedEmail;
 
-        if (!emailToSend) {
+        if (isN8nError || !hasDraft) {
+          const errMsg = isN8nError ? ((data as any)._error_message || "Research service unavailable") : "No draft generated";
+          setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: "no_email", details: errMsg } : t));
+        } else if (!emailToSend) {
           setTasks(prev => prev.map((t, idx) => idx === i ? { ...t, status: "no_email", details: "No email found on website" } : t));
         } else if (acceptedEmailFromN8N) {
           // N8N automatically sent and logged this email to the database!

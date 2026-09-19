@@ -128,18 +128,6 @@ const itemVariants = {
 };
 
 
-const formatCurrency = (value: number | string | null | undefined) => {
-  const numeric = typeof value === 'number' ? value : Number(value ?? 0);
-  if (!Number.isFinite(numeric)) return '$0';
-  return `$${numeric.toLocaleString()}`;
-};
-
-const formatNumber = (value: number | string | null | undefined) => {
-  const numeric = typeof value === 'number' ? value : Number(value ?? 0);
-  if (!Number.isFinite(numeric)) return '0';
-  return numeric.toLocaleString();
-};
-
 export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any) {
   const { role, user } = useRole();
   const { t } = useLanguage();
@@ -229,10 +217,10 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
       {/* KPI METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: t("admin_dashboard.kpi_total_revenue"), value: formatCurrency(adminStats?.revenue), trend: t("admin_dashboard.kpi_trend_revenue"), icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-          { title: t("admin_dashboard.kpi_active_clients"), value: formatNumber(adminStats?.total), trend: t("admin_dashboard.kpi_trend_clients"), icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-          { title: t("admin_dashboard.kpi_pipeline_value"), value: formatCurrency(adminStats?.pipelineValue), trend: t("admin_dashboard.kpi_trend_pipeline"), icon: Target, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
-          { title: t("admin_dashboard.kpi_pending_tasks"), value: formatNumber(adminStats?.pending), trend: t("admin_dashboard.kpi_trend_pending"), icon: Timer, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+          { title: t("admin_dashboard.kpi_total_revenue"), value: adminStats?.revenue != null ? `$${adminStats.revenue.toLocaleString()}` : "$0", trend: t("admin_dashboard.kpi_trend_revenue"), icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+          { title: t("admin_dashboard.kpi_active_clients"), value: adminStats?.total || 0, trend: t("admin_dashboard.kpi_trend_clients"), icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+          { title: t("admin_dashboard.kpi_pipeline_value"), value: adminStats?.pipelineValue != null ? `$${adminStats.pipelineValue.toLocaleString()}` : "$0", trend: t("admin_dashboard.kpi_trend_pipeline"), icon: Target, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
+          { title: t("admin_dashboard.kpi_pending_tasks"), value: adminStats?.pending || 0, trend: t("admin_dashboard.kpi_trend_pending"), icon: Timer, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
         ].map((kpi, idx) => (
           <motion.div key={idx} variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm flex items-center gap-4">
             <div className={`p-3 rounded-xl ${kpi.bg}`}>
@@ -276,7 +264,7 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
             <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-500/10 text-emerald-600 rounded-md">{t("admin_dashboard.last_6_months")}</span>
           </div>
           <div className="p-5 flex-1 w-full h-full min-h-0">
-            {adminStats?.revenueData?.length ? (
+            {adminStats?.revenueData?.length && adminStats.revenueData.some((d: any) => d.revenue || d.expenses) ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={adminStats.revenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -295,7 +283,7 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
                   <Tooltip 
                     contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 'bold' }} 
                     itemStyle={{ color: 'var(--text-primary)' }}
-                    formatter={(value: any) => [formatCurrency(value), '']}
+                    formatter={(value: any) => [`$${value.toLocaleString()}`, '']}
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
                   <Area type="monotone" dataKey="revenue" name={t("admin_dashboard.revenue")} stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
