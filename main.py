@@ -472,6 +472,9 @@ def on_startup():
             conn.execute(text('ALTER TABLE projects ADD COLUMN IF NOT EXISTS "projectMemberIds" JSON;'))
             conn.execute(text('ALTER TABLE client_profiles ADD COLUMN IF NOT EXISTS "projectId" INTEGER REFERENCES projects(id);'))
             conn.execute(text('ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS service_id INTEGER REFERENCES service_catalog(id);'))
+            conn.execute(text('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS project_id INTEGER REFERENCES projects(id);'))
+            conn.execute(text('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS created_by INTEGER REFERENCES users(id);'))
+            conn.execute(text('ALTER TABLE task_comments ADD COLUMN IF NOT EXISTS author_id INTEGER REFERENCES users(id);'))
             
             # Radar & Competitor Relationship Leads Migration
             try:
