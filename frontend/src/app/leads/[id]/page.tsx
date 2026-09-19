@@ -25,18 +25,13 @@ import NotesTab from './components/tabs/NotesTab';
 import TasksTab from './components/tabs/TasksTab';
 import OpportunitiesTab from './components/tabs/OpportunitiesTab';
 import FilesTab from './components/tabs/FilesTab';
-import HealthTab from './components/tabs/HealthTab';
-import TicketsTab from './components/tabs/TicketsTab';
 
 // ─── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'overview',       label: 'Overview',       icon: LayoutDashboard },
   { key: 'timeline',       label: 'Timeline',        icon: Activity        },
   { key: 'opportunities',  label: 'Opportunities',   icon: Lightbulb       },
-  { key: 'tasks',          label: 'Tasks',           icon: CheckSquare     },
-  { key: 'tickets',        label: 'Tickets',         icon: Ticket          },
   { key: 'files',          label: 'Files',           icon: FolderOpen      },
-  { key: 'health',         label: 'Health',          icon: HeartPulse      },
   { key: 'conversations',  label: 'Conversations',   icon: MessageSquare   },
 ];
 
@@ -797,7 +792,6 @@ export default function LeadDetailsPage() {
   const tabBadges: Record<string, number> = {
     conversations: conversations.length,
     notes:         notes.length,
-    tasks:         tasks.filter(t => t.status !== 'Done').length,
     files:         files.length,
   };
 
@@ -951,36 +945,12 @@ export default function LeadDetailsPage() {
                     onRefresh={() => fetch(`${API_BASE_URL}/leads/${id}/notes`).then(r => r.json()).then(d => setNotes(d.notes || []))}
                   />
                 )}
-                {activeTab === 'tasks' && (
-                  <TasksTab
-                    leadId={id}
-                    tasks={tasks}
-                    employees={employees}
-                    onRefresh={() => fetch(`${API_BASE_URL}/tasks?lead_id=${id}`).then(r => r.json()).then(d => {
-                      const all = d.tasks || d || [];
-                      setTasks(all.filter((t: any) => String(t.client_id) === String(id)));
-                    })}
-                  />
-                )}
                 {activeTab === 'files' && (
                   <FilesTab
                     leadId={id}
                     files={files}
                     onRefresh={() => fetch(`${API_BASE_URL}/leads/${id}/files`).then(r => r.json()).then(d => setFiles(d.files || d || []))}
                   />
-                )}
-                {activeTab === 'health' && (
-                  <HealthTab
-                    lead={lead}
-                    activities={activities}
-                    emails={emails}
-                    timeline={timeline}
-                    serviceRequests={serviceRequests}
-                  />
-                )}
-                
-                {activeTab === 'tickets' && (
-                  <TicketsTab leadId={id} />
                 )}
               </motion.div>
             </AnimatePresence>

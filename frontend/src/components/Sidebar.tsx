@@ -100,19 +100,10 @@ const defaultSidebarSections = [
       { id: "item-solutions", name: "Solutions", icon: "BookOpen", href: "/support/solutions", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
-  {
-    id: "section-system",
-    heading: "SYSTEM",
-    items: [
-      { id: "item-import", name: "Import Data", icon: "FileBarChart2", href: "/import", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-api-intelligence", name: "API Intelligence", icon: "Activity", href: "/admin/api-intelligence", roles: ["Admin", "SuperAdmin"] },
-      { id: "item-demo-accounts", name: "Demo Account Data", icon: "Users", href: "/admin/telemetry", roles: ["Admin", "SuperAdmin"] },
-    ],
-  },
 ];
 
 // --- Sortable Section Component ---
-const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT", "SYSTEM"];
+const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT"];
 const ITEM_KEY_OVERRIDES: Record<string, string> = {
   "item-teams": "team_directory",
   "item-products": "catalog",

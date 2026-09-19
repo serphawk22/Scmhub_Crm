@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, ArrowRight, CheckCircle2, Clock, XCircle, Target, Brain, Mail, Calendar, Wand2, Loader2, Store, AlertCircle, MessageCircle, Phone } from 'lucide-react';
+import { TrendingUp, ArrowRight, CheckCircle2, Clock, XCircle, Target, Brain, Calendar, Wand2, Loader2, Store, AlertCircle, MessageCircle, Phone } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { ResultCard } from '@/components/email-agent/ResultCard';
 import { API_BASE_URL } from '@/config';
@@ -133,7 +133,6 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
   const milestoneEvents = timeline.filter(e => e.type === 'milestone').slice(0, 5);
 
   const [activeSubTab, setActiveSubTab] = React.useState('presales');
-  const [expandedEmailId, setExpandedEmailId] = React.useState<number | null>(null);
 
   let leadAgentData: any = null;
   if (lead?.ai_analysis_results) {
@@ -192,13 +191,8 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
 
   const [isAutoResearching, setIsAutoResearching] = React.useState(false);
   const [isExtracting, setIsExtracting] = React.useState(false);
-  const [isGeneratingDraft, setIsGeneratingDraft] = React.useState(false);
   const [extractResult, setExtractResult] = React.useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = React.useState<string | null>(null);
-  const hasEmailAgentData = Boolean(
-    (lead?.source === 'Email Agent' || eaData?.company_info || eaData?.draft) && eaData
-  );
-
   const [autoResearchMsg, setAutoResearchMsg] = React.useState<string | null>(null);
   const handleAutoResearch = async () => {
     try {
@@ -250,48 +244,17 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
     }
   };
 
-  const handleGenerateDraft = async () => {
-    setIsGeneratingDraft(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/leads/${lead?.id}/generate-outbound-draft`, { 
-        method: 'POST',
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      if (res.ok) {
-        window.dispatchEvent(new CustomEvent('refresh-lead-data'));
-      } else {
-        const text = await res.text().catch(() => "");
-        let errData: any = {};
-        try { errData = JSON.parse(text); } catch (e) {}
-        const msg = errData?.detail?.message || errData?.detail || text || "Failed to generate draft.";
-        alert(`Error: ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`);
-      }
-    } catch (e: any) {
-      console.error(e);
-      alert(`Error: ${e.message}`);
-    } finally {
-      setIsGeneratingDraft(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-700 dark:border-slate-800 pb-4 overflow-x-auto">
-        {[
-          { id: 'presales', label: language === 'es' ? 'Análisis del Agente IA' : 'AI Agent Analysis', icon: Brain },
-          ...(hasEmailAgentData ? [{ id: 'emails', label: language === 'es' ? 'Correos Salientes' : 'Outbound Emails', icon: Mail }] : []),
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveSubTab(t.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
-              activeSubTab === t.id ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800' : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-slate-800/50 border border-transparent'
-            }`}
-          >
-            <t.icon size={16} /> {t.label}
-          </button>
-        ))}
+        <button
+          onClick={() => setActiveSubTab('presales')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${
+            activeSubTab === 'presales' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800' : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-slate-800/50 border border-transparent'
+          }`}
+        >
+          <Brain size={16} /> {language === 'es' ? 'Análisis del Agente IA' : 'AI Agent Analysis'}
+        </button>
       </div>
 
       {activeSubTab === 'presales' && (
@@ -441,208 +404,6 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
         </div>
       </div>
       )}
-
-      {hasEmailAgentData && activeSubTab === 'emails' && (
-        <div className="space-y-6">
-          
-          {/* Research Data (ResultCard & PDF Download) */}
-          {(researchData || eaData) && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-black text-slate-800 dark:text-zinc-100 dark:text-white">AI Agent Output</h4>
-                <button
-                  onClick={() => {
-                    const printWindow = window.open('', '_blank');
-                    if (!printWindow) return;
-                    printWindow.document.write(`
-                      <html>
-                        <head>
-                          <title>AI Investigation Report - ${lead?.company_name || 'Lead'}</title>
-                          <style>
-                            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.6; }
-                            h1 { color: #4f46e5; margin-bottom: 8px; font-size: 28px; }
-                            .meta { color: #64748b; font-size: 14px; margin-bottom: 40px; }
-                            h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 40px; font-size: 20px; }
-                            h3 { color: #334155; font-size: 16px; margin-top: 24px; }
-                            p { color: #334155; font-size: 14px; }
-                            ul { font-size: 14px; color: #334155; padding-left: 20px; }
-                            li { margin-bottom: 8px; }
-                            .badge { display: inline-block; padding: 4px 8px; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 8px; }
-                            .box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-top: 16px; }
-                          </style>
-                        </head>
-                        <body>
-                          <h1>AI Deep Investigation Report</h1>
-                          <div class="meta">Generated for ${lead?.company_name || 'Lead'} • ${new Date().toLocaleDateString()}</div>
-                          
-                          <h2>⚡ Executive Verdict</h2>
-                          <p>${researchData?.executive_verdict || research?.company_overview || 'N/A'}</p>
-                          
-                          <h2>📦 Product & Service Portfolio</h2>
-                          ${(researchData?.product_portfolio || []).map((p: any) => `
-                            <div class="box">
-                              <h3>${p.name}</h3>
-                              <p>${p.description}</p>
-                              ${p.pricing_tier ? `<span class="badge">${p.pricing_tier}</span>` : ''}
-                              ${p.target_customer ? `<span class="badge">${p.target_customer}</span>` : ''}
-                            </div>
-                          `).join('')}
-
-                          <h2>🎯 Ideal Customer Profiles (ICPs)</h2>
-                          ${(researchData?.ideal_customer_profiles || []).map((icp: any) => `
-                            <div class="box">
-                              <h3>${icp.name}</h3>
-                              <p><strong>Pain:</strong> ${icp.pain}</p>
-                              <p><strong>Desire:</strong> ${icp.desire}</p>
-                              <p><strong>Hook:</strong> ${icp.hook}</p>
-                            </div>
-                          `).join('')}
-
-                          <h2>⚔️ Competitive Landscape</h2>
-                          <p>${researchData?.competitive_landscape?.summary || 'N/A'}</p>
-                          ${(researchData?.competitive_landscape?.top_competitors || []).map((c: any) => `
-                            <div class="box">
-                              <h3>${c.name}</h3>
-                              <p><strong>Their Edge:</strong> ${c.their_edge}</p>
-                              <p><strong>Where to Attack:</strong> ${c.where_they_are_weak}</p>
-                            </div>
-                          `).join('')}
-                          
-                          <script>
-                            setTimeout(() => {
-                              window.print();
-                            }, 500);
-                          </script>
-                        </body>
-                      </html>
-                    `);
-                    printWindow.document.close();
-                  }}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2"
-                >
-                  <FileText size={16} />
-                  Download PDF Report
-                </button>
-              </div>
-              <ResultCard
-                historyId="research"
-                result={researchData || eaData}
-                companyName={lead?.company_name || ""}
-                companyUrl={lead?.website || ""}
-                onSendManually={async () => { throw new Error("Not implemented here"); }}
-                onSendAutomatically={async () => { throw new Error("Not implemented here"); }}
-                onSaveFollowUp={async () => { return true; }}
-                onRemove={() => {}}
-              />
-            </div>
-          )}
-
-          {/* Outbound Emails / Round 1 */}
-          {emails && emails.length > 0 ? (
-        <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-white dark:bg-zinc-900 dark:bg-slate-900 p-6 shadow-sm mt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-blue-500 rounded-xl text-white">
-              <Mail size={16} />
-            </div>
-            <h4 className="text-lg font-black text-slate-800 dark:text-zinc-100 dark:text-white">Outbound Communications</h4>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 ml-auto">
-              {emails.length} Emails
-            </span>
-          </div>
-          
-          <div className="space-y-3">
-            {emails.map((em: any, idx: number) => {
-              const isExpanded = expandedEmailId === idx;
-              let whatsappDraft = '';
-              try {
-                if (em.draft_json) {
-                  const draftData = typeof em.draft_json === 'string' ? JSON.parse(em.draft_json) : em.draft_json;
-                  whatsappDraft = draftData.whatsapp_draft || (draftData.outreach && draftData.outreach.whatsapp_draft) || '';
-                }
-              } catch (e) {}
-              
-              const phone = lead?.phone || '';
-              const waLink = phone && whatsappDraft ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappDraft)}` : `https://wa.me/?text=${encodeURIComponent(whatsappDraft)}`;
-
-              return (
-              <div key={idx} className="p-4 border border-slate-100 dark:border-zinc-800 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-zinc-950/50 dark:bg-slate-800/30 hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => setExpandedEmailId(isExpanded ? null : idx)}>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                      <Mail size={10} className="text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <p className="text-sm font-bold text-slate-800 dark:text-zinc-100 dark:text-slate-200 line-clamp-1">{em.subject || 'No Subject'}</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-semibold bg-white dark:bg-zinc-900 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-zinc-700 dark:border-slate-700 shrink-0">
-                    <Calendar size={10} />
-                    {em.sent_at ? new Date(em.sent_at).toLocaleDateString() : 'Draft'}
-                  </div>
-                </div>
-                {em.english_body && (
-                  <div className="ml-8">
-                    {!isExpanded ? (
-                      <p className="text-xs text-slate-500 dark:text-zinc-400 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                        {em.english_body}
-                      </p>
-                    ) : (
-                      <div className={`mt-4 grid grid-cols-1 gap-4 ${whatsappDraft ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-                        <div className="p-3 bg-white dark:bg-zinc-900 dark:bg-slate-900 border border-slate-200 dark:border-zinc-700 dark:border-slate-700 rounded-xl">
-                          <p className="text-[10px] font-black uppercase text-blue-600 mb-2">English</p>
-                          <p className="text-xs text-slate-600 dark:text-zinc-300 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">{em.english_body}</p>
-                        </div>
-                        {em.spanish_body && (
-                          <div className="p-3 bg-white dark:bg-zinc-900 dark:bg-slate-900 border border-slate-200 dark:border-zinc-700 dark:border-slate-700 rounded-xl">
-                            <p className="text-[10px] font-black uppercase text-blue-600 mb-2">Spanish</p>
-                            <p className="text-xs text-slate-600 dark:text-zinc-300 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">{em.spanish_body}</p>
-                          </div>
-                        )}
-                        {whatsappDraft && (
-                          <div className="p-3 bg-white dark:bg-zinc-900 dark:bg-slate-900 border border-slate-200 dark:border-zinc-700 dark:border-slate-700 rounded-xl relative flex flex-col">
-                            <p className="text-[10px] font-black uppercase text-emerald-600 mb-2">WhatsApp Draft</p>
-                            <p className="text-xs text-slate-600 dark:text-zinc-300 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed mb-10 flex-1">{whatsappDraft}</p>
-                            <a href={waLink} target="_blank" rel="noopener noreferrer" className="absolute bottom-3 right-3 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold uppercase rounded-lg transition-colors flex items-center gap-1.5" onClick={(e) => { e.stopPropagation(); }}>
-                              <MessageCircle size={12} /> Send
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {em.manual && (
-                  <span className="inline-block ml-8 mt-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wider rounded-md">
-                    Manual Draft
-                  </span>
-                )}
-                {!isExpanded && (
-                  <p className="ml-8 mt-1 text-[10px] text-indigo-500 font-medium">Click to view full email</p>
-                )}
-              </div>
-            )})}
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-white dark:bg-zinc-900 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm mt-6 flex flex-col items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4 border border-blue-100 dark:border-blue-800">
-            <Mail className="text-blue-500 dark:text-blue-400" size={24} />
-          </div>
-          <p className="text-slate-800 dark:text-zinc-100 font-bold mb-2">No outbound communications found</p>
-          <p className="text-slate-500 dark:text-zinc-400 text-sm max-w-md mb-6">Trigger the AI Email Agent to automatically write highly personalized outreach sequences based on the CRM context.</p>
-          <button
-            onClick={handleGenerateDraft}
-            disabled={isGeneratingDraft || (!lead?.company_name && !lead?.website)}
-            title={(!lead?.company_name && !lead?.website) ? 'Add a company name or website first' : 'Generate Outreach Emails'}
-            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
-          >
-            {isGeneratingDraft ? <Loader2 size={16} className="animate-spin" /> : <Bot size={16} />}
-            {isGeneratingDraft ? 'Generating Draft...' : 'Trigger Email Agent'}
-          </button>
-        </div>
-      )}
-      </div>
-      )}
-
-
     </div>
   );
 }
