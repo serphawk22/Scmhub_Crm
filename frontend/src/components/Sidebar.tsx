@@ -70,8 +70,11 @@ const defaultSidebarSections = [
   },
   {
     id: "section-projects",
-    heading: "ACTIVITIES",
+    heading: "PROJECTS & ACTIVITIES",
     items: [
+      { id: "item-projects", name: "Projects", icon: "FolderOpen", href: "/projects", roles: ["Admin", "Employee", "Intern", "Demo"] },
+      { id: "item-meetings", name: "Meetings", icon: "Calendar", href: "/meetings", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-calls", name: "Calls", icon: "Phone", href: "/calls", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },
   {
@@ -112,7 +115,7 @@ const defaultSidebarSections = [
 ];
 
 // --- Sortable Section Component ---
-const DEFAULT_HEADINGS = ["CRM", "ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT", "SYSTEM"];
+const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT", "SYSTEM"];
 const ITEM_KEY_OVERRIDES: Record<string, string> = {
   "item-teams": "team_directory",
   "item-products": "catalog",
