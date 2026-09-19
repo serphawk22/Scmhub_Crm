@@ -855,14 +855,59 @@ export default function AdminClientDetailPage() {
     }
   };
 
+  const hasResearchResult = (researchData: any) => {
+    if (!researchData) return false;
+    if (researchData.company_overview || researchData.pain_points || researchData.business_goals || researchData.competitors || researchData.swot_analysis) return true;
+
+    const emailAgentData = researchData.email_agent_data;
+    if (emailAgentData) {
+      const parsed = typeof emailAgentData === 'string' ? (() => { try { return JSON.parse(emailAgentData); } catch { return null; } })() : emailAgentData;
+      if (parsed?.full_markdown_report || parsed?.company_overview || parsed?.summary) return true;
+    }
+
+    return false;
+  };
+
+  const waitForResearchResult = async () => {
+    const maxAttempts = 60;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/clients/${id}/research`);
+        if (res.ok) {
+          const data = await res.json();
+          const nextResearch = data.research || null;
+          if (hasResearchResult(nextResearch)) {
+            setResearch(nextResearch);
+            return true;
+          }
+        }
+      } catch (err) {
+        console.error('Research polling failed:', err);
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+
+    return false;
+  };
+
   const handleGenerateAnalysis = async () => {
     if (!id) return;
     setIsGeneratingResearch(true);
     try {
-      await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
-      // Research runs in background — no popup, no auto-refresh
+      const res = await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || 'Failed to start AI research');
+      }
+
+      const ready = await waitForResearchResult();
+      if (!ready) {
+        alert('AI research is still running. Please wait a moment and refresh this page.');
+      }
     } catch (e) {
-      // silent
+      console.error('AI research error:', e);
+      alert('AI research could not be completed. Please try again.');
     } finally {
       setIsGeneratingResearch(false);
     }

@@ -93,18 +93,6 @@ const defaultSidebarSections = [
     ],
   },
   {
-    id: "section-inventory",
-    heading: "INVENTORY",
-    items: [
-      { id: "item-inventory", name: "Inventory", icon: "Package", href: "/inventory", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-products", name: "Products Catalog", icon: "Package", href: "/products", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-orders", name: "Orders", icon: "ShoppingCart", href: "/orders", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-billing", name: "Billing", icon: "FileText", href: "/billing", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-proposals", name: "Proposals", icon: "FileEdit", href: "/proposals", roles: ["Admin", "SalesManager", "Demo"] },
-      { id: "item-marketplace", name: "Marketplace", icon: "ShoppingBag", href: "/admin/marketplace", roles: ["Admin", "SalesManager", "Demo"] },
-    ],
-  },
-  {
     id: "section-support",
     heading: "SUPPORT",
     items: [
@@ -124,7 +112,7 @@ const defaultSidebarSections = [
 ];
 
 // --- Sortable Section Component ---
-const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "INVENTORY", "SUPPORT", "SYSTEM"];
+const DEFAULT_HEADINGS = ["CRM", "PROJECTS & ACTIVITIES", "TEAMS", "AI AGENTS", "SUPPORT", "SYSTEM"];
 const ITEM_KEY_OVERRIDES: Record<string, string> = {
   "item-teams": "team_directory",
   "item-products": "catalog",

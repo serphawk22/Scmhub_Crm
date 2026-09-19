@@ -32,7 +32,8 @@ import {
   Eye,
   TrendingDown,
   Lightbulb,
-  ShieldAlert
+  ShieldAlert,
+  Brain
 } from 'lucide-react';
 import { API_BASE_URL } from '@/config';
 import { useRole } from '@/context/RoleContext';
@@ -128,6 +129,7 @@ export default function ClientDetailPage() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
   const [timeline, setTimeline] = useState<any[]>([]);
+  const [research, setResearch] = useState<any>(null);
   const [timelineFilter, setTimelineFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -182,6 +184,7 @@ export default function ClientDetailPage() {
         fetchStatuses(),
         fetchServiceRequests(),
         fetchTimeline(),
+        fetchResearch(),
       ]).catch(console.error).finally(() => setPageLoading(false));
     }
   }, [id]);
@@ -297,6 +300,18 @@ export default function ClientDetailPage() {
       if (res.ok) {
         const data = await res.json();
         setTimeline(data.timeline || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchResearch = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/clients/${id}/research`);
+      if (res.ok) {
+        const data = await res.json();
+        setResearch(data.research || null);
       }
     } catch (err) {
       console.error(err);
@@ -457,6 +472,23 @@ const handleSaveMetrics = async () => {
       alert('Error connecting to AI');
     } finally {
       setIsSwotLoading(false);
+    }
+  };
+
+  const handleGenerateResearch = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to generate research.');
+      }
+      await fetchResearch();
+    } catch (err) {
+      console.error(err);
+      alert('Error generating AI research.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1011,6 +1043,98 @@ const handleSaveMetrics = async () => {
               </div>
 </motion.div>
           </div>
+        </motion.div>
+
+        {/* ─── AI RESEARCH + REPORT ─── */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.85 }} className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="h-1 w-12 bg-gradient-to-r from-violet-400 to-indigo-500 rounded-full"></div>
+              <h2 className="text-2xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider">AI Client Research</h2>
+            </div>
+            <button
+              onClick={handleGenerateResearch}
+              disabled={loading}
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50"
+            >
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Brain className="w-4 h-4" />}
+              {loading ? 'Analyzing...' : 'Generate Research'}
+            </button>
+          </div>
+
+          {research && (
+            <div className="space-y-6">
+              {research.company_overview && (
+                <div className="p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-3xl shadow-sm">
+                  <h3 className="text-lg font-black text-slate-800 dark:text-zinc-100 mb-3">Company Overview</h3>
+                  <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300 whitespace-pre-wrap">{research.company_overview}</p>
+                </div>
+              )}
+
+              {(research.pain_points || research.business_goals || research.competitors) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {research.pain_points && (
+                    <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-3xl">
+                      <h3 className="text-lg font-black text-red-800 dark:text-red-400 mb-3">Pain Points</h3>
+                      <p className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap">{research.pain_points}</p>
+                    </div>
+                  )}
+                  {research.business_goals && (
+                    <div className="p-6 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-3xl">
+                      <h3 className="text-lg font-black text-green-800 dark:text-green-400 mb-3">Business Goals</h3>
+                      <p className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">{research.business_goals}</p>
+                    </div>
+                  )}
+                  {research.competitors && (
+                    <div className="p-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-3xl">
+                      <h3 className="text-lg font-black text-blue-800 dark:text-blue-400 mb-3">Competitors</h3>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 whitespace-pre-wrap">{research.competitors}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {research.email_agent_data && (() => {
+                try {
+                  const parsed = typeof research.email_agent_data === 'string'
+                    ? JSON.parse(research.email_agent_data)
+                    : research.email_agent_data;
+
+                  if (parsed?.full_markdown_report) {
+                    return (
+                      <div className="p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-3xl shadow-sm">
+                        <h3 className="text-lg font-black text-slate-800 dark:text-zinc-100 mb-4">Comprehensive AI Report</h3>
+                        <div className="prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
+                          {parsed.full_markdown_report}
+                        </div>
+                      </div>
+                    );
+                  }
+                } catch (err) {
+                  console.error('Failed to parse research report', err);
+                }
+                return null;
+              })()}
+            </div>
+          )}
+
+          {!research && (
+            <div className="flex flex-col items-center justify-center py-16 px-6 bg-slate-50 dark:bg-zinc-900/50 border border-dashed border-slate-300 dark:border-zinc-700 rounded-3xl">
+              <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-sm mb-4">
+                <Brain className="w-7 h-7 text-violet-500" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">No AI research yet</h3>
+              <p className="text-sm text-slate-500 text-center max-w-md mb-6">Generate a deep client analysis to unlock the company overview, opportunity gaps, and full report.</p>
+              <button
+                onClick={handleGenerateResearch}
+                disabled={loading}
+                className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {loading ? <Loader2 size={16} className="animate-spin" /> : <Brain className="w-4 h-4" />}
+                {loading ? 'Generating...' : 'Generate AI Analysis'}
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* ─── AI SWOT ANALYSIS ─── */}
