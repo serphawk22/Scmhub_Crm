@@ -1,17 +1,5 @@
 {
-  "name": "scm-hub-crm",
-  "version": "1.0.0",
-  "description": "SCM HUB CRM - Unified Enterprise SaaS Workspace with Neon PostgreSQL integration",
-  "main": "server.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "pg": "^8.13.1"
+    "tailwindcss": "^4.2.1"
   }
 }

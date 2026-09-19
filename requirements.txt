@@ -1,0 +1,38 @@
+flask
+requests
+beautifulsoup4
+google-generativeai>=0.8.3
+python-dotenv
+openai
+
+Pillow>=10.0.0
+
+# ========================================
+# Cold Outreach CRM Dependencies
+# ========================================
+
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+
+# Database
+sqlmodel>=0.0.22
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.36
+bcrypt>=4.0.0
+
+
+# Form handling
+python-multipart==0.0.6
+
+# Additional utilities
+httpx==0.26.0
+reportlab>=4.0
+google-auth>=2.20.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+google-api-python-client>=2.90.0
+
+# Duplicates removed
+pandas>=2.0.0
+openpyxl>=3.1.0

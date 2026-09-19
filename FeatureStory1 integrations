@@ -1,0 +1,176 @@
+For a modern CRM, the best integrations depend on your sales process, but if you're designing a CRM that follows current industry standards while minimizing development cost, I would group integrations into 10 core categories.
+
+1. Communication Integrations (Highest Priority)
+Email
+Microsoft Outlook
+Microsoft 365 Exchange Online
+Gmail
+
+Use for:
+
+Email sync
+Send/receive emails
+Email tracking
+Automated follow-ups
+Calendar
+Google Calendar
+Microsoft Calendar
+
+Use for:
+
+Meeting scheduling
+Activity tracking
+Reminders
+2. Telephony & Calling
+Cloud Calling
+Twilio
+RingCentral
+Aircall
+
+Features:
+
+Click-to-call
+Call recording
+Call transcription
+Call analytics
+3. WhatsApp & Messaging
+WhatsApp Business
+WhatsApp Business Platform
+SMS
+Twilio Messaging
+Team Messaging
+Slack
+Microsoft Teams
+
+Features:
+
+Lead notifications
+Customer conversations
+Automated alerts
+4. Marketing Automation
+Email Marketing
+Mailchimp
+Brevo
+HubSpot Marketing Hub
+
+Features:
+
+Campaign management
+Lead nurturing
+Drip sequences
+5. Lead Capture
+Forms
+Typeform
+Jotform
+Google Forms
+Website Chat
+Intercom
+Tidio
+
+Features:
+
+Lead creation
+Qualification
+Website visitor tracking
+6. Video Meeting Integrations
+Zoom
+Google Meet
+Microsoft Teams Meetings
+
+Features:
+
+Schedule meetings
+Join from CRM
+Store recordings
+7. Document & E-Signature
+Document Storage
+Google Drive
+Microsoft OneDrive
+E-Signature
+DocuSign
+Adobe Acrobat Sign
+
+Features:
+
+Proposal generation
+Contract signing
+Audit trail
+8. Payment Integrations
+Online Payments
+Stripe
+PayPal
+Mercado Pago
+
+Features:
+
+Invoice payment
+Subscription billing
+Revenue tracking
+9. Customer Support
+Ticketing
+Zendesk
+Freshdesk
+
+Features:
+
+Customer tickets
+SLA tracking
+Escalations
+10. AI Integrations (2026 Standard)
+LLM Providers
+OpenAI Platform
+Google Gemini API
+Anthropic Claude API
+
+Use Cases:
+
+Lead scoring
+Email generation
+Meeting summaries
+Call summaries
+Opportunity risk analysis
+AI sales assistant
+Recommended MVP Stack (Lowest Development Cost)
+
+If I were building a CRM startup today:
+
+Category	Tool
+Authentication	Auth0
+Database	PostgreSQL
+Backend	NestJS
+Frontend	Next.js
+Email	Gmail + Outlook
+Calling	Twilio
+WhatsApp	WhatsApp Business API
+Video	Zoom
+Payments	Stripe
+E-signature	DocuSign
+AI	OpenAI
+Workflow Automation	n8n
+Integration Priority Roadmap
+Phase 1 (Must Have)
+Gmail
+Outlook
+Google Calendar
+Microsoft Calendar
+WhatsApp
+Twilio Calling
+Zoom
+Phase 2 (Revenue Features)
+Stripe
+DocuSign
+Google Drive
+OneDrive
+Phase 3 (Growth Features)
+Mailchimp
+Slack
+Zendesk
+OpenAI
+Phase 4 (Enterprise)
+Salesforce migration
+ERP integrations
+SAP
+Oracle
+Microsoft Dynamics 365
+
+For a CRM targeting health clinics, insurance agencies, real estate, and SMB sales teams (similar to what you've discussed for your AI chatbot business), I'd prioritize WhatsApp + Email + Calendar + Calling + AI + E-signature + Payments first, because those integrations deliver the highest customer value and fastest ROI.

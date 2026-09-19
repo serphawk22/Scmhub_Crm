@@ -1,0 +1,75 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+⚠ Mismatching @next/swc version, detected: 16.1.7 while Next.js is on 16.1.6. Please ensure these match
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/vijay/Projects/serphawk_crm_seo/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /home/vijay/Projects/serphawk_crm_seo/frontend/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.7:3000
+
+✓ Starting...
+✓ Ready in 873ms
+○ Compiling / ...
+ GET / 200 in 56ms (compile: 7ms, render: 49ms)
+ GET /billing 200 in 1181ms (compile: 1119ms, render: 62ms)
+ GET /contacts 200 in 909ms (compile: 834ms, render: 74ms)
+ GET / 200 in 55ms (compile: 11ms, render: 43ms)
+ GET /work-queue 200 in 1423ms (compile: 1359ms, render: 64ms)
+ GET / 200 in 60ms (compile: 10ms, render: 50ms)
+ GET /work-queue 200 in 55ms (compile: 14ms, render: 41ms)
+ GET /notifications 200 in 1182ms (compile: 1106ms, render: 76ms)
+ GET /leads 200 in 1643ms (compile: 1584ms, render: 59ms)
+ GET /inventory 200 in 1091ms (compile: 1012ms, render: 79ms)
+ GET /products 200 in 1078ms (compile: 1048ms, render: 30ms)
+ GET /inventory 200 in 47ms (compile: 6ms, render: 41ms)
+ GET /teams 200 in 1923ms (compile: 1716ms, render: 207ms)
+✓ Compiled in 722ms
+✓ Compiled in 730ms
+✓ Compiled in 331ms
+ GET /meetings 200 in 452ms (compile: 392ms, render: 60ms)
+ GET /proposals 200 in 421ms (compile: 397ms, render: 24ms)
+ GET /leads 200 in 103ms (compile: 57ms, render: 46ms)
+ GET /inventory 200 in 135ms (compile: 89ms, render: 45ms)
+ GET /proposals 200 in 16ms (compile: 5ms, render: 12ms)
+ GET /inventory 200 in 20ms (compile: 7ms, render: 13ms)
+ GET /leads 200 in 22ms (compile: 9ms, render: 13ms)
+ GET /contacts 200 in 104ms (compile: 64ms, render: 39ms)
+ GET /products 200 in 105ms (compile: 59ms, render: 46ms)
+ GET /orders 200 in 385ms (compile: 369ms, render: 16ms)
+ GET /inventory 200 in 13ms (compile: 3ms, render: 10ms)
+ GET /leads 200 in 19ms (compile: 4ms, render: 14ms)
+ GET / 200 in 89ms (compile: 57ms, render: 32ms)
+ GET /work-queue 200 in 98ms (compile: 58ms, render: 40ms)
+ GET /notifications 200 in 87ms (compile: 54ms, render: 33ms)
+ GET /leads 200 in 18ms (compile: 4ms, render: 15ms)
+ GET /inventory 200 in 24ms (compile: 6ms, render: 18ms)
+ GET /products 200 in 23ms (compile: 6ms, render: 18ms)
+ GET /inventory 200 in 28ms (compile: 5ms, render: 22ms)
+ GET /inventory 200 in 215ms (compile: 4ms, render: 211ms)
+ GET /orders 200 in 28ms (compile: 6ms, render: 22ms)
+ GET /inventory 200 in 15ms (compile: 4ms, render: 11ms)
+ GET /leads 200 in 15ms (compile: 2ms, render: 13ms)
+ GET /inventory 200 in 23ms (compile: 4ms, render: 18ms)
+ GET /teams 200 in 99ms (compile: 61ms, render: 38ms)
+ GET /leads 200 in 15ms (compile: 1838µs, render: 13ms)
+ GET /admin/radar 200 in 611ms (compile: 579ms, render: 32ms)
+ GET /clients 200 in 700ms (compile: 679ms, render: 21ms)
+ GET /admin/clients/8 200 in 1371ms (compile: 1343ms, render: 28ms)
+ GET /admin/clients/8/competitors 200 in 820ms (compile: 800ms, render: 20ms)
+ GET /leads 200 in 26ms (compile: 5ms, render: 21ms)
+ GET /contacts 200 in 24ms (compile: 5ms, render: 19ms)
+ GET /clients 200 in 22ms (compile: 1760µs, render: 20ms)
+ GET /leads 200 in 18ms (compile: 3ms, render: 14ms)
+✓ Compiled in 74ms
+✓ Compiled in 51ms

@@ -1,0 +1,50 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@example.com",
+      "role": "Admin",
+      "profile_id": null
+    },
+    {
+      "id": 2,
+      "email": "vars@gmail.com",
+      "role": "Client",
+      "profile_id": 3
+    },
+    {
+      "id": 3,
+      "email": "",
+      "role": "Client",
+      "profile_id": 4
+    },
+    {
+      "id": 4,
+      "email": "unknown_contact_f45edb62@placeholder.com",
+      "role": "Client",
+      "profile_id": 5
+    }
+  ],
+  "requests": [
+    {
+      "id": 1,
+      "status": "Quoted",
+      "client_id": 4,
+      "thread": {
+        "id": 1,
+        "client_id": 4,
+        "msg_count": 1
+      }
+    },
+    {
+      "id": 2,
+      "status": "Accepted",
+      "client_id": 3,
+      "thread": {
+        "id": 2,
+        "client_id": 3,
+        "msg_count": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,810 @@
+INFO:     Started server process [6958]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+OpenAI client globally patched for API Intelligence Tracking.
+Finished checking and adding tenant_id columns to 66 tables.
+sidebar_preferences column already exists or error: (psycopg2.errors.DuplicateColumn) column "sidebar_preferences" of relation "users" already exists
+
+[SQL: ALTER TABLE users ADD COLUMN sidebar_preferences JSON;]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Successfully added phone to users table.
+Successfully added call_pitch columns to client_profiles table.
+Successfully added call limit/usage columns to tenants table.
+ai_analysis_results column already exists or error: (psycopg2.errors.DuplicateColumn) column "ai_analysis_results" of relation "leads" already exists
+
+[SQL: ALTER TABLE leads ADD COLUMN ai_analysis_results JSON;]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Successfully added swot_analysis to client_profiles and leads tables.
+project_type column already exists or error: (psycopg2.errors.DuplicateColumn) column "project_type" of relation "projects" already exists
+
+[SQL: ALTER TABLE projects ADD COLUMN project_type VARCHAR DEFAULT 'Development';]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+clientId column already exists or error: (psycopg2.errors.DuplicateColumn) column "clientId" of relation "projects" already exists
+
+[SQL: ALTER TABLE projects ADD COLUMN "clientId" INTEGER;]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+leadId column already exists or error: (psycopg2.errors.DuplicateColumn) column "leadId" of relation "projects" already exists
+
+[SQL: ALTER TABLE projects ADD COLUMN "leadId" INTEGER;]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+phone column already exists or error: (psycopg2.errors.DuplicateColumn) column "phone" of relation "users" already exists
+
+[SQL: ALTER TABLE users ADD COLUMN phone VARCHAR(50);]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+tenant call limits already exist or error: (psycopg2.errors.DuplicateColumn) column "limit_calls" of relation "tenants" already exists
+
+[SQL: ALTER TABLE tenants ADD COLUMN limit_calls INTEGER DEFAULT 5;]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+DB keepalive started (pings every 60s).
+Successfully added url and case_type columns to cases table.
+INFO:     127.0.0.1:58180 - "GET /demo/limits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "OPTIONS /users/me/sidebar-preferences?user_id=527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52388 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "OPTIONS /sales-orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "OPTIONS /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52422 - "OPTIONS /clients?per_page=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "OPTIONS /chatbot/history/gmv3gqri065 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52388 - "OPTIONS /users/me/sidebar-preferences?user_id=527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52422 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "OPTIONS /sales-orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "OPTIONS /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "OPTIONS /clients?per_page=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52422 - "OPTIONS /chatbot/history/gmv3gqri065 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52388 - "GET /users/me/sidebar-preferences?user_id=527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38062 - "GET /chatbot/history/gmv3gqri065 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "GET /clients?per_page=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "GET /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52388 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38062 - "GET /users/me/sidebar-preferences?user_id=527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /sales-orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "GET /sales-orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52388 - "GET /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /chatbot/history/gmv3gqri065 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38062 - "GET /clients?per_page=1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52386 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52414 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36384 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36384 - "OPTIONS /sales-orders/2/pdf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40224 - "GET /sales-orders/2/pdf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56114 - "OPTIONS /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56120 - "OPTIONS /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56126 - "OPTIONS /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56126 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56152 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56114 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56140 - "POST /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56120 - "GET /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56120 - "GET /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56120 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38990 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38998 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38974 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51616 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47476 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47490 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47460 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40592 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37026 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37030 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37032 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35642 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33210 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33222 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33204 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44770 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55208 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55214 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55192 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42020 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43540 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43538 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43534 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46116 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46092 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46106 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46106 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56402 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56394 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56404 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34284 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34290 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34278 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34278 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57150 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57154 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33418 - "GET /notifications/527 HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 185, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 187, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vijay/Projects/serphawk_crm_seo/main.py", line 390, in dispatch
+    user_obj = session.get(User, user_id_val)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 3702, in get
+    return self._get_impl(
+           ~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<7 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 3881, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlmodel/orm/session.py", line 136, in execute
+    return super().execute(
+           ~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+[SQL: SELECT users.tenant_id AS users_tenant_id, users.id AS users_id, users.email AS users_email, users.password AS users_password, users.hashed_password AS users_hashed_password, users.name AS users_name, users.phone AS users_phone, users.role AS users_role, users.is_active AS users_is_active, users.status AS users_status, users.sidebar_preferences AS users_sidebar_preferences, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(pk_1)s]
+[parameters: {'pk_1': 527}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Keepalive ping failed: (psycopg2.OperationalError) could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+[SQL: SELECT 1]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Unhandled Exception: (psycopg2.OperationalError) could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+[SQL: SELECT users.tenant_id AS users_tenant_id, users.id AS users_id, users.email AS users_email, users.password AS users_password, users.hashed_password AS users_hashed_password, users.name AS users_name, users.phone AS users_phone, users.role AS users_role, users.is_active AS users_is_active, users.status AS users_status, users.sidebar_preferences AS users_sidebar_preferences, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(pk_1)s]
+[parameters: {'pk_1': 527}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO:     127.0.0.1:44460 - "GET /notifications/527 HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 399, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 187, in __call__
+    raise exc
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 185, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 187, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vijay/Projects/serphawk_crm_seo/main.py", line 390, in dispatch
+    user_obj = session.get(User, user_id_val)
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 3702, in get
+    return self._get_impl(
+           ~~~~~~~~~~~~~~^
+        entity,
+        ^^^^^^^
+    ...<7 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 3881, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlmodel/orm/session.py", line 136, in execute
+    return super().execute(
+           ~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/vijay/Projects/serphawk_crm_seo/.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not receive data from server: Network is unreachable
+SSL SYSCALL error: Network is unreachable
+
+[SQL: SELECT users.tenant_id AS users_tenant_id, users.id AS users_id, users.email AS users_email, users.password AS users_password, users.hashed_password AS users_hashed_password, users.name AS users_name, users.phone AS users_phone, users.role AS users_role, users.is_active AS users_is_active, users.status AS users_status, users.sidebar_preferences AS users_sidebar_preferences, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(pk_1)s]
+[parameters: {'pk_1': 527}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO:     127.0.0.1:39468 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "OPTIONS /proposals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44488 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44476 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49712 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /clients?per_page=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /proposals/catalog HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "OPTIONS /proposals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /clients?per_page=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49704 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "OPTIONS /proposals/catalog HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "POST /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /leads HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /proposals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /proposals/catalog HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /clients?per_page=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /proposals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /clients?per_page=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43780 - "GET /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43804 - "GET /proposals/catalog HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "POST /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /quotes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56206 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43792 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43752 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37844 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37832 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37816 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44184 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44172 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44190 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46702 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38888 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38912 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38904 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57598 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48444 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48462 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48450 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38784 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36114 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36110 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36098 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49606 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49588 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49594 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49486 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49472 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48450 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48466 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48464 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56596 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56578 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56590 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53908 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53936 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53924 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33222 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33236 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33250 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33222 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33256 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33250 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58012 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58014 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58016 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47374 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47376 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47364 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54630 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54614 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54606 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36926 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36912 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36904 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45140 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45116 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45132 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49428 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49400 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49412 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56700 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56690 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56698 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39738 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39740 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39732 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52750 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52760 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52734 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59778 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59762 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59780 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58114 - "OPTIONS /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58116 - "OPTIONS /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58120 - "OPTIONS /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58114 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58116 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58134 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56722 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56714 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56710 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46448 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46456 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46470 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56174 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56180 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56188 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57060 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57056 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57068 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51448 - "OPTIONS /telemetry/page-visit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51436 - "GET /notifications/527 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51440 - "GET /notifications/527?unread_only=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51442 - "GET /calls?unsummarized=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51462 - "POST /telemetry/page-visit HTTP/1.1" 200 OK
