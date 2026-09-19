@@ -678,6 +678,9 @@ def on_startup():
 
 allowed_origins = [
     "https://stable-crm.vercel.app",
+    "https://scmhub-crm.vercel.app",
+    "https://www.scmhub-crm.vercel.app",
+    "https://web-production-565b6.up.railway.app",
     "https://web-production-5e474.up.railway.app",
     "https://serphawk-crm-seo.vercel.app",
     "http://localhost:3000",
