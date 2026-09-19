@@ -4,6 +4,7 @@ from functools import wraps
 current_client_id = contextvars.ContextVar("current_client_id", default=None)
 current_salesperson_id = contextvars.ContextVar("current_salesperson_id", default=None)
 current_endpoint = contextvars.ContextVar("current_endpoint", default=None)
+current_tenant_id = contextvars.ContextVar("current_tenant_id", default=None)
 
 def track_api_call(service: str, endpoint: str):
     def decorator(func):
