@@ -470,6 +470,7 @@ def on_startup():
     try:
         with engine.connect() as conn:
             conn.execute(text('ALTER TABLE projects ADD COLUMN IF NOT EXISTS "projectMemberIds" JSON;'))
+            conn.execute(text('ALTER TABLE client_profiles ADD COLUMN IF NOT EXISTS "projectId" INTEGER REFERENCES projects(id);'))
             
             # Radar & Competitor Relationship Leads Migration
             try:
