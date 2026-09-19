@@ -696,6 +696,7 @@ def on_startup():
 
 allowed_origins = [
     "https://serphawk-crm-seo.vercel.app",
+    "https://scmhub-crm.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://web-production-6cd72.up.railway.app",
@@ -708,7 +709,9 @@ allowed_origins = [
     "https://crm.dapros.serphawk.in",
     "https://dapros.serphawk.in",
     "https://crm-seo.allytechcourses.com",
-    "http://dapros.serphawk.in"
+    "http://dapros.serphawk.in",
+    "https://*.vercel.app",
+    "https://*.up.railway.app",
 ]
 
 
@@ -729,7 +732,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=r"https://([a-z0-9-]+\.)*serphawk\.in",
+    allow_origin_regex=r"https://([a-z0-9-]+\.)*(vercel\.app|serphawk\.in|up\.railway\.app)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
