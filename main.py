@@ -471,6 +471,7 @@ def on_startup():
         with engine.connect() as conn:
             conn.execute(text('ALTER TABLE projects ADD COLUMN IF NOT EXISTS "projectMemberIds" JSON;'))
             conn.execute(text('ALTER TABLE client_profiles ADD COLUMN IF NOT EXISTS "projectId" INTEGER REFERENCES projects(id);'))
+            conn.execute(text('ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS service_id INTEGER REFERENCES service_catalog(id);'))
             
             # Radar & Competitor Relationship Leads Migration
             try:
@@ -521,20 +522,51 @@ def on_startup():
         name for name, table in SQLModel.metadata.tables.items() 
         if "tenant_id" in table.columns
     ]
-    
+
+    try:
+        with engine.connect() as conn:
+            tenant_count = conn.execute(text("SELECT COUNT(*) FROM tenants")).scalar()
+            if tenant_count == 0:
+                conn.execute(
+                    text(
+                        "INSERT INTO tenants (name, business_name, email, phone, is_trial, created_at, limit_clients, limit_emails, limit_searches, limit_projects, limit_calls, usage_clients, usage_emails, usage_searches, usage_projects, usage_calls) "
+                        "VALUES (:name, :business_name, :email, :phone, :is_trial, NOW(), :limit_clients, :limit_emails, :limit_searches, :limit_projects, :limit_calls, 0, 0, 0, 0, 0)"
+                    ),
+                    {
+                        "name": "Default Tenant",
+                        "business_name": "Default Tenant",
+                        "email": "admin@serphawk.com",
+                        "phone": None,
+                        "is_trial": False,
+                        "limit_clients": 15,
+                        "limit_emails": 5,
+                        "limit_searches": 5,
+                        "limit_projects": 5,
+                        "limit_calls": 5,
+                    },
+                )
+                conn.commit()
+    except Exception as e:
+        print(f"Default tenant bootstrap error: {e}")
+
     for table in tables_with_tenant:
         try:
             with engine.connect() as conn:
+                default_tenant_id = conn.execute(text("SELECT id FROM tenants ORDER BY id LIMIT 1")).scalar()
+                if default_tenant_id is None:
+                    print(f"Skipping tenant backfill for {table} because no tenant rows exist.")
+                    continue
+
                 conn.execute(text(f'ALTER TABLE {table} ADD COLUMN IF NOT EXISTS tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE;'))
                 conn.execute(text(f'CREATE INDEX IF NOT EXISTS ix_{table}_tenant_id ON {table} (tenant_id);'))
-                
+
                 # Fix for existing records that have NULL tenant_id after migration
-                conn.execute(text(f'UPDATE {table} SET tenant_id = 1 WHERE tenant_id IS NULL;'))
-                
+                conn.execute(text(f'UPDATE {table} SET tenant_id = :tenant_id WHERE tenant_id IS NULL;'), {"tenant_id": default_tenant_id})
+
                 conn.commit()
         except Exception as e:
             print(f"Migration error for {table}: {e}")
-            
+
     print(f"Finished checking and adding tenant_id columns to {len(tables_with_tenant)} tables.")
         
     try:
