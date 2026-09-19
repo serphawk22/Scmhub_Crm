@@ -118,12 +118,16 @@ from database import (
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-import contextvars
 from sqlalchemy import event
 from sqlalchemy.orm import Session as SASession
 from sqlalchemy.sql.selectable import Select
 
-current_tenant_id = contextvars.ContextVar("current_tenant_id", default=None)
+from modules.api_tracker import (
+    current_client_id,
+    current_endpoint,
+    current_salesperson_id,
+    current_tenant_id,
+)
 
 @event.listens_for(SASession, "do_orm_execute")
 def _add_tenant_filter(execute_state):
