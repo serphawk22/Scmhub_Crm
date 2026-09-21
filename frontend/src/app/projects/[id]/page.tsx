@@ -247,6 +247,24 @@ export default function ProjectDetailPage() {
 
         {/* Left Column: Progress & Description */}
         <div className="lg:col-span-2 space-y-8 font-poppins text-gray-800 dark:text-zinc-100">
+                <div className="bg-white dark:bg-zinc-900 p-7 rounded-[2.5rem] border shadow-sm">
+                   <div className="flex items-center justify-between mb-5">
+                      <div>
+                         <h2 className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-zinc-200">Associated Team</h2>
+                         <p className="text-xs text-gray-400 mt-1">People assigned to this project and its ticket board.</p>
+                      </div>
+                      <button onClick={() => setActiveTab('team')} className="text-xs font-black text-indigo-600 hover:underline">Manage team</button>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                      {[...(team?.employees || []).map((member: any) => ({ ...member, role: 'Employee' })), ...(team?.interns || []).map((member: any) => ({ ...member, role: 'Intern' })), ...(team?.projectMembers || []).map((member: any) => ({ ...member, role: 'Project Member' }))].map((member: any) => (
+                         <span key={`${member.role}-${member.id}`} className="inline-flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 dark:bg-zinc-950 dark:text-zinc-200">
+                            <User className="h-3.5 w-3.5 text-indigo-500" /> {member.name} <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{member.role}</span>
+                         </span>
+                      ))}
+                      {(!team?.employees?.length && !team?.interns?.length && !team?.projectMembers?.length) && <span className="text-sm text-slate-400">No team members assigned yet.</span>}
+                   </div>
+                   <button onClick={() => setActiveTab('kanban')} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-black text-white hover:bg-indigo-700"><ListChecks className="h-4 w-4" /> Open ticket board</button>
+                </div>
                 {/* Ticket-driven delivery dashboard */}
                 {dashboard && (
                    <div className="space-y-6">

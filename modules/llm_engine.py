@@ -221,7 +221,7 @@ def analyze_content(text):
         }
 
 
-def generate_email(analysis, contact=None, recommended_services=None, owner_name="Varshith"):
+def generate_email(analysis, contact=None, recommended_services=None, owner_name="Noushad C I"):
     """
     Generates a personalized bilingual cold email using OpenAI.
     Returns english_body (para 1) and spanish_body (para 2) separately.
@@ -251,7 +251,7 @@ def generate_email(analysis, contact=None, recommended_services=None, owner_name
         services_list_str = ', '.join(services_to_mention) if services_to_mention else 'SEO, digital marketing, and automation'
 
         prompt = f"""
-        You are an expert B2B outreach copywriter writing on behalf of Team DaPros (SERP Hawk Digital Agency). Use ONLY the provided company info below. Do not invent details.
+        You are an expert B2B outreach copywriter writing on behalf of SCM BPO, the logistics back-office support services division of SCM SHIPPING SERVICES PVT LTD. Use ONLY the provided company info below. Do not mention SERP Hawk, Team DaPros, or any unrelated brand.
 
         PROSPECT INFO:
         Company: {company_name}
@@ -261,28 +261,22 @@ def generate_email(analysis, contact=None, recommended_services=None, owner_name
 
         SERVICES TO HIGHLIGHT: {services_list_str}
 
-        OUR FULL SERVICE CATALOG (for context):
-        • Organic SEO — higher Google rankings, more organic traffic
-        • Local SEO — dominate Google Maps & local search
-        • Google Ads — targeted PPC with measurable ROI
-        • Meta Ads — Facebook & Instagram campaigns that convert
-        • Social Media — brand presence & audience engagement
-        • Content Marketing — SEO blogs, landing pages, conversion copy
-        • Web Development — fast, modern, conversion-optimized sites
-        • App Development — custom mobile & web applications
-        • Automation & Consulting — smart workflows & strategy
+        OUR SERVICE PROFILE (for context):
+        • Logistics back-office support services (BPO)
+        • Shipment documentation and data processing
+        • Logistics operations coordination and administrative support
 
         EMAIL STRUCTURE (English):
         1. Hook (1-2 sentences) — A specific observation about {company_name}'s online presence or an opportunity you spotted. Make it personal.
         2. Problem/Opportunity (2-3 sentences) — A concrete challenge they likely face based on their industry and what they do.
-        3. Service Spotlight (3-5 sentences) — For EACH service in [{services_list_str}], write one clear sentence: what it does + the measurable result for them. Use concrete outcomes like "rank on page 1", "2x local visibility", "cut ad spend waste by 30%".
+        3. Service Spotlight (3-5 sentences) — Explain how SCM BPO's logistics back-office support, documentation, data processing, and operations coordination can reduce administrative workload and improve turnaround time. Do not pitch SEO, SERP Hawk, or digital marketing.
         4. Social proof (1 sentence) — Mention working with similar businesses to build trust.
         5. CTA (1 sentence) — Invite them to a free 15-minute strategy call. Make it effortless.
-        6. Sign-off: "Best regards,\n{owner_name} | SERP Hawk Digital Agency"
+        6. Sign-off exactly as: "Best regards,\n{owner_name}\nSCM BPO | SCM SHIPPING SERVICES PVT LTD"
 
         STYLE: 120-180 words total. Short paragraphs (2-3 sentences each), separated by blank lines. Conversational, confident, zero fluff. Services are the STAR — the reader should finish knowing exactly what you offer and why it matters for them.
 
-        Then provide the FULL Spanish translation with identical structure, signed as "Saludos cordiales,\n{owner_name} | SERP Hawk Digital Agency".
+        Then provide the FULL Spanish translation with identical structure, signed as "Saludos cordiales,\n{owner_name}\nSCM BPO | SCM SHIPPING SERVICES PVT LTD".
 
         Then provide a short, punchy WhatsApp message (English only) to send to them. Keep it under 50 words. It should be casual but professional, mention the opportunity, and ask for a quick chat.
 

@@ -832,7 +832,7 @@ class SmartResearchRequest(BaseModel):
     company_name: str
     company_url: Optional[str] = None
     client_id: Optional[int] = None  # If set, link extracted services to this CRM client
-    owner_name: Optional[str] = "Varshith"
+    owner_name: Optional[str] = "Noushad C I"
 
 
 # ─── Background Auto-Research Helper ────────────────────────────────────────
@@ -1252,8 +1252,8 @@ def send_manual(body: SendManualRequest, session: Session = Depends(get_session)
     if not body.skip_send:
         import os
         import httpx
-        sender = os.getenv("EMAIL_SENDER") or os.getenv("OUTLOOK_EMAIL", "crm@serphawk.in")
-        password = os.getenv("EMAIL_PASSWORD") or os.getenv("OUTLOOK_PASSWORD", "")
+        sender = os.getenv("EMAIL_AGENT_SENDER") or os.getenv("EMAIL_SENDER") or os.getenv("OUTLOOK_EMAIL", "contact@scmbpo.com")
+        password = os.getenv("EMAIL_AGENT_PASSWORD") or os.getenv("EMAIL_PASSWORD") or os.getenv("OUTLOOK_PASSWORD", "")
         smtp_server = os.getenv("EMAIL_HOST") or os.getenv("SMTP_SERVER", "mail.serphawk.in")
         smtp_port = os.getenv("EMAIL_PORT") or os.getenv("SMTP_PORT", 587)
 
@@ -4926,6 +4926,10 @@ def create_project(body: ProjectCreateRequest, session: Session = Depends(get_se
         employeeIds=body.employeeIds,
         internIds=body.internIds,
         clientIds=body.clientIds,
+        projectMemberIds=body.projectMemberIds,
+        project_type=body.project_type,
+        clientId=body.clientId,
+        leadId=body.leadId,
         tenant_id=current_tenant_id.get()
     )
     session.add(p)
@@ -5121,6 +5125,10 @@ def _project_dict(p: Project) -> dict:
         "employeeIds": p.employeeIds or [],
         "internIds": p.internIds or [],
         "clientIds": p.clientIds or [],
+        "projectMemberIds": p.projectMemberIds or [],
+        "project_type": p.project_type,
+        "clientId": p.clientId,
+        "leadId": p.leadId,
         "createdAt": p.createdAt.isoformat(),
         "updatedAt": p.updatedAt.isoformat(),
     }

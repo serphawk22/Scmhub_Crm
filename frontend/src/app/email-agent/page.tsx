@@ -214,6 +214,7 @@ export default function EmailAgentPage() {
         body: JSON.stringify({
           company_name: name,
           company_url: cleanUrl || null,
+          owner_name: "Noushad C I",
         }),
       });
       

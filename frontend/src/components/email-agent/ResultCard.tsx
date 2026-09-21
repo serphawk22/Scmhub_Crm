@@ -650,7 +650,7 @@ export function ResultCard({ historyId, result, companyName, companyUrl, onSendM
                   <span className="text-slate-500 w-12">From:</span>
                   <input 
                     type="text" 
-                    value="vkanjali@serphawk.com"
+                    value="contact@scmbpo.com"
                     readOnly
                     disabled
                     className="flex-1 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 px-3 py-1.5 text-sm text-slate-500 cursor-not-allowed focus:outline-none transition-all"

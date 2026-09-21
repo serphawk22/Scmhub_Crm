@@ -6,6 +6,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 
 type ProjectTicket = {
   id?: number;
+  project_id?: number;
+  created_at?: string;
   competitor?: string;
   category?: string;
   task: string;
