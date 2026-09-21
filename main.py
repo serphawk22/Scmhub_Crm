@@ -1508,8 +1508,10 @@ class ClientFollowUpRequest(BaseModel):
 
 
 class ProjectTeamRequest(BaseModel):
-    emails: list[str]
-    roles: list[str]
+    emails: list[str] = []
+    roles: list[str] = []
+    member_ids: list[int] = []
+    new_member: Optional[dict] = None
 
 class ProjectTicketRequest(BaseModel):
     competitor: str | None = None
@@ -7468,28 +7470,45 @@ def add_project_team(project_id: int, body: ProjectTeamRequest, session: Session
     if not p: raise HTTPException(404, "Project not found")
     
     added_users = []
-    # Initialize list if None
-    current_members = p.projectMemberIds or []
-    
-    for email, role in zip(body.emails, body.roles):
-        user = session.exec(select(User).where(User.email == email)).first()
-        if not user:
-            # Create user
-            user = User(
-                email=email,
-                name=email.split('@')[0],
-                role="ProjectMember",
-                password=_hash_password("password123")
-            )
-            session.add(user)
-            session.commit()
-            session.refresh(user)
-        
-        if user.id not in current_members:
-            current_members.append(user.id)
+    assignments = {
+        "Employee": list(p.employeeIds or []),
+        "Intern": list(p.internIds or []),
+        "ProjectMember": list(p.projectMemberIds or []),
+    }
+
+    users = []
+    if body.member_ids:
+        users = session.exec(select(User).where(User.id.in_(body.member_ids))).all()
+        missing = set(body.member_ids) - {user.id for user in users}
+        if missing:
+            raise HTTPException(400, f"Directory user(s) not found: {sorted(missing)}")
+
+    if body.new_member:
+        member = body.new_member
+        name = str(member.get("name", "")).strip()
+        email = str(member.get("email", "")).strip().lower()
+        password = str(member.get("password", ""))
+        if not name or not email or len(password) < 8:
+            raise HTTPException(400, "New project member requires name, email, and a password of at least 8 characters")
+        existing = session.exec(select(User).where(User.email == email)).first()
+        if existing:
+            raise HTTPException(409, "A user with this email already exists. Select them from the directory instead.")
+        new_user = User(name=name, email=email, role="ProjectMember", password=_hash_password(password), tenant_id=current_tenant_id.get())
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        users.append(new_user)
+
+    role_by_id = {user.id: user.role for user in users}
+    for user in users:
+        target_role = user.role if user.role in assignments else "ProjectMember"
+        if user.id not in assignments[target_role]:
+            assignments[target_role].append(user.id)
             added_users.append(user.id)
-            
-    p.projectMemberIds = current_members
+
+    p.employeeIds = assignments["Employee"]
+    p.internIds = assignments["Intern"]
+    p.projectMemberIds = assignments["ProjectMember"]
     session.add(p)
     session.commit()
     return {"message": "Team updated", "added_count": len(added_users)}
