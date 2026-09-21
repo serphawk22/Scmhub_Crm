@@ -23,14 +23,14 @@ import TimelineTab from './components/tabs/TimelineTab';
 import ConversationsTab from './components/tabs/ConversationsTab';
 import NotesTab from './components/tabs/NotesTab';
 import TasksTab from './components/tabs/TasksTab';
-import OpportunitiesTab from './components/tabs/OpportunitiesTab';
 import FilesTab from './components/tabs/FilesTab';
+import AiDataTab from '@/app/admin/clients/[id]/components/tabs/AiDataTab';
 
 // ─── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'overview',       label: 'Overview',       icon: LayoutDashboard },
   { key: 'timeline',       label: 'Timeline',        icon: Activity        },
-  { key: 'opportunities',  label: 'Opportunities',   icon: Lightbulb       },
+  { key: 'ai_data',        label: 'AI DATA',         icon: Brain           },
   { key: 'files',          label: 'Files',           icon: FolderOpen      },
   { key: 'conversations',  label: 'Conversations',   icon: MessageSquare   },
 ];
@@ -932,13 +932,12 @@ export default function LeadDetailsPage() {
                     onFilterChange={setTimelineFilter}
                   />
                 )}
-                {activeTab === 'opportunities' && (
-                  <OpportunitiesTab
-                    lead={lead}
-                    timeline={timeline}
-                    serviceRequests={serviceRequests}
-                    research={research}
-                    emails={emails}
+                {activeTab === 'ai_data' && (
+                  <AiDataTab
+                    clientId={id}
+                    websiteUrl={lead?.websiteUrl || lead?.website}
+                    resourceType="leads"
+                    onClientRefresh={fetchLead}
                   />
                 )}
                 {activeTab === 'conversations' && (

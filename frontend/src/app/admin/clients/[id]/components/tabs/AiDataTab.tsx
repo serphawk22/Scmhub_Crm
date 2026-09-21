@@ -10,6 +10,7 @@ interface AiDataTabProps {
   clientId: string;
   websiteUrl?: string;
   onClientRefresh?: () => void;
+  resourceType?: 'clients' | 'leads';
 }
 
 type AnalysisStatus = 'idle' | 'pending' | 'done' | 'error';
@@ -18,7 +19,7 @@ const errorMessage = (error: unknown, fallback: string) => (
   error instanceof Error && error.message ? error.message : fallback
 );
 
-export default function AiDataTab({ clientId, websiteUrl, onClientRefresh }: AiDataTabProps) {
+export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resourceType = 'clients' }: AiDataTabProps) {
   const [status, setStatus] = useState<AnalysisStatus>('idle');
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -26,6 +27,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh }: AiD
   const [extractResult, setExtractResult] = useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resourcePath = `${API_BASE_URL}/${resourceType}/${clientId}`;
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -35,10 +37,19 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh }: AiD
   }, []);
 
   const readAnalysis = useCallback(async () => {
-    const response = await fetch(`${API_BASE_URL}/clients/${clientId}/full-analysis`);
+    const response = await fetch(resourceType === 'clients' ? `${resourcePath}/full-analysis` : `${resourcePath}/research`);
     if (!response.ok) return null;
-    return response.json();
-  }, [clientId]);
+    const data = await response.json();
+    if (resourceType === 'clients') return data;
+
+    const research = data.research || {};
+    let agentData = research.email_agent_data;
+    if (typeof agentData === 'string') {
+      try { agentData = JSON.parse(agentData); } catch { agentData = null; }
+    }
+    const report = agentData?.full_markdown_report || (Object.keys(research).length > 0 ? JSON.stringify(research, null, 2) : null);
+    return report ? { status: 'done', report } : { status: 'pending' };
+  }, [resourcePath, resourceType]);
 
   const startPolling = useCallback(() => {
     stopPolling();
@@ -71,14 +82,17 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh }: AiD
     setReport(null);
     setError('');
     try {
-      const response = await fetch(`${API_BASE_URL}/clients/${clientId}/full-analysis`, { method: 'POST' });
+      const response = await fetch(
+        resourceType === 'clients' ? `${resourcePath}/full-analysis` : `${resourcePath}/auto-research`,
+        { method: 'POST' }
+      );
       if (!response.ok) throw new Error('Could not start AI data extraction.');
       startPolling();
     } catch (err: unknown) {
       setStatus('error');
       setError(errorMessage(err, 'Could not start AI data extraction.'));
     }
-  }, [clientId, startPolling]);
+  }, [resourcePath, resourceType, startPolling]);
 
   useEffect(() => {
     let active = true;
@@ -111,7 +125,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh }: AiD
     setExtractResult(null);
     setExtractError('');
     try {
-      const response = await fetch(`${API_BASE_URL}/clients/${clientId}/extract-services`, { method: 'POST' });
+      const response = await fetch(`${resourcePath}/extract-services`, { method: 'POST' });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || data.ok === false) {
         throw new Error(data.detail || data.message || 'Failed to extract services.');
