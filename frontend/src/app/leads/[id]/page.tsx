@@ -752,7 +752,7 @@ export default function LeadDetailsPage() {
           const r = await fetch(`${API_BASE_URL}/leads/${id}/research`);
           if (r.ok) {
             const d = await r.json();
-            if (d.research?.company_overview) {
+            if (d.research?.email_agent_data || d.research?.company_overview) {
               setResearch(d.research);
               clearInterval(poll);
               setIsGeneratingResearch(false);

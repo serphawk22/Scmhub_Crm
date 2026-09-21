@@ -491,7 +491,7 @@ const handleSaveMetrics = async () => {
           const r = await fetch(`${API_BASE_URL}/clients/${id}/research`);
           if (r.ok) {
             const d = await r.json();
-            if (d.research?.company_overview) {
+            if (d.research?.email_agent_data || d.research?.company_overview) {
               setResearch(d.research);
               clearInterval(poll);
               setLoading(false);
