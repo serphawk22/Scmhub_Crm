@@ -6137,13 +6137,21 @@ def dashboard_stats(
             })
             
         activities.sort(key=lambda x: x["date"] or "", reverse=True)
+
+        won_deals = session.exec(select(Deal).where(Deal.assigned_to == user.id, Deal.stage == "Closed Won")).all()
+        closed_deals = session.exec(select(Deal).where(Deal.assigned_to == user.id, Deal.stage.in_(["Closed Won", "Closed Lost"]))).all()
+        converted_leads = session.exec(select(Lead).where(Lead.owner_id == user.id, Lead.is_converted == True)).all()
         
         return {
             "isSalesManager": True,
             "metrics": {
                 "assigned_leads": assigned_leads_count,
                 "assigned_contacts": assigned_contacts_count,
-                "assigned_clients": assigned_clients_count
+                "assigned_clients": assigned_clients_count,
+                "deals_won": len(won_deals),
+                "revenue_won": round(sum(deal.value or 0 for deal in won_deals), 2),
+                "conversion_percentage": round((len(converted_leads) / assigned_leads_count) * 100, 2) if assigned_leads_count else 0,
+                "deal_win_rate": round((len(won_deals) / len(closed_deals)) * 100, 2) if closed_deals else 0,
             },
             "recent_activity": activities[:5]
         }
@@ -7461,6 +7469,10 @@ def _milestone_dict(m: Milestone) -> dict:
 
 @app.get("/developer/tickets")
 def get_all_assigned_tickets(member_id: int, session: Session = Depends(get_session)):
+    member = session.get(User, member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail="Developer not found")
+    owner_names = {str(member_id).lower(), (member.name or "").strip().lower(), (member.email or "").strip().lower()}
     projects = session.exec(select(Project)).all()
     assigned_project_ids = []
     project_names = {}
@@ -7478,6 +7490,7 @@ def get_all_assigned_tickets(member_id: int, session: Session = Depends(get_sess
     tickets = session.exec(
         select(ProjectTicket).where(ProjectTicket.project_id.in_(assigned_project_ids))
     ).all()
+    tickets = [ticket for ticket in tickets if (ticket.current_owner or "").strip().lower() in owner_names]
     
     ticket_list = []
     for t in tickets:
@@ -7497,7 +7510,11 @@ def get_project_tickets(project_id: int, session: Session = Depends(get_session)
 def create_project_ticket(project_id: int, body: ProjectTicketRequest, session: Session = Depends(get_session)):
     if not body.requested_date:
         body.requested_date = datetime.utcnow().date().isoformat()
-    t = ProjectTicket(**body.model_dump(), project_id=project_id)
+    payload = body.model_dump()
+    if not payload.get("current_owner") and current_salesperson_id.get():
+        creator = session.get(User, current_salesperson_id.get())
+        payload["current_owner"] = creator.name if creator else str(current_salesperson_id.get())
+    t = ProjectTicket(**payload, project_id=project_id)
     session.add(t)
     session.commit()
     session.refresh(t)

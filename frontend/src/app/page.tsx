@@ -341,10 +341,10 @@ function Dashboard() {
   return (
     <motion.div initial="hidden" animate="show" variants={containerVariants} className={cn(isAdmin || role === 'ProjectMember' || role === 'Demo' ? "space-y-6" : "")}>
       {role === "ProjectMember" && <DeveloperDashboard />}
-      {role === "SalesManager" && <SalesManagerDashboard />}
+      {role === "SalesManager" && stats && <SalesManagerDashboard stats={stats as any} name={user?.name || email} />}
       {isAdmin && adminStats && <AdminDashboard adminStats={adminStats} NAV_CARDS={NAV_CARDS} language={language} />}
       {role === "Demo" && <AdminDashboard adminStats={adminStats} NAV_CARDS={visibleNavCards} language={language} isDemo={true} />}
-      {!isAdmin && role !== "Demo" && role !== "ProjectMember" && role !== "SalesManager" && role !== "Supplier" && (
+      {!isAdmin && role !== "Demo" && role !== "ProjectMember" && role !== "SalesManager" && (
         <ClientDashboard clientStats={clientStats} NAV_CARDS={visibleNavCards} language={language} />
       )}
 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Users, UserPlus, PhoneCall, Calendar, ArrowRight, TrendingUp, Target } from 'lucide-react';
+import { Briefcase, Users, UserPlus, PhoneCall, Calendar, ArrowRight, TrendingUp, Target, DollarSign, Percent } from 'lucide-react';
 import Link from 'next/link';
 
 interface Activity {
@@ -17,6 +17,10 @@ interface SalesManagerStats {
     assigned_leads: number;
     assigned_contacts: number;
     assigned_clients: number;
+    deals_won?: number;
+    revenue_won?: number;
+    conversion_percentage?: number;
+    deal_win_rate?: number;
   };
   recent_activity: Activity[];
 }
@@ -111,6 +115,14 @@ export function SalesManagerDashboard({ stats, name }: { stats: SalesManagerStat
             <h2 className="text-4xl font-black text-slate-800 dark:text-white">{stats.metrics?.assigned_clients || 0}</h2>
           </div>
         </motion.div>
+      </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="rounded-2xl border bg-white dark:bg-zinc-900 p-5"><p className="text-xs font-bold text-slate-400 uppercase">Deals Won</p><p className="text-2xl font-black dark:text-white">{stats.metrics?.deals_won || 0}</p></div>
+        <div className="rounded-2xl border bg-white dark:bg-zinc-900 p-5"><p className="text-xs font-bold text-slate-400 uppercase">Revenue Won</p><p className="text-2xl font-black dark:text-white">${stats.metrics?.revenue_won || 0}</p></div>
+        <div className="rounded-2xl border bg-white dark:bg-zinc-900 p-5"><p className="text-xs font-bold text-slate-400 uppercase">Lead Conversion</p><p className="text-2xl font-black dark:text-white">{stats.metrics?.conversion_percentage || 0}%</p></div>
+        <div className="rounded-2xl border bg-white dark:bg-zinc-900 p-5"><p className="text-xs font-bold text-slate-400 uppercase">Deal Win Rate</p><p className="text-2xl font-black dark:text-white">{stats.metrics?.deal_win_rate || 0}%</p></div>
       </motion.div>
 
       {/* Recent Activity */}

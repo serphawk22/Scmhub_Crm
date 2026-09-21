@@ -268,7 +268,7 @@ export function DeveloperDashboard() {
           <button 
             onClick={() => {
               setSelectedTicket(null);
-              setForm({ task: "", current_state: "Planning" });
+              setForm({ task: "", current_state: "Planning", current_owner: user?.name || "" });
               setShowModal(true);
             }}
             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-sm hover:from-indigo-700 hover:to-purple-700 hover:scale-105 transition-all shadow-lg shadow-indigo-500/30"
