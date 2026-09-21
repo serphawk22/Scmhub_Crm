@@ -18,6 +18,7 @@ interface Deal {
   client_id: number;
   client_name: string;
   assigned_to: number | null;
+  assigned_name?: string;
   stage: string;
   expected_close_date: string | null;
   created_at: string;
@@ -30,14 +31,16 @@ export default function PipelinePage() {
   const { role, user } = useRole();
   const router = useRouter();
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [salesPerformance, setSalesPerformance] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newDeal, setNewDeal] = useState({ title: "", value: "", client_id: "", stage: "Lead", expected_close_date: "" });
+  const [newDeal, setNewDeal] = useState({ title: "", value: "", client_id: "", assigned_to: "", stage: "Lead", expected_close_date: "" });
   const [clients, setClients] = useState<{ id: number; email: string; companyName?: string }[]>([]);
+  const [salesUsers, setSalesUsers] = useState<{ id: number; name: string; email: string }[]>([]);
 
   useEffect(() => {
     if (role === "Client") {
@@ -46,6 +49,7 @@ export default function PipelinePage() {
     }
     fetchDeals();
     fetchClients();
+    fetch(`${API_BASE_URL}/users?role=SalesManager,Employee`).then(r => r.json()).then(data => setSalesUsers(data.users || [])).catch(() => {});
   }, [role, router]);
 
   const fetchDeals = async () => {
@@ -55,6 +59,7 @@ export default function PipelinePage() {
       if (!res.ok) throw new Error("Failed to fetch deals");
       const data = await res.json();
       setDeals(data.deals);
+      setSalesPerformance(data.sales_performance || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -119,14 +124,14 @@ export default function PipelinePage() {
           title: newDeal.title,
           value: parseFloat(newDeal.value) || 0.0,
           client_id: parseInt(newDeal.client_id),
-          assigned_to: role === "SalesManager" ? user?.id || null : null,
+          assigned_to: role === "SalesManager" ? user?.id || null : (newDeal.assigned_to ? Number(newDeal.assigned_to) : null),
           stage: newDeal.stage,
           expected_close_date: newDeal.expected_close_date || null
         })
       });
       if (res.ok) {
         setShowAddModal(false);
-        setNewDeal({ title: "", value: "", client_id: "", stage: "Lead", expected_close_date: "" });
+        setNewDeal({ title: "", value: "", client_id: "", assigned_to: "", stage: "Lead", expected_close_date: "" });
         fetchDeals();
       }
     } catch (err) {
@@ -176,6 +181,8 @@ export default function PipelinePage() {
 
           {error && <div className="p-4 mb-4 bg-red-50 text-red-600 rounded-xl">{error}</div>}
 
+          {role === "Admin" && salesPerformance.length > 0 && <div className="mb-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-zinc-800"><tr><th className="px-4 py-3">Salesperson</th><th className="px-4 py-3">Deals</th><th className="px-4 py-3">Pipeline</th><th className="px-4 py-3">Won Revenue</th><th className="px-4 py-3">Lead</th><th className="px-4 py-3">Negotiation</th><th className="px-4 py-3">Won</th></tr></thead><tbody>{salesPerformance.map(item => <tr key={item.assigned_to || "unassigned"} className="border-t border-slate-100 dark:border-zinc-800"><td className="px-4 py-3 font-bold dark:text-white">{item.salesperson}</td><td className="px-4 py-3">{item.deals}</td><td className="px-4 py-3">${Number(item.pipeline_value).toLocaleString()}</td><td className="px-4 py-3 font-bold text-emerald-600">${Number(item.won_revenue).toLocaleString()}</td><td className="px-4 py-3">{item.stages.Lead || 0}</td><td className="px-4 py-3">{item.stages.Negotiation || 0}</td><td className="px-4 py-3">{item.stages["Closed Won"] || 0}</td></tr>)}</tbody></table></div>}
+
           {/* Kanban Board */}
           <div className="flex gap-6 h-[calc(100vh-180px)] pb-4 overflow-x-auto snap-x">
             {STAGES.map(stage => (
@@ -217,11 +224,12 @@ export default function PipelinePage() {
                         {deal.client_name}
                       </div>
                       
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800">
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800">
                         <div className="flex items-center gap-1 text-emerald-600 font-semibold text-sm">
                           <DollarSign className="w-4 h-4" />
                           {deal.value.toLocaleString()}
                         </div>
+                        {deal.assigned_name && <p className="mt-2 text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
                         {deal.expected_close_date && (
                           <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
                             <Calendar className="w-3.5 h-3.5" />
@@ -249,6 +257,13 @@ export default function PipelinePage() {
                   <label className="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">{t("pipeline.deal_title")}</label>
                   <input required type="text" value={newDeal.title} onChange={e => setNewDeal({...newDeal, title: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none" placeholder="e.g. Website Redesign" />
                 </div>
+                {role !== "SalesManager" && <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">Assign Sales Owner</label>
+                  <select required value={newDeal.assigned_to} onChange={e => setNewDeal({...newDeal, assigned_to: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl outline-none">
+                    <option value="">Select salesperson</option>
+                    {salesUsers.map(salesUser => <option key={salesUser.id} value={salesUser.id}>{salesUser.name || salesUser.email} · {salesUser.email}</option>)}
+                  </select>
+                </div>}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-zinc-200 mb-1">{t("pipeline.client")}</label>
                   <select required value={newDeal.client_id} onChange={e => setNewDeal({...newDeal, client_id: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">

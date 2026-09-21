@@ -8831,8 +8831,16 @@ def get_deals(user_id: Optional[int] = None, session: Session = Depends(get_sess
     
     # We fetch client names for the UI manually
     results = []
+    performance = {}
     for d in deals:
         client = session.get(ClientProfile, d.client_id)
+        owner = session.get(User, d.assigned_to) if d.assigned_to else None
+        owner_key = d.assigned_to or 0
+        bucket = performance.setdefault(owner_key, {"assigned_to": d.assigned_to, "salesperson": owner.name if owner else "Unassigned", "pipeline_value": 0, "won_revenue": 0, "deals": 0, "stages": {stage: 0 for stage in ["Lead", "Discovery", "Demo", "Negotiation", "Closed Won", "Closed Lost"]}})
+        bucket["pipeline_value"] += d.value or 0
+        bucket["won_revenue"] += d.value or 0 if d.stage == "Closed Won" else 0
+        bucket["deals"] += 1
+        bucket["stages"][d.stage] = bucket["stages"].get(d.stage, 0) + 1
         results.append({
             "id": d.id,
             "title": d.title,
@@ -8840,19 +8848,27 @@ def get_deals(user_id: Optional[int] = None, session: Session = Depends(get_sess
             "client_id": d.client_id,
             "client_name": client.companyName or client.email if client else "Unknown",
             "assigned_to": d.assigned_to,
+            "assigned_name": owner.name if owner else None,
             "stage": d.stage,
             "expected_close_date": d.expected_close_date,
             "created_at": d.created_at.isoformat()
         })
-    return {"deals": results}
+    return {"deals": results, "sales_performance": list(performance.values())}
 
 @app.post("/deals")
 def create_deal(body: DealCreateRequest, session: Session = Depends(get_session)):
+    caller = session.get(User, current_salesperson_id.get()) if current_salesperson_id.get() else None
+    assigned_to = caller.id if caller and caller.role == "SalesManager" else body.assigned_to
+    if not assigned_to:
+        raise HTTPException(status_code=400, detail="A sales owner is required")
+    owner = session.get(User, assigned_to)
+    if not owner or owner.role not in ("SalesManager", "Employee", "Admin"):
+        raise HTTPException(status_code=400, detail="Select a valid sales owner")
     deal = Deal(
         title=body.title,
         value=body.value,
         client_id=body.client_id,
-        assigned_to=body.assigned_to,
+        assigned_to=assigned_to,
         stage=body.stage,
         expected_close_date=body.expected_close_date
     )
