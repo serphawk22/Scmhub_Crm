@@ -176,17 +176,20 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
     }
   }, [research, leadAgentData]);
 
+  const [liveResearch, setLiveResearch] = React.useState<any>(research || null);
+  React.useEffect(() => { setLiveResearch(research || null); }, [research]);
+
   let parsedPainPoints: any = null;
-  if (research?.pain_points) {
-    try { parsedPainPoints = JSON.parse(research.pain_points); } catch(e) { parsedPainPoints = research.pain_points; }
+  if (liveResearch?.pain_points) {
+    try { parsedPainPoints = JSON.parse(liveResearch.pain_points); } catch(e) { parsedPainPoints = liveResearch.pain_points; }
   }
   let parsedCompetitors: any = null;
-  if (research?.competitors) {
-    try { parsedCompetitors = JSON.parse(research.competitors); } catch(e) { parsedCompetitors = research.competitors; }
+  if (liveResearch?.competitors) {
+    try { parsedCompetitors = JSON.parse(liveResearch.competitors); } catch(e) { parsedCompetitors = liveResearch.competitors; }
   }
   let parsedBusinessGoals: any = null;
-  if (research?.business_goals) {
-    try { parsedBusinessGoals = JSON.parse(research.business_goals); } catch(e) { parsedBusinessGoals = research.business_goals; }
+  if (liveResearch?.business_goals) {
+    try { parsedBusinessGoals = JSON.parse(liveResearch.business_goals); } catch(e) { parsedBusinessGoals = liveResearch.business_goals; }
   }
 
   const [isAutoResearching, setIsAutoResearching] = React.useState(false);
@@ -194,9 +197,6 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
   const [extractResult, setExtractResult] = React.useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = React.useState<string | null>(null);
   const [autoResearchMsg, setAutoResearchMsg] = React.useState<string | null>(null);
-  const [liveResearch, setLiveResearch] = React.useState<any>(research || null);
-
-  React.useEffect(() => { setLiveResearch(research || null); }, [research]);
 
   const pollResearch = React.useCallback((leadId: number) => {
     let attempts = 0;
@@ -380,7 +380,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-sm text-slate-600 dark:text-zinc-300">{research.pain_points}</p>
+                      <p className="text-sm text-slate-600 dark:text-zinc-300">{liveResearch.pain_points}</p>
                     )}
                   </div>
                 )}
@@ -403,7 +403,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-600 dark:text-zinc-300">{research.competitors}</p>
+                      <p className="text-sm text-slate-600 dark:text-zinc-300">{liveResearch.competitors}</p>
                     )}
                   </div>
                 )}
@@ -422,7 +422,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-600 dark:text-zinc-300">{research.business_goals}</p>
+                      <p className="text-sm text-slate-600 dark:text-zinc-300">{liveResearch.business_goals}</p>
                     )}
                   </div>
                 )}
