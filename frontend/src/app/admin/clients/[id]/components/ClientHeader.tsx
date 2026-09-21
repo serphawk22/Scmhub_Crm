@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Building2, Star, User, ArrowLeft, Plus, MessageSquare,
-  CheckSquare, Calendar, Mail, Upload, Target, Zap,
+  Calendar, Mail, Target, Zap,
   TrendingUp, Phone, Globe, Sun, Moon, MapPin, Linkedin
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -15,10 +15,8 @@ interface ClientHeaderProps {
   onBack: () => void;
   onAddNote: () => void;
   onAddConversation: () => void;
-  onCreateTask: () => void;
   onScheduleMeeting: () => void;
   onSendEmail: () => void;
-  onUploadFile: () => void;
   onCreateOpportunity: () => void;
   darkMode: boolean;
   onToggleDarkMode: () => void;
@@ -52,7 +50,7 @@ function LeadScoreRing({ score }: { score: number }) {
 
 export default function ClientHeader({
   client, employees, onBack, onAddNote, onAddConversation,
-  onCreateTask, onScheduleMeeting, onSendEmail, onUploadFile,
+  onScheduleMeeting, onSendEmail,
   onCreateOpportunity, darkMode, onToggleDarkMode
 }: ClientHeaderProps) {
   const { language } = useLanguage();

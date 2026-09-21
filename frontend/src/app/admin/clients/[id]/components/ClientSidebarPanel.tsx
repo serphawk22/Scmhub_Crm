@@ -169,28 +169,9 @@ export default function ClientSidebarPanel({
     onResearchUpdate({ ...(research || {}), [field]: value });
   };
 
-  const [isAutoResearching, setIsAutoResearching] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractResult, setExtractResult] = useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = useState<string | null>(null);
-
-  const handleAutoResearch = async () => {
-    try {
-      setIsAutoResearching(true);
-      const res = await fetch(`${API_BASE_URL}/clients/${clientId}/auto-research`, {
-        method: 'POST'
-      });
-      if (res.ok) {
-        const data = await res.json();
-        onResearchUpdate(data.research);
-        setResearchOpen(true);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsAutoResearching(false);
-    }
-  };
 
   const handleExtractServices = async () => {
     setIsExtracting(true);
@@ -269,15 +250,6 @@ export default function ClientSidebarPanel({
             >
               <div className="px-4 pb-4 border-t border-slate-100 dark:border-zinc-800 ">
                 <div className="pt-3">
-                  <button
-                    onClick={handleAutoResearch}
-                    disabled={isAutoResearching}
-                    className="w-full mb-2 py-2 px-3 flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100   text-indigo-600  font-semibold text-xs rounded-xl transition-colors disabled:opacity-50"
-                  >
-                    {isAutoResearching ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
-                    {isAutoResearching ? (language === 'es' ? 'Investigando Empresa...' : 'Researching Company...') : (language === 'es' ? 'Autocompletar con IA' : 'Auto-Fill with AI')}
-                  </button>
-
                   {/* ── Extract Services Button ── */}
                   <button
                     onClick={handleExtractServices}

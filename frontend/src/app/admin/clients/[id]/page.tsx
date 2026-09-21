@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Activity, MessageSquare, StickyNote, CheckSquare, Building2, ChevronDown,
-  Target, FolderOpen, HeartPulse, LayoutDashboard, Users,
+  Activity, MessageSquare, StickyNote, Building2, ChevronDown,
+  Target, HeartPulse, LayoutDashboard, Users,
   TrendingUp, TrendingDown, Lightbulb, ShieldAlert, DollarSign, Zap, Star, Mail, Clock, Ticket, Globe, Navigation, Store, Tag, Phone, X, FileText, Send, Search, Filter, Check, Smartphone, Calendar, AlertCircle, ArrowUpRight, Copy, Brain, Loader2, Radar
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -22,20 +22,12 @@ import AiCopilotPanel from './components/AiCopilotPanel';
 import TimelineTab from './components/tabs/TimelineTab';
 import ConversationsTab from './components/tabs/ConversationsTab';
 import NotesTab from './components/tabs/NotesTab';
-import TasksTab from './components/tabs/TasksTab';
-import OpportunitiesTab from './components/tabs/OpportunitiesTab';
-import FilesTab from './components/tabs/FilesTab';
 import HealthTab from './components/tabs/HealthTab';
-import TicketsTab from './components/tabs/TicketsTab';
 
 // ─── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'overview',       label: 'Overview',       icon: LayoutDashboard },
-  { key: 'ai_research',    label: 'AI Research',    icon: Brain           },
   { key: 'timeline',       label: 'Timeline',        icon: Activity        },
-  { key: 'tasks',          label: 'Tasks',           icon: CheckSquare     },
-  { key: 'tickets',        label: 'Tickets',         icon: Ticket          },
-  { key: 'files',          label: 'Files',           icon: FolderOpen      },
   { key: 'health',         label: 'Health',          icon: HeartPulse      },
   { key: 'conversations',  label: 'Conversations',   icon: MessageSquare   },
 ];
@@ -101,7 +93,7 @@ function CollapsibleSection({ title, icon: Icon, count, defaultOpen = false, acc
 }
 
 // ─── Overview Tab — premium light ──────────────────────────────────────────
-function OverviewTab({ client, employees, serviceRequests, activities, timeline, research, notes, conversations, clientId, onNotesRefresh, onConversationsRefresh, emails, handleGenerateAnalysis, isGeneratingResearch, onRefresh }: any) {
+function OverviewTab({ client, employees, serviceRequests, activities, timeline, research, notes, conversations, clientId, onNotesRefresh, onConversationsRefresh, emails, onRefresh, onActivitySelect }: any) {
   const { t, language } = useLanguage();
   const recentActivities = (activities || []).slice(0, 8);
 
@@ -432,7 +424,7 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
             recentActivities.map((a: any) => (
               <div 
                 key={a.id} 
-                onClick={() => setSelectedActivity(a)}
+                onClick={() => onActivitySelect(a)}
                 style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 8px', borderBottom: '1px solid var(--border)', cursor: 'pointer', borderRadius: 8, transition: 'background 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -451,7 +443,7 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
         </div>
       </CollapsibleSection>
 
-      {/* Agent Data */}
+      {false && (
       <CollapsibleSection title="Agent data" icon={Target} accentColor="#4f46e5" defaultOpen={true}>
         {(() => {
           let eaData: any = null;
@@ -551,6 +543,7 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
         }})()}
 
       </CollapsibleSection>
+      )}
 
       {/* SWOT Section */}
       <CollapsibleSection title="SWOT Analysis" icon={Radar} accentColor="#f97316" defaultOpen={true}>
@@ -715,10 +708,7 @@ export default function AdminClientDetailPage() {
   const [timeline, setTimeline]           = useState<any[]>([]);
   const [notes, setNotes]                 = useState<any[]>([]);
   const [conversations, setConversations] = useState<any[]>([]);
-  const [tasks, setTasks]                 = useState<any[]>([]);
-  const [files, setFiles]                 = useState<any[]>([]);
   const [research, setResearch]           = useState<any>(null);
-  const [isGeneratingResearch, setIsGeneratingResearch] = useState(false);
 
   // UI state
   const [activeTab, setActiveTab]         = useState('overview');
@@ -755,7 +745,7 @@ export default function AdminClientDetailPage() {
     if (!id) return;
     try {
       const fetchJson = (url: string) => fetch(url).then(r => { if (!r.ok) throw new Error(`Fetch failed for ${url}`); return r.json(); });
-      const [clientRes, empRes, actRes, emailRes, svcRes, tlRes, notesRes, convRes, taskRes, filesRes, researchRes] = await Promise.allSettled([
+      const [clientRes, empRes, actRes, emailRes, svcRes, tlRes, notesRes, convRes, researchRes] = await Promise.allSettled([
         fetchJson(`${API_BASE_URL}/clients/${id}`),
         fetchJson(`${API_BASE_URL}/users`),
         fetchJson(`${API_BASE_URL}/clients/${id}/activities`),
@@ -764,8 +754,6 @@ export default function AdminClientDetailPage() {
         fetchJson(`${API_BASE_URL}/clients/${id}/timeline`),
         fetchJson(`${API_BASE_URL}/clients/${id}/notes`),
         fetchJson(`${API_BASE_URL}/clients/${id}/conversations`),
-        fetchJson(`${API_BASE_URL}/tasks?client_id=${id}`),
-        fetchJson(`${API_BASE_URL}/clients/${id}/files`),
         fetchJson(`${API_BASE_URL}/clients/${id}/research`),
       ]);
 
@@ -777,14 +765,6 @@ export default function AdminClientDetailPage() {
       if (tlRes.status === 'fulfilled') setTimeline(tlRes.value.timeline || []);
       if (notesRes.status === 'fulfilled') setNotes(notesRes.value.notes || []);
       if (convRes.status === 'fulfilled') setConversations(convRes.value.conversations || []);
-      if (taskRes.status === 'fulfilled') {
-        const tVal = Array.isArray(taskRes.value?.tasks) ? taskRes.value.tasks : (Array.isArray(taskRes.value) ? taskRes.value : []);
-        setTasks(tVal.filter((t: any) => String(t.client_id) === String(id)));
-      }
-      if (filesRes.status === 'fulfilled') {
-        const fVal = Array.isArray(filesRes.value?.files) ? filesRes.value.files : (Array.isArray(filesRes.value) ? filesRes.value : []);
-        setFiles(fVal);
-      }
       if (researchRes.status === 'fulfilled') setResearch(researchRes.value.research || null);
     } catch (e) { console.error(e); }
     finally { setPageLoading(false); }
@@ -831,64 +811,6 @@ export default function AdminClientDetailPage() {
     }
   };
 
-  const hasResearchResult = (researchData: any) => {
-    if (!researchData) return false;
-    if (researchData.company_overview || researchData.pain_points || researchData.business_goals || researchData.competitors || researchData.swot_analysis) return true;
-
-    const emailAgentData = researchData.email_agent_data;
-    if (emailAgentData) {
-      const parsed = typeof emailAgentData === 'string' ? (() => { try { return JSON.parse(emailAgentData); } catch { return null; } })() : emailAgentData;
-      if (parsed?.full_markdown_report || parsed?.company_overview || parsed?.summary) return true;
-    }
-
-    return false;
-  };
-
-  const waitForResearchResult = async () => {
-    const maxAttempts = 60;
-    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/clients/${id}/research`);
-        if (res.ok) {
-          const data = await res.json();
-          const nextResearch = data.research || null;
-          if (hasResearchResult(nextResearch)) {
-            setResearch(nextResearch);
-            return true;
-          }
-        }
-      } catch (err) {
-        console.error('Research polling failed:', err);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-
-    return false;
-  };
-
-  const handleGenerateAnalysis = async () => {
-    if (!id) return;
-    setIsGeneratingResearch(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/clients/${id}/auto-research`, { method: 'POST' });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(errText || 'Failed to start AI research');
-      }
-
-      const ready = await waitForResearchResult();
-      if (!ready) {
-        alert('AI research is still running. Please wait a moment and refresh this page.');
-      }
-    } catch (e) {
-      console.error('AI research error:', e);
-      alert('AI research could not be completed. Please try again.');
-    } finally {
-      setIsGeneratingResearch(false);
-    }
-  };
-
   // ─── Loading & Auth Guards ────────────────────────────────────────────────
   if (loading || pageLoading) return <PageSkeleton />;
 
@@ -926,8 +848,6 @@ export default function AdminClientDetailPage() {
   const tabBadges: Record<string, number> = {
     conversations: conversations.length,
     notes:         notes.length,
-    tasks:         tasks.filter(t => t.status !== 'Done').length,
-    files:         files.length,
   };
 
   return (
@@ -978,10 +898,8 @@ export default function AdminClientDetailPage() {
         onBack={() => router.back()}
         onAddNote={() => switchTab('notes')}
         onAddConversation={() => switchTab('conversations')}
-        onCreateTask={() => switchTab('tasks')}
         onScheduleMeeting={() => router.push('/meetings')}
         onSendEmail={() => client?.email ? window.location.href = `mailto:${client.email}` : alert(language === 'es' ? 'No hay correo' : 'No email found for this client')}
-        onUploadFile={() => switchTab('files')}
         onCreateOpportunity={() => {}}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
@@ -1044,18 +962,8 @@ export default function AdminClientDetailPage() {
                     clientId={id}
                     onNotesRefresh={() => fetch(`${API_BASE_URL}/clients/${id}/notes`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => setNotes(d.notes || []))}
                     onConversationsRefresh={() => fetch(`${API_BASE_URL}/clients/${id}/conversations`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => setConversations(d.conversations || []))}
-                    handleGenerateAnalysis={handleGenerateAnalysis}
-                    isGeneratingResearch={isGeneratingResearch}
+                    onActivitySelect={setSelectedActivity}
                     onRefresh={fetchClient}
-                  />
-                )}
-                {activeTab === 'ai_research' && (
-                  <OpportunitiesTab
-                    client={client}
-                    timeline={timeline}
-                    serviceRequests={serviceRequests}
-                    research={research}
-                    emails={emails}
                   />
                 )}
                 {activeTab === 'timeline' && (
@@ -1081,25 +989,6 @@ export default function AdminClientDetailPage() {
                     onRefresh={() => fetch(`${API_BASE_URL}/clients/${id}/notes`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => setNotes(d.notes || []))}
                   />
                 )}
-                {activeTab === 'tasks' && (
-                  <TasksTab
-                    clientId={id}
-                    tasks={tasks}
-                    employees={employees}
-                    onRefresh={() => fetch(`${API_BASE_URL}/tasks?client_id=${id}`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
-                      const all = d.tasks || d || [];
-                      setTasks(all.filter((t: any) => String(t.client_id) === String(id)));
-                    })}
-                  />
-                )}
-
-                {activeTab === 'files' && (
-                  <FilesTab
-                    clientId={id}
-                    files={files}
-                    onRefresh={() => fetch(`${API_BASE_URL}/clients/${id}/files`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => setFiles(d.files || d || []))}
-                  />
-                )}
                 {activeTab === 'health' && (
                   <HealthTab
                     client={client}
@@ -1110,9 +999,6 @@ export default function AdminClientDetailPage() {
                   />
                 )}
                 
-                {activeTab === 'tickets' && (
-                  <TicketsTab clientId={id} />
-                )}
               </motion.div>
             </AnimatePresence>
           </main>
