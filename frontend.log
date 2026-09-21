@@ -1,0 +1,27 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+⚠ Mismatching @next/swc version, detected: 16.1.7 while Next.js is on 16.1.6. Please ensure these match
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/vijay/Projects/serphawk_crm_seo/package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /home/vijay/Projects/serphawk_crm_seo/frontend/package-lock.json
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.217.233.254:3000
+
+✓ Starting...
+✓ Ready in 1764ms
+ GET / 200 in 2.3s (compile: 1052ms, render: 1269ms)
+ GET /orders 200 in 220ms (compile: 62ms, render: 158ms)
+ GET /billing 200 in 136ms (compile: 68ms, render: 68ms)
+ GET /proposals 200 in 31ms (compile: 14ms, render: 17ms)
+ GET /billing 200 in 21ms (compile: 5ms, render: 16ms)

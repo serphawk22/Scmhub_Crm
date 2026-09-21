@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Light Mode (Zoho Inspired)
+═══════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --border: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-hover: #f1f5f9;
+  --sidebar-text: #475569;
+  --sidebar-active-bg: #eff6ff;
+  --sidebar-active-text: #2563eb;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --radius: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Dark Mode (Linear / GitHub Inspired)
+═══════════════════════════════════════════════ */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #000000;
+  --surface: #0a0a0a;
+  --card: #111111;
+  --border: #222222;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --primary: #ffffff;
+  --primary-hover: #cccccc;
+  --success: #cccccc;
+  --warning: #a3a3a3;
+  --danger: #737373;
+
+  --sidebar-bg: #000000;
+  --sidebar-border: #222222;
+  --sidebar-hover: #111111;
+  --sidebar-text: #a3a3a3;
+  --sidebar-active-bg: #222222;
+  --sidebar-active-text: #ffffff;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL SMOOTH TRANSITION
+═══════════════════════════════════════════════ */
+*, *::before, *::after {
+  transition:
+    background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    fill 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    stroke 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-spin, .animate-pulse, .animate-bounce, .animate-shimmer {
+  transition: none !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--text-primary);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-surface: var(--surface);
+  --color-text-secondary: var(--text-secondary);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FORM CONTROLS — keep native dropdown lists & inputs legible
+   in both themes (the theme is set via data-theme, not the
+   OS color scheme, so the browser needs explicit guidance)
+──────────────────────────────────────────────────────────── */
+select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+[data-theme="dark"] select option {
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+/* ═══════════════════════════════════════════════
+   CARDS / PANELS
+═══════════════════════════════════════════════ */
+.zoho-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .zoho-card {
+  background: var(--card);
+}
+
+.zoho-card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.zoho-card-hover:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLBARS
+═══════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS (Loaders)
+═══════════════════════════════════════════════ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-loader {
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+[data-theme="dark"] .skeleton-loader {
+  background: linear-gradient(90deg, var(--border) 25%, var(--card) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+}

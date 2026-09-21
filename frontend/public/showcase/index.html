@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+ <title>SERP Hawk CRM — 5 AI Agents Running Your Entire SEO Agency</title>
+ <meta name="description" content="5 AI Agents that win clients, analyse competitors, pitch on calls, monitor everything, and answer via WhatsApp. One platform."/>
+ <link rel="preconnect" href="https://fonts.googleapis.com"/>
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+ <style>
+ /* THEME TOKENS */
+ :root {
+ /* Light mode defaults */
+ --bg: #ffffff;
+ --bg2: #fafafa;
+ --bg3: #f0f0f0;
+ --text: #000000;
+ --muted: #555555;
+ --border: rgba(0,0,0,0.10);
+ --glass: rgba(0,0,0,0.03);
+ --glass2: rgba(0,0,0,0.06);
+ --accent: #000000;
+ --accent-inv: #ffffff;
+ --card-bg: #f8f8f8;
+ --nav-bg: rgba(255,255,255,0.85);
+ --particle-color: #000000;
+ --shadow: rgba(0,0,0,0.12);
+ --badge-bg: rgba(0,0,0,0.06);
+ --badge-border: rgba(0,0,0,0.15);
+ --badge-text: #000000;
+ --stat-text: #000000;
+ --eyebrow: #000000;
+ --check-bg: rgba(0,0,0,0.08);
+ --check-color: #000000;
+ --input-bg: rgba(0,0,0,0.04);
+ --scroll-bar: #000000;
+ --tag-bg: rgba(0,0,0,0.05);
+ --tag-text: #333333;
+ --wa-bg: rgba(0,0,0,0.04);
+ --wa-border: rgba(0,0,0,0.10);
+ --pipeline-icon-bg: rgba(0,0,0,0.06);
+ --pipeline-arrow: rgba(0,0,0,0.25);
+ --role-card-bg: #f8f8f8;
+ --tech-pill-bg: rgba(0,0,0,0.04);
+ --browser-chrome-bg: #e8e8e8;
+ --browser-url-bg: rgba(0,0,0,0.06);
+ --float-badge-bg: #ffffff;
+ --neon: #16a34a;
+ --neon-dim: rgba(22,163,74,0.12);
+ --neon-glow: 0 0 8px rgba(22,163,74,0.4), 0 0 24px rgba(22,163,74,0.15);
+ }
+ [data-theme="dark"] {
+ --bg: #000000;
+ --bg2: #0a0a0a;
+ --bg3: #111111;
+ --text: #ffffff;
+ --muted: #888888;
+ --border: rgba(255,255,255,0.08);
+ --glass: rgba(255,255,255,0.03);
+ --glass2: rgba(255,255,255,0.06);
+ --accent: #ffffff;
+ --accent-inv: #000000;
+ --card-bg: #0f0f0f;
+ --nav-bg: rgba(0,0,0,0.85);
+ --particle-color: #ffffff;
+ --shadow: rgba(0,0,0,0.6);
+ --badge-bg: rgba(255,255,255,0.06);
+ --badge-border: rgba(255,255,255,0.12);
+ --badge-text: #ffffff;
+ --stat-text: #ffffff;
+ --eyebrow: #999999;
+ --check-bg: rgba(255,255,255,0.08);
+ --check-color: #ffffff;
+ --input-bg: rgba(255,255,255,0.05);
+ --scroll-bar: #ffffff;
+ --tag-bg: rgba(255,255,255,0.05);
+ --tag-text: #aaaaaa;
+ --wa-bg: rgba(255,255,255,0.04);
+ --wa-border: rgba(255,255,255,0.10);
+ --pipeline-icon-bg: rgba(255,255,255,0.05);
+ --pipeline-arrow: rgba(255,255,255,0.25);
+ --role-card-bg: #0f0f0f;
+ --tech-pill-bg: rgba(255,255,255,0.04);
+ --browser-chrome-bg: #1a1a1a;
+ --browser-url-bg: rgba(255,255,255,0.06);
+ --float-badge-bg: #111111;
+ --neon: #39ff80;
+ --neon-dim: rgba(57,255,128,0.10);
+ --neon-glow: 0 0 8px rgba(57,255,128,0.6), 0 0 30px rgba(57,255,128,0.25);
+ }
+
+ /* RESET */
+ *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+ html{scroll-behavior:smooth}
+ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;transition:background .3s,color .3s}
+
+ /* CANVAS + PROGRESS */
+ #particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.15}
+ .scroll-progress{position:fixed;top:0;left:0;height:2px;z-index:200;background:var(--neon);box-shadow:var(--neon-glow);transition:width .1s}
+
+ /* CUSTOM CURSOR */
+ *{cursor:none !important}
+ @media(pointer:coarse){*{cursor:auto !important}}
+ #cursor-dot{position:fixed;width:6px;height:6px;border-radius:50%;background:var(--neon);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .08s,width .2s,height .2s,opacity .2s;box-shadow:0 0 6px var(--neon),0 0 16px var(--neon);will-change:left,top}
+ #cursor-ring{position:fixed;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--neon);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:0.5;transition:width .25s,height .25s,opacity .25s,border-color .25s;will-change:left,top}
+ #cursor-dot.expanded{width:12px;height:12px;box-shadow:0 0 12px var(--neon),0 0 30px var(--neon)}
+ #cursor-ring.expanded{width:48px;height:48px;opacity:0.25}
+ #cursor-dot.clicking{transform:translate(-50%,-50%) scale(0.6)}
+ #cursor-ring.clicking{width:22px;height:22px;opacity:0.8}
+
+ /* NAV */
+ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all .3s;gap:16px}
+ .nav-logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:18px;text-decoration:none;color:var(--text)}
+ .nav-logo-icon{width:34px;height:34px;background:var(--text);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--bg)}
+ .nav-links{display:flex;gap:24px;flex:1;justify-content:center}
+ .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+ .nav-links a:hover{color:var(--text);text-shadow:var(--neon-glow)}
+ .nav-controls{display:flex;align-items:center;gap:10px}
+
+ /* Theme Toggle */
+ .theme-toggle{width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--glass2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;color:var(--text)}
+ .theme-toggle:hover{background:var(--glass);border-color:var(--accent)}
+
+ /* Language Toggle */
+ .lang-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--glass2)}
+ .lang-btn{padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s;letter-spacing:.5px}
+ .lang-btn.active{background:var(--accent);color:var(--accent-inv)}
+
+ /* CTA & Login Button */
+ .nav-cta{padding:8px 18px;border-radius:100px;background:var(--text);color:var(--bg);font-weight:700;font-size:13px;text-decoration:none;transition:all .2s;white-space:nowrap;border:none}
+ .nav-cta:hover{box-shadow:var(--neon-glow);background:var(--text);transform:translateY(-1px)}
+ .nav-login{color:var(--text);font-weight:600;font-size:14px;text-decoration:none;transition:color .2s;padding:8px 12px}
+ .nav-login:hover{color:var(--neon)}
+
+ section{position:relative;z-index:1}
+
+ /* HERO */
+ .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 40px 80px;overflow:hidden}
+ .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:100px;background:var(--badge-bg);border:1px solid var(--badge-border);font-size:13px;font-weight:600;color:var(--badge-text);margin-bottom:24px}
+ .dot{width:7px;height:7px;border-radius:50%;background:var(--neon);flex-shrink:0;animation:pulse-neon 2s ease-in-out infinite;box-shadow:0 0 6px var(--neon)}
+ @keyframes pulse-neon{0%,100%{opacity:1;box-shadow:0 0 6px var(--neon),0 0 14px var(--neon)}50%{opacity:.6;box-shadow:0 0 3px var(--neon)}}
+ .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:800;line-height:1.05;letter-spacing:-2.5px;margin-bottom:24px;color:var(--text)}
+ .hero h1 em{font-style:normal;color:var(--muted)}
+ .hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:640px;margin:0 auto 40px;line-height:1.8;font-weight:400}
+ .hero-actions{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:72px}
+ .hero-btn-primary{padding:14px 28px;border-radius:100px;background:var(--text);color:var(--bg);font-weight:700;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:none;transition:all .25s}
+ .hero-btn-primary:hover{transform:translateY(-2px);box-shadow:var(--neon-glow)}
+ .hero-btn-secondary{padding:14px 28px;border-radius:100px;background:transparent;color:var(--text);font-weight:600;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--border);transition:all .25s}
+ .hero-btn-secondary:hover{border-color:var(--neon);color:var(--text);box-shadow:0 0 10px rgba(57,255,128,0.15)}
+
+ /* Browser Mockup */
+ .hero-mockup{position:relative;width:100%;max-width:1100px;margin:0 auto}
+ .browser-chrome{background:var(--browser-chrome-bg);border-radius:12px 12px 0 0;padding:10px 16px;display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-bottom:none}
+ .browser-dot{width:11px;height:11px;border-radius:50%}
+ .browser-dot.r{background:#ff5f57}.browser-dot.y{background:#febc2e}.browser-dot.g{background:#28c840}
+ .browser-url{flex:1;background:var(--browser-url-bg);border-radius:5px;padding:4px 12px;margin-left:8px;font-size:12px;color:var(--muted)}
+ .browser-screen{border-radius:0 0 12px 12px;overflow:hidden;border:1px solid var(--border);border-top:none;box-shadow:0 40px 100px var(--shadow)}
+ .browser-screen img{width:100%;display:block}
+ .float-badge{position:absolute;background:var(--float-badge-bg);border:1px solid var(--border);border-radius:10px;padding:9px 15px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 8px 30px var(--shadow);backdrop-filter:blur(10px);z-index:10;color:var(--text)}
+ .float-badge.top-right{top:-14px;right:-20px}
+ .float-badge.bottom-left{bottom:-14px;left:-20px}
+ .bdot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+ .animate-float{animation:float 4s ease-in-out infinite}
+ .animate-float-slow{animation:float 6s ease-in-out infinite 1s}
+ @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+ /* STATS */
+ .stats-bar{padding:48px 40px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+ .stats-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:32px;text-align:center}
+ .stat-num{font-family:'Space Grotesk',sans-serif;font-size:48px;font-weight:900;color:var(--stat-text);display:block;letter-spacing:-2px}
+ .stat-label{font-size:13px;color:var(--muted);margin-top:2px;font-weight:500}
+
+ /* SECTION SHARED */
+ .section-eyebrow{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--neon);margin-bottom:14px;text-shadow:0 0 10px rgba(57,255,128,0.4);border:1px solid var(--border);padding:4px 12px;border-radius:100px;background:var(--glass2)}
+ .section-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,4.5vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;color:var(--text)}
+ .section-sub{font-size:17px;color:var(--muted);max-width:580px;margin:0 auto 56px;line-height:1.75}
+
+ /* PROBLEM */
+ .problem{padding:100px 40px;text-align:center}
+ .chaos-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+ .chaos-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:left;transition:all .3s;position:relative;overflow:hidden}
+ .chaos-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--text);opacity:.2}
+ .chaos-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 40px var(--shadow)}
+ .chaos-icon{font-size:28px;margin-bottom:12px}
+ .chaos-title{font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)}
+ .chaos-desc{font-size:14px;color:var(--muted);line-height:1.65}
+ .arrow-down{display:block;text-align:center;margin:44px auto;font-size:36px;color:var(--muted);animation:bounce 2s infinite}
+ @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+ /* AGENT STRIP */
+ .agents-strip{padding:48px 40px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+ .agents-row{max-width:1100px;margin:0 auto;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+ .agent-chip{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-weight:700;font-size:14px;transition:all .3s;cursor:pointer;color:var(--text)}
+ .agent-chip:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 8px 24px var(--shadow)}
+ .agent-chip .chip-num{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:var(--text);color:var(--bg)}
+
+ /* FEATURE SECTIONS */
+ .feature-outer{padding:90px 40px;border-bottom:1px solid var(--border)}
+ .feature-outer:nth-child(even){background:var(--bg2)}
+ .feature-row{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;max-width:1200px;margin:0 auto}
+ .feature-row.reverse{direction:rtl}
+ .feature-row.reverse>*{direction:ltr}
+ .feature-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:100px;background:var(--neon-dim);border:1px solid rgba(57,255,128,0.25);color:var(--neon);margin-bottom:16px}
+ .feature-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,3vw,42px);font-weight:800;line-height:1.15;letter-spacing:-.8px;margin-bottom:18px;color:var(--text)}
+ .feature-desc{font-size:16px;color:var(--muted);line-height:1.85;margin-bottom:28px}
+ .feature-bullets{list-style:none;display:flex;flex-direction:column;gap:11px}
+ .feature-bullets li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--muted);line-height:1.55}
+ .check{width:20px;height:20px;border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:var(--check-bg);color:var(--check-color)}
+ .feature-visual{position:relative}
+ .screen-wrap{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 24px 72px var(--shadow),0 0 0 1px var(--border);transition:transform .4s}
+ .screen-wrap:hover{transform:scale(1.02) translateY(-4px)}
+ .screen-wrap img{width:100%;display:block}
+
+ /* PIPELINE */
+ .pipeline-section{padding:80px 40px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);text-align:center}
+ .pipeline-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;margin-top:52px;max-width:1000px;margin-left:auto;margin-right:auto}
+ .pipeline-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 8px}
+ .pipeline-icon{width:68px;height:68px;border-radius:16px;background:var(--pipeline-icon-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;transition:transform .3s}
+ .pipeline-step:hover .pipeline-icon{transform:translateY(-4px)}
+ .pipeline-label{font-size:13px;font-weight:700;color:var(--text)}
+ .pipeline-sub{font-size:11px;color:var(--muted);margin-top:3px;max-width:80px}
+ .pipeline-arrow{font-size:20px;color:var(--pipeline-arrow);margin:0 4px;margin-bottom:32px}
+
+ /* WHATSAPP COMMANDS */
+ .whatsapp-commands{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:28px}
+ .wa-cmd{background:var(--wa-bg);border:1px solid var(--wa-border);border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;transition:all .25s}
+ .wa-cmd:hover{border-color:var(--accent);transform:translateY(-2px)}
+ .wa-cmd-code{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:800;color:var(--text);background:var(--glass2);padding:2px 8px;border-radius:5px;flex-shrink:0;margin-top:1px;border:1px solid var(--border)}
+ .wa-cmd-desc{font-size:13px;color:var(--muted);line-height:1.45}
+
+ /* AI SUMMARY BANNER */
+ .ai-banner{padding:80px 40px;text-align:center;border-top:1px solid var(--border)}
+ .ai-agents-list{max-width:860px;margin:44px auto 0;display:flex;flex-direction:column;gap:12px}
+ .ai-agent-row{display:flex;align-items:center;gap:18px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:18px 24px;transition:all .3s;text-align:left}
+ .ai-agent-row:hover{border-color:var(--accent);transform:translateX(4px);box-shadow:0 8px 28px var(--shadow)}
+ .ai-agent-num{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:900;color:var(--muted);flex-shrink:0;width:38px;letter-spacing:-1px}
+ .ai-agent-content{flex:1}
+ .ai-agent-title{font-weight:700;font-size:16px;margin-bottom:3px;color:var(--text)}
+ .ai-agent-desc{font-size:13px;color:var(--muted);line-height:1.5}
+ .ai-agent-badge{flex-shrink:0;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;background:var(--glass2);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+
+ /* MODULES */
+ .modules-section{padding:90px 40px;text-align:center;background:var(--bg2);border-top:1px solid var(--border)}
+ .modules-grid{max-width:1200px;margin:52px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+ .module-card{padding:32px 28px;border-radius:16px;background:var(--bg);border:1px solid var(--border);text-align:left;transition:all .3s}
+ .module-card:hover{border-color:var(--neon);box-shadow:0 12px 36px var(--shadow), var(--neon-glow);transform:translateY(-4px)}
+ .module-card-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;color:var(--text)}
+ .module-card-desc{font-size:13px;color:var(--muted);line-height:1.65}
+ .module-card-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:5px}
+ .module-tag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;background:var(--tag-bg);border:1px solid var(--border);color:var(--tag-text);letter-spacing:.3px}
+
+ /* ROLES */
+ .roles-section{padding:90px 40px;border-top:1px solid var(--border)}
+ .roles-grid{max-width:1100px;margin:52px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+ .role-card{border-radius:16px;padding:28px;border:1px solid var(--border);background:var(--role-card-bg);transition:all .3s}
+ .role-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 36px var(--shadow)}
+ .role-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--neon)}
+ .role-avatar svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ .role-title{font-weight:800;font-size:18px;margin-bottom:5px;color:var(--text)}
+ .role-tagline{font-size:12px;color:var(--muted);margin-bottom:14px;font-weight:500}
+ .role-perms{list-style:none;display:flex;flex-direction:column;gap:7px}
+ .role-perms li{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+ .role-perms li::before{content:'';color:var(--text);font-weight:800;font-size:11px}
+
+ /* TYPEWRITER */
+ .typewriter-section{padding:90px 40px;text-align:center;border-top:1px solid var(--border);background:var(--bg2)}
+ .typewriter-label{font-size:16px;color:var(--muted);margin-bottom:16px}
+ .typewriter-text{font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,3.8vw,50px);font-weight:800;line-height:1.2;min-height:100px;color:var(--text)}
+ .typewriter-cursor{display:inline-block;width:3px;height:.9em;background:var(--text);margin-left:4px;vertical-align:middle;animation:blink 1s step-end infinite}
+ @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+ /* TECH */
+ .tech-section{padding:72px 40px;border-top:1px solid var(--border);text-align:center}
+ .tech-logos{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:860px;margin:40px auto 0}
+ .tech-pill{display:flex;align-items:center;gap:6px;background:var(--tech-pill-bg);border:1px solid var(--border);border-radius:100px;padding:7px 16px;font-size:13px;font-weight:600;color:var(--muted);transition:all .25s}
+ .tech-pill:hover{border-color:var(--accent);color:var(--text);transform:translateY(-2px)}
+
+ /* CTA */
+ .cta-section{padding:110px 40px;text-align:center;border-top:1px solid var(--border)}
+ .cta-card{max-width:640px;margin:0 auto;position:relative;z-index:1;background:var(--card-bg);border:1px solid var(--border);border-radius:24px;padding:64px 52px;box-shadow:0 40px 100px var(--shadow)}
+ .cta-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,3.8vw,48px);font-weight:800;line-height:1.15;margin-bottom:16px;letter-spacing:-1px;color:var(--text)}
+ .cta-sub{font-size:15px;color:var(--muted);margin-bottom:36px;line-height:1.7}
+ .cta-form{display:flex;gap:10px;max-width:420px;margin:0 auto}
+ .cta-input{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-size:15px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s}
+ .cta-input:focus{border-color:var(--accent)}
+ .cta-input::placeholder{color:var(--muted)}
+ .cta-btn{padding:15px 32px;border-radius:100px;background:var(--text);color:var(--bg);font-weight:700;font-size:15px;border:none;transition:all .25s;white-space:nowrap}
+ .cta-btn:hover{transform:translateY(-2px);box-shadow:var(--neon-glow)}
+
+ /* FOOTER */
+ footer{padding:36px 40px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;background:var(--bg2)}
+ .footer-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--text)}
+ .footer-logo-icon{width:28px;height:28px;background:var(--text);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--bg)}
+ .footer-links{display:flex;gap:20px}
+ .footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
+ .footer-links a:hover{color:var(--text)}
+ .footer-copy{font-size:12px;color:var(--muted)}
+
+ /* ANIMATIONS */
+ .reveal{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease}
+ .reveal.visible{opacity:1;transform:translateY(0)}
+ .reveal-left{opacity:0;transform:translateX(-32px);transition:opacity .75s ease,transform .75s ease}
+ .reveal-left.visible{opacity:1;transform:translateX(0)}
+ .reveal-right{opacity:0;transform:translateX(32px);transition:opacity .75s ease,transform .75s ease}
+ .reveal-right.visible{opacity:1;transform:translateX(0)}
+
+ @keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+ @keyframes fadeInDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+ @keyframes floatUp{from{opacity:0;transform:translateY(50px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+ /* RESPONSIVE */
+ @media(max-width:960px){
+ .feature-row,.feature-row.reverse{grid-template-columns:1fr;direction:ltr;gap:40px}
+ nav{padding:12px 20px}
+ .nav-links{display:none}
+ .hero{padding:90px 20px 60px}
+ .feature-outer{padding:60px 20px}
+ .cta-card{padding:44px 24px}
+ .cta-form{flex-direction:column}
+ footer{flex-direction:column;text-align:center}
+ .agents-strip{padding:36px 20px}
+ }
+ </style>
+</head>
+<body>
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div class="scroll-progress" id="progressBar"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+ <a href="#" class="nav-logo">
+ <img src="logo.png" alt="SERP Hawk Logo" style="width:40px;height:40px;object-fit:contain;"/>
+ SERP Hawk
+ </a>
+ <div class="nav-links">
+ <a href="#agents" data-i18n="nav_agents">AI Agents</a>
+ <a href="#whatsapp" data-i18n="nav_whatsapp">WhatsApp</a>
+ <a href="#telemetry" data-i18n="nav_telemetry">Telemetry</a>
+ <a href="#modules" data-i18n="nav_modules">Modules</a>
+ <a href="#cta" data-i18n="nav_demo">Get Demo</a>
+ </div>
+ <div class="nav-controls">
+ <div class="lang-toggle">
+ <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+ <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+ </div>
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">
+  <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  <a href="/login" class="nav-login" data-i18n="nav_login">Sign In</a>
+  <a href="/login" class="nav-cta" data-i18n="nav_cta">Try Demo →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+ <div class="hero-badge"><span class="dot"></span><span data-i18n="hero_badge">5 AI Agents · Built for SEO Agencies · Always On</span></div>
+ <h1 data-i18n="hero_h1">Your agency, run by<br/><em>AI agents</em> while you sleep.</h1>
+ <p class="hero-sub" data-i18n="hero_sub">SERP Hawk deploys 5 AI agents that win clients, analyse competitors, build call pitches, monitor your entire platform in real time, and answer clients on WhatsApp — 24 hours a day.</p>
+ <div class="hero-actions">
+ <a href="/login" class="btn-primary" data-i18n="hero_btn_primary"> Try Live Demo</a>
+ <a href="#agents" class="btn-secondary" data-i18n="hero_btn_secondary">Meet the Agents ↓</a>
+ </div>
+ <div class="hero-mockup">
+ <div class="browser-chrome">
+ <div class="browser-dot r"></div><div class="browser-dot y"></div><div class="browser-dot g"></div>
+ <div class="browser-url"> crm.serphawk.in/dashboard</div>
+ </div>
+ <div class="browser-screen"><img src="img_dashboard.jpg" alt="SERP Hawk CRM Dashboard"/></div>
+ <div class="float-badge top-right animate-float"><span class="bdot"></span><span data-i18n="hero_badge1">5 agents running live</span></div>
+ <div class="float-badge bottom-left animate-float-slow"><span></span><span data-i18n="hero_badge2">Last AI action: 12 seconds ago</span></div>
+ </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+ <div class="stats-grid reveal">
+ <div><span class="stat-num counter" data-target="5">0</span><span class="stat-label" data-i18n="stat1">AI Agents</span></div>
+ <div><span class="stat-num counter" data-target="27">0</span><span class="stat-label" data-i18n="stat2">Modules</span></div>
+ <div><span class="stat-num counter" data-target="70">0</span><span class="stat-label" data-i18n="stat3">API Endpoints</span></div>
+ <div><span class="stat-num counter" data-target="15">0</span><span class="stat-label" data-i18n="stat4">Webhook Events</span></div>
+ <div><span class="stat-num counter" data-target="40">0</span><span class="stat-label" data-i18n="stat5">Frontend Pages</span></div>
+ <div><span class="stat-num counter" data-target="4">0</span><span class="stat-label" data-i18n="stat6">User Roles</span></div>
+ </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem">
+ <span class="section-eyebrow reveal" data-i18n="prob_eyebrow">The Old Way</span>
+ <h2 class="section-title reveal" data-i18n="prob_title">Running an agency<br/>without AI is slow</h2>
+ <p class="section-sub reveal" data-i18n="prob_sub">Manual prospecting. Manual pitching. Manual reporting. Clients waiting. Competitors winning. There's a better way.</p>
+ <div class="chaos-grid reveal">
+ <div class="chaos-card"><div class="chaos-icon"></div><div class="chaos-title" data-i18n="prob1_title">Writing cold emails manually</div><div class="chaos-desc" data-i18n="prob1_desc">Hours per prospect. Generic templates. Low open rates. Competing against agencies with AI outreach.</div></div>
+ <div class="chaos-card"><div class="chaos-icon"></div><div class="chaos-title" data-i18n="prob2_title">No idea what competitors do</div><div class="chaos-desc" data-i18n="prob2_desc">Your clients are being outranked. You don't know why, what keywords you're missing, or how to fight back.</div></div>
+ <div class="chaos-card"><div class="chaos-icon"></div><div class="chaos-title" data-i18n="prob3_title">Fumbling sales calls</div><div class="chaos-desc" data-i18n="prob3_desc">Walking into calls without knowing the prospect's pain points, their tech stack, or what objections they'll raise.</div></div>
+ <div class="chaos-card"><div class="chaos-icon"></div><div class="chaos-title" data-i18n="prob4_title">Clients on hold</div><div class="chaos-desc" data-i18n="prob4_desc">Clients WhatsApp you for updates. You scramble to find the info. They feel neglected. They leave.</div></div>
+ </div>
+ <span class="arrow-down">↓</span>
+ <h2 class="section-title reveal" data-i18n="prob_cta">5 AI agents fix every single one of these</h2>
+</section>
+
+<!-- AGENT STRIP -->
+<div class="agents-strip" id="agents">
+ <div class="agents-row reveal">
+ <div class="agent-chip"><div class="chip-num">01</div><span data-i18n="chip1"> AI Email Agent</span></div>
+ <div class="agent-chip"><div class="chip-num">02</div><span data-i18n="chip2"> Client X-Ray</span></div>
+ <div class="agent-chip"><div class="chip-num">03</div><span data-i18n="chip3"> Radar Analysis</span></div>
+ <div class="agent-chip"><div class="chip-num">04</div><span data-i18n="chip4"> Call Pitch</span></div>
+ <div class="agent-chip"><div class="chip-num">05</div><span data-i18n="chip5"> WhatsApp Bot</span></div>
+ </div>
+</div>
+
+<!-- AGENT 01 · EMAIL -->
+<div class="feature-outer">
+ <div class="feature-row">
+ <div class="feature-text reveal-left">
+ <div class="feature-tag" data-i18n="a1_tag"> Agent 01 — AI Email Agent</div>
+ <h2 class="feature-title" data-i18n="a1_title">Writes personalized cold emails<br/>while you sleep</h2>
+ <p class="feature-desc" data-i18n="a1_desc">Type any company name. The agent scrapes their website, reads their business, finds decision-maker contacts, picks your best-fit services, and writes a fully personalized outreach email — in English AND Spanish. In under 60 seconds.</p>
+ <ul class="feature-bullets">
+ <li><span class="check"></span><span data-i18n="a1_b1"><strong>Website scraping</strong> — reads their pages, products, and pain points automatically</span></li>
+ <li><span class="check"></span><span data-i18n="a1_b2"><strong>Contact discovery</strong> — finds names, emails, and titles from the site</span></li>
+ <li><span class="check"></span><span data-i18n="a1_b3"><strong>Service matching</strong> — AI picks which of your offerings fit their exact needs</span></li>
+ <li><span class="check"></span><span data-i18n="a1_b4"><strong>Bilingual output</strong> — English AND Spanish email drafts, auto-generated</span></li>
+ <li><span class="check"></span><span data-i18n="a1_b5"><strong>Auto-creates client</strong> — sends email and creates the CRM profile in one click</span></li>
+ </ul>
+ </div>
+ <div class="feature-visual reveal-right">
+ <div class="screen-wrap"><img src="img_emailagent.jpg" alt="AI Email Agent UI"/></div>
+ <div class="float-badge top-right animate-float"><span></span><span data-i18n="a1_badge">47 seconds to a live email</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- AGENT 02 · X-RAY -->
+<div class="feature-outer">
+ <div class="feature-row reverse">
+ <div class="feature-text reveal-right">
+ <div class="feature-tag" data-i18n="a2_tag"> Agent 02 — Client X-Ray</div>
+ <h2 class="feature-title" data-i18n="a2_title">Know everything about a<br/>client before they even call</h2>
+ <p class="feature-desc" data-i18n="a2_desc">Hawk's X-Ray agent does a deep intelligence scan of any client or prospect. Tech stack, business profile, employee count, AI-detected pain points, and an Opportunity Score 0-100 that tells you exactly how much you can help them.</p>
+ <ul class="feature-bullets">
+ <li><span class="check"></span><span data-i18n="a2_b1"><strong>Tech stack detection</strong> — React? Shopify? GTM? WordPress? Instantly known</span></li>
+ <li><span class="check"></span><span data-i18n="a2_b2"><strong>Business profiling</strong> — industry, size, founding year, funding stage</span></li>
+ <li><span class="check"></span><span data-i18n="a2_b3"><strong>AI pain points</strong> — GPT-4o reads their site and flags what they're doing wrong</span></li>
+ <li><span class="check"></span><span data-i18n="a2_b4"><strong>Opportunity Score</strong> — 0-100 score showing how much room you have to help</span></li>
+ <li><span class="check"></span><span data-i18n="a2_b5"><strong>Service recommendations</strong> — AI suggests exactly which services to pitch</span></li>
+ </ul>
+ </div>
+ <div class="feature-visual reveal-left">
+ <div class="screen-wrap"><img src="img_xray.jpg" alt="Client X-Ray Agent UI"/></div>
+ <div class="float-badge bottom-left animate-float-slow"><span class="bdot"></span><span data-i18n="a2_badge">Opportunity Score: 87/100</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- AGENT 03 · RADAR -->
+<div class="feature-outer">
+ <div class="feature-row">
+ <div class="feature-text reveal-left">
+ <div class="feature-tag" data-i18n="a3_tag"> Agent 03 — Radar Analysis</div>
+ <h2 class="feature-title" data-i18n="a3_title">Know exactly where you<br/>stand vs. every competitor</h2>
+ <p class="feature-desc" data-i18n="a3_desc">The Radar agent scrapes your client's site AND their top competitors simultaneously. It maps 6 dimensions — Keywords, Backlinks, Content, Speed, Social, Trust — then generates a battle report with specific action items to win.</p>
+ <ul class="feature-bullets">
+ <li><span class="check"></span><span data-i18n="a3_b1"><strong>6-axis radar chart</strong> — visual head-to-head across every SEO dimension</span></li>
+ <li><span class="check"></span><span data-i18n="a3_b2"><strong>Keyword gap</strong> — exactly which keywords competitors rank for that you don't</span></li>
+ <li><span class="check"></span><span data-i18n="a3_b3"><strong>Backlink gap</strong> — how many more links they have and where from</span></li>
+ <li><span class="check"></span><span data-i18n="a3_b4"><strong>Threat level</strong> — LOW / MEDIUM / HIGH / CRITICAL competitive threat score</span></li>
+ <li><span class="check"></span><span data-i18n="a3_b5"><strong>Battle report</strong> — AI-written action plan to outrank each competitor</span></li>
+ </ul>
+ </div>
+ <div class="feature-visual reveal-right">
+ <div class="screen-wrap"><img src="img_radar.jpg" alt="Radar Competitor Analysis UI"/></div>
+ <div class="float-badge top-right animate-float"><span></span><span data-i18n="a3_badge">Threat Level: HIGH detected</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- AGENT 04 · CALL PITCH -->
+<div class="feature-outer">
+ <div class="feature-row reverse">
+ <div class="feature-text reveal-right">
+ <div class="feature-tag" data-i18n="a4_tag"> Agent 04 — Call Pitch</div>
+ <h2 class="feature-title" data-i18n="a4_title">Walk into every sales call<br/>fully loaded</h2>
+ <p class="feature-desc" data-i18n="a4_desc">Before any call, the Pitch agent reads the prospect's website, business profile, tech stack, and pain points — then generates a custom call script. Opening hook, pain points to probe, your value proposition, objection handlers, and the exact call to action.</p>
+ <ul class="feature-bullets">
+ <li><span class="check"></span><span data-i18n="a4_b1"><strong>Opening hook</strong> — personalized opening that shows you did your homework</span></li>
+ <li><span class="check"></span><span data-i18n="a4_b2"><strong>Pain point probes</strong> — 3-5 questions designed to surface their biggest problems</span></li>
+ <li><span class="check"></span><span data-i18n="a4_b3"><strong>Value proposition</strong> — ties your services to their specific business goals</span></li>
+ <li><span class="check"></span><span data-i18n="a4_b4"><strong>Objection handlers</strong> — AI pre-writes responses to "too expensive", "already have someone"</span></li>
+ <li><span class="check"></span><span data-i18n="a4_b5"><strong>Confidence score</strong> — 0-100 rating on how strong this pitch is for this prospect</span></li>
+ </ul>
+ </div>
+ <div class="feature-visual reveal-left">
+ <div class="screen-wrap"><img src="img_callpitch.jpg" alt="AI Call Pitch Agent UI"/></div>
+ <div class="float-badge top-right animate-float"><span></span><span data-i18n="a4_badge">Confidence Score: 94%</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- AGENT 05 · WHATSAPP -->
+<div class="feature-outer" id="whatsapp">
+ <div class="feature-row">
+ <div class="feature-text reveal-left">
+ <div class="feature-tag" data-i18n="a5_tag"> Agent 05 — WhatsApp Bot</div>
+ <h2 class="feature-title" data-i18n="a5_title">Clients access everything<br/>through WhatsApp</h2>
+ <p class="feature-desc" data-i18n="a5_desc">Your clients already live on WhatsApp. SERP Hawk connects a Business API bot that knows your entire CRM. Clients type a command and instantly get their rankings, invoices, task status, and reports — no login needed, any time of day.</p>
+ <div class="whatsapp-commands">
+ <div class="wa-cmd"><span class="wa-cmd-code">/report</span><span class="wa-cmd-desc" data-i18n="wa1">Get their latest performance report PDF</span></div>
+ <div class="wa-cmd"><span class="wa-cmd-code">/invoice</span><span class="wa-cmd-desc" data-i18n="wa2">See all open &amp; paid invoices instantly</span></div>
+ <div class="wa-cmd"><span class="wa-cmd-code">/rankings</span><span class="wa-cmd-desc" data-i18n="wa3">Check keyword positions right now</span></div>
+ <div class="wa-cmd"><span class="wa-cmd-code">/tasks</span><span class="wa-cmd-desc" data-i18n="wa4">See what's being worked on today</span></div>
+ <div class="wa-cmd"><span class="wa-cmd-code">/milestones</span><span class="wa-cmd-desc" data-i18n="wa5">View upcoming project deliverables</span></div>
+ <div class="wa-cmd"><span class="wa-cmd-code">/status</span><span class="wa-cmd-desc" data-i18n="wa6">Overall project health at a glance</span></div>
+ </div>
+ </div>
+ <div class="feature-visual reveal-right">
+ <div class="screen-wrap"><img src="img_whatsapp.jpg" alt="WhatsApp CRM Bot UI"/></div>
+ <div class="float-badge bottom-left animate-float-slow"><span class="bdot"></span><span data-i18n="a5_badge">SERP Hawk Bot — Connected</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- TELEMETRY -->
+<div class="feature-outer" id="telemetry">
+ <div class="feature-row reverse">
+ <div class="feature-text reveal-right">
+ <div class="feature-tag" data-i18n="tel_tag"> Live Telemetry</div>
+ <h2 class="feature-title" data-i18n="tel_title">Watch every action<br/>happen in real time</h2>
+ <p class="feature-desc" data-i18n="tel_desc">A live telemetry feed shows every event across your entire CRM — who's viewing what, tasks completing, emails opening, WhatsApp messages arriving, API health, database performance. Zero blind spots.</p>
+ <ul class="feature-bullets">
+ <li><span class="check"></span><span data-i18n="tel_b1"><strong>Live activity stream</strong> — every client action, task, email, and message, real time</span></li>
+ <li><span class="check"></span><span data-i18n="tel_b2"><strong>Activity heatmap</strong> — hour-by-day grid showing when your team is most active</span></li>
+ <li><span class="check"></span><span data-i18n="tel_b3"><strong>API health gauges</strong> — response times, DB queries, error rate, session count</span></li>
+ <li><span class="check"></span><span data-i18n="tel_b4"><strong>Zero blind spots</strong> — every agent action is logged and visible in the feed</span></li>
+ <li><span class="check"></span><span data-i18n="tel_b5"><strong>Instant alerts</strong> — anomalies trigger smart notifications to your team</span></li>
+ </ul>
+ </div>
+ <div class="feature-visual reveal-left">
+ <div class="screen-wrap"><img src="img_telemetry.jpg" alt="Live Telemetry Dashboard UI"/></div>
+ <div class="float-badge top-right animate-float"><span class="bdot"></span><span data-i18n="tel_badge">Live Feed — 847 sessions</span></div>
+ </div>
+ </div>
+</div>
+
+<!-- AI SUMMARY -->
+<div class="ai-banner">
+ <span class="section-eyebrow reveal" data-i18n="sum_eyebrow">Your AI Team</span>
+ <h2 class="section-title reveal" data-i18n="sum_title">5 agents that never sleep,<br/>never take lunch, never miss</h2>
+ <div class="ai-agents-list reveal">
+ <div class="ai-agent-row">
+ <div class="ai-agent-num">01</div>
+ <div class="ai-agent-content">
+ <div class="ai-agent-title" data-i18n="sum1_title">AI Email Agent</div>
+ <div class="ai-agent-desc" data-i18n="sum1_desc">Scrapes any website → finds contacts → matches services → writes EN + ES personalized cold email. Sends in one click.</div>
+ </div>
+ </div>
+ <div class="ai-agent-row">
+ <div class="ai-agent-num">02</div>
+ <div class="ai-agent-content">
+ <div class="ai-agent-title" data-i18n="sum2_title">Client X-Ray Agent</div>
+ <div class="ai-agent-desc" data-i18n="sum2_desc">Deep scans any client — tech stack, business profile, AI-detected pain points, Opportunity Score 0-100, recommended services.</div>
+ </div>
+ </div>
+ <div class="ai-agent-row">
+ <div class="ai-agent-num">03</div>
+ <div class="ai-agent-content">
+ <div class="ai-agent-title" data-i18n="sum3_title">Radar Analysis Agent</div>
+ <div class="ai-agent-desc" data-i18n="sum3_desc">Scrapes client + competitors simultaneously, plots 6-axis radar chart, identifies keyword/backlink gaps, produces battle report.</div>
+ </div>
+ </div>
+ <div class="ai-agent-row">
+ <div class="ai-agent-num">04</div>
+ <div class="ai-agent-content">
+ <div class="ai-agent-title" data-i18n="sum4_title">Call Pitch Agent</div>
+ <div class="ai-agent-desc" data-i18n="sum4_desc">Generates a full call script — hook, pain probes, value prop, objection handlers, CTA — personalized for each prospect. 94% confidence.</div>
+ </div>
+ </div>
+ <div class="ai-agent-row">
+ <div class="ai-agent-num">05</div>
+ <div class="ai-agent-content">
+ <div class="ai-agent-title" data-i18n="sum5_title">WhatsApp Bot Agent</div>
+ <div class="ai-agent-desc" data-i18n="sum5_desc">Connects to WhatsApp Business API. Clients type /report, /invoice, /rankings to get real-time data 24/7 — no login, no friction.</div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- MODULES -->
+<section class="modules-section" id="modules">
+ <span class="section-eyebrow reveal" data-i18n="mod_eyebrow">Full Platform</span>
+ <h2 class="section-title reveal" data-i18n="mod_title">Everything else your<br/>agency needs too</h2>
+ <p class="section-sub reveal" data-i18n="mod_sub">Beyond the 5 AI agents — 22 more modules handling every part of your business.</p>
+ <div class="modules-grid reveal">
+ <div class="module-card"><div class="module-card-title" data-i18n="m1_t">Live Dashboard</div><div class="module-card-desc" data-i18n="m1_d">KPI cards, revenue charts, activity feed, and real-time team overview. Your agency's heartbeat at a glance.</div><div class="module-card-tags"><span class="module-tag">Real-time</span><span class="module-tag">Charts</span><span class="module-tag">KPIs</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m2_t">Client Management</div><div class="module-card-desc" data-i18n="m2_d">360° client profiles — contact info, services, projects, invoices, rankings, files, and full activity history in one view.</div><div class="module-card-tags"><span class="module-tag">360° View</span><span class="module-tag">Timeline</span><span class="module-tag">X-Ray</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m3_t">Projects &amp; Kanban</div><div class="module-card-desc" data-i18n="m3_d">Drag-and-drop Kanban board with 4 priority levels, task comments, due dates, team assignment, and progress bars.</div><div class="module-card-tags"><span class="module-tag">Kanban</span><span class="module-tag">Drag &amp; Drop</span><span class="module-tag">Priorities</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m4_t">Real-Time Messaging</div><div class="module-card-desc" data-i18n="m4_d">WebSocket-powered chat with typing indicators, read receipts (), and unread badges. Clients feel like VIPs.</div><div class="module-card-tags"><span class="module-tag">WebSocket</span><span class="module-tag">Read Receipts</span><span class="module-tag">Threads</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m5_t">Proposals &amp; Contracts</div><div class="module-card-desc" data-i18n="m5_d">Rich content editor. Clients accept or reject online. Accepted proposals auto-generate an invoice instantly.</div><div class="module-card-tags"><span class="module-tag">E-Accept</span><span class="module-tag">PDF</span><span class="module-tag">5 Statuses</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m6_t">Billing &amp; Invoicing</div><div class="module-card-desc" data-i18n="m6_d">Auto-numbered invoices (INV-2026-0001), tax, 6 payment statuses, overdue tracking, and branded PDF exports.</div><div class="module-card-tags"><span class="module-tag">Auto-number</span><span class="module-tag">PDF</span><span class="module-tag">6 Statuses</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m7_t">Keyword Rankings</div><div class="module-card-desc" data-i18n="m7_d">Track keyword positions over time across Google, Bing, and Yahoo. Show clients their rankings climbing month by month.</div><div class="module-card-tags"><span class="module-tag">Google</span><span class="module-tag">Bing</span><span class="module-tag">History</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m8_t">OCR Business Cards</div><div class="module-card-desc" data-i18n="m8_d">Snap a business card photo. Gemini Vision extracts name, email, phone, company instantly. One click to import as client.</div><div class="module-card-tags"><span class="module-tag">Gemini AI</span><span class="module-tag">Photo → Client</span><span class="module-tag">Auto-import</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m9_t">Smart Notifications</div><div class="module-card-desc" data-i18n="m9_d">4 types, clickable action links, per-user feeds, unread badge counts. Every important event surfaces immediately.</div><div class="module-card-tags"><span class="module-tag">Real-time</span><span class="module-tag">Actionable</span><span class="module-tag">Per-user</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m10_t">Zapier Webhooks</div><div class="module-card-desc" data-i18n="m10_d">15 event types with HMAC-signed payloads. Connect to 5,000+ apps — Slack, Notion, HubSpot, Gmail, and more.</div><div class="module-card-tags"><span class="module-tag">15 Events</span><span class="module-tag">HMAC</span><span class="module-tag">5000+ Apps</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m11_t">Call Logging</div><div class="module-card-desc" data-i18n="m11_d">Log calls with duration, AI-generated summaries, follow-up flags, and client linking. Full conversation history, always.</div><div class="module-card-tags"><span class="module-tag">AI Summary</span><span class="module-tag">Follow-ups</span><span class="module-tag">Logged</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m12_t">NPS Surveys</div><div class="module-card-desc" data-i18n="m12_d">One-click satisfaction surveys. 0-10 scores plus written feedback. Know exactly who's happy and who's at risk of leaving.</div><div class="module-card-tags"><span class="module-tag">0-10 Score</span><span class="module-tag">Feedback</span><span class="module-tag">Public Page</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m13_t">Interactive Tours</div><div class="module-card-desc" data-i18n="m13_d">Step-by-step guided tours on all 40 pages. Clients and new employees learn the full platform in minutes.</div><div class="module-card-tags"><span class="module-tag">40 Pages</span><span class="module-tag">Auto-launch</span><span class="module-tag">Keyboard</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m14_t">Service Store</div><div class="module-card-desc" data-i18n="m14_d">Clients browse your service catalog and request quotes. 5-stage pipeline: Quoted → Accepted → In Progress → Delivered.</div><div class="module-card-tags"><span class="module-tag">Client Store</span><span class="module-tag">5 Stages</span><span class="module-tag">Auto-threads</span></div></div>
+ <div class="module-card"><div class="module-card-title" data-i18n="m15_t">Milestones</div><div class="module-card-desc" data-i18n="m15_d">Create deliverables with due dates. Clients see their milestones in the portal — builds trust and shows progress clearly.</div><div class="module-card-tags"><span class="module-tag">Client Visible</span><span class="module-tag">Due Dates</span><span class="module-tag">Status</span></div></div>
+ </div>
+</section>
+
+<!-- ROLES -->
+<section class="roles-section" id="roles">
+ <div style="text-align:center">
+  <span class="section-eyebrow reveal" data-i18n="role_eyebrow">Access Control</span>
+  <h2 class="section-title reveal" data-i18n="role_title">The right view for every person</h2>
+  <p class="section-sub reveal" data-i18n="role_sub">6 roles with precise permissions. Everyone sees exactly what they need.</p>
+ </div>
+ <div class="roles-grid reveal">
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+   <div class="role-title" data-i18n="r1_title">Admin</div><div class="role-tagline" data-i18n="r1_tag">Full control</div>
+   <ul class="role-perms">
+    <li data-i18n="r1_1">All 5 AI agents</li><li data-i18n="r1_2">Billing &amp; invoicing</li>
+    <li data-i18n="r1_3">Employee management</li><li data-i18n="r1_4">Webhooks &amp; settings</li><li data-i18n="r1_5">Telemetry feed</li>
+   </ul>
+  </div>
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+   <div class="role-title" data-i18n="r2_title">Employee</div><div class="role-tagline" data-i18n="r2_tag">Daily operations</div>
+   <ul class="role-perms">
+    <li data-i18n="r2_1">AI email + call pitch agents</li><li data-i18n="r2_2">Clients, projects, tasks</li>
+    <li data-i18n="r2_3">Messaging &amp; files</li><li data-i18n="r2_4">Radar + X-Ray analysis</li><li data-i18n="r2_5">No billing access</li>
+   </ul>
+  </div>
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+   <div class="role-title">Sales</div><div class="role-tagline">Revenue focused</div>
+   <ul class="role-perms">
+    <li>AI outreach &amp; email agent</li><li>Lead pipeline &amp; contacts</li>
+    <li>Call pitch generator</li><li>Client X-Ray reports</li><li>No billing settings</li>
+   </ul>
+  </div>
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+   <div class="role-title">Demo</div><div class="role-tagline">Sandboxed preview</div>
+   <ul class="role-perms">
+    <li>Full UI walkthrough</li><li>AI agents (read-only)</li>
+    <li>Sample data only</li><li>No real actions</li><li>Auto-expires 7 days</li>
+   </ul>
+  </div>
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+   <div class="role-title">Supplier</div><div class="role-tagline">Vendor portal</div>
+   <ul class="role-perms">
+    <li>Own orders &amp; invoices</li><li>Delivery status updates</li>
+    <li>Product catalog view</li><li>Messaging with agency</li><li>No client data access</li>
+   </ul>
+  </div>
+  <div class="role-card">
+   <div class="role-avatar"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+   <div class="role-title" data-i18n="r4_title">Client</div><div class="role-tagline" data-i18n="r4_tag">Their own portal</div>
+   <ul class="role-perms">
+    <li data-i18n="r4_1">Own invoices &amp; proposals</li><li data-i18n="r4_2">Keyword rankings view</li>
+    <li data-i18n="r4_3">Milestones &amp; files</li><li data-i18n="r4_4">Messaging with agency</li><li data-i18n="r4_5">WhatsApp commands</li>
+   </ul>
+  </div>
+ </div>
+</section>
+
+<!-- TYPEWRITER -->
+<section class="typewriter-section">
+ <div class="reveal" style="max-width:760px;margin:0 auto">
+ <div class="typewriter-label" data-i18n="tw_label">SERP Hawk AI agents help you...</div>
+ <div class="typewriter-text"><span id="typewriter-display"></span><span class="typewriter-cursor"></span></div>
+ </div>
+</section>
+
+
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+ <div class="cta-card reveal">
+ <div class="hero-badge" style="margin-bottom:20px"><span class="dot"></span><span data-i18n="cta_badge">No credit card · Full access · 5 agents ready</span></div>
+ <h2 class="cta-title" data-i18n="cta_title">Put your agency on<br/>AI autopilot today</h2>
+ <p class="cta-sub" data-i18n="cta_sub">5 agents working around the clock. Every client served. Every competitor analysed. Every call pitch ready.</p>
+ <form class="cta-form" onsubmit="handleCTA(event)">
+ <input type="email" class="cta-input" id="ctaEmail" data-i18n-placeholder="cta_placeholder" placeholder="your@agency.com" required/>
+ <button type="submit" class="cta-btn" data-i18n="cta_btn">Get Demo Access →</button>
+ </form>
+ <p style="margin-top:16px;font-size:13px;color:var(--muted)"><span data-i18n="cta_or">Or</span> <a href="/login" style="color:var(--text);text-decoration:underline" data-i18n="cta_link">try the live demo instantly →</a></p>
+ </div>
+</section>
+
+<footer>
+ <div class="footer-logo">
+ <img src="logo.png" alt="SERP Hawk Logo" style="width:36px;height:36px;object-fit:contain;"/>
+ <span>SERP Hawk CRM</span>
+ </div>
+ <div class="footer-links">
+ <a href="#agents" data-i18n="nav_agents">AI Agents</a>
+ <a href="#modules" data-i18n="nav_modules">Modules</a>
+ <a href="#roles" data-i18n="role_eyebrow">Roles</a>
+ <a href="/login" data-i18n="nav_demo">Live Demo</a>
+ </div>
+ <div class="footer-copy" data-i18n="footer_copy">© 2026 SERP Hawk · Built for SEO agencies that want to win</div>
+</footer>
+
+<script>
+/* ── CUSTOM CURSOR ──────────────────────────────── */
+(function(){
+  const dot  = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  if(!dot || !ring) return;
+  let mx=0, my=0, rx=0, ry=0;
+  let rafId;
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function animate(){
+    rx = lerp(rx, mx, 0.12);
+    ry = lerp(ry, my, 0.12);
+    dot.style.left  = mx + 'px';
+    dot.style.top   = my + 'px';
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    rafId = requestAnimationFrame(animate);
+  }
+  animate();
+  document.addEventListener('mousedown', () => { dot.classList.add('clicking'); ring.classList.add('clicking'); });
+  document.addEventListener('mouseup',   () => { dot.classList.remove('clicking'); ring.classList.remove('clicking'); });
+  document.querySelectorAll('a,button,input,[data-hover]').forEach(el => {
+    el.addEventListener('mouseenter', () => { dot.classList.add('expanded'); ring.classList.add('expanded'); });
+    el.addEventListener('mouseleave', () => { dot.classList.remove('expanded'); ring.classList.remove('expanded'); });
+  });
+  window.addEventListener('mouseleave', () => { dot.style.opacity='0'; ring.style.opacity='0'; });
+  window.addEventListener('mouseenter', () => { dot.style.opacity='1'; ring.style.opacity='0.5'; });
+})();
+
+/* 
+ TRANSLATIONS
+ */
+const T = {
+ en: {
+ nav_agents:"AI Agents", nav_whatsapp:"WhatsApp", nav_telemetry:"Telemetry",
+ nav_modules:"Modules", nav_demo:"Get Demo", nav_cta:"Try Demo →",
+
+ hero_badge:"5 AI Agents · Built for SEO Agencies · Always On",
+ hero_h1:"Your agency, run by<br/><em>AI agents</em> while you sleep.",
+ hero_sub:"SERP Hawk deploys 5 AI agents that win clients, analyse competitors, build call pitches, monitor your entire platform in real time, and answer clients on WhatsApp — 24 hours a day.",
+ hero_btn_primary:" Try Live Demo", hero_btn_secondary:"Meet the Agents ↓",
+ hero_badge1:"5 agents running live", hero_badge2:"Last AI action: 12 seconds ago",
+
+ stat1:"AI Agents", stat2:"Modules", stat3:"API Endpoints",
+ stat4:"Webhook Events", stat5:"Frontend Pages", stat6:"User Roles",
+
+ prob_eyebrow:"The Old Way",
+ prob_title:"Running an agency<br/>without AI is slow",
+ prob_sub:"Manual prospecting. Manual pitching. Manual reporting. Clients waiting. Competitors winning. There's a better way.",
+ prob1_title:"Writing cold emails manually", prob1_desc:"Hours per prospect. Generic templates. Low open rates. Competing against agencies with AI outreach.",
+ prob2_title:"No idea what competitors do", prob2_desc:"Your clients are being outranked. You don't know why, what keywords you're missing, or how to fight back.",
+ prob3_title:"Fumbling sales calls", prob3_desc:"Walking into calls without knowing the prospect's pain points, their tech stack, or what objections they'll raise.",
+ prob4_title:"Clients on hold", prob4_desc:"Clients WhatsApp you for updates. You scramble to find the info. They feel neglected. They leave.",
+ prob_cta:"5 AI agents fix every single one of these",
+
+ chip1:" AI Email Agent", chip2:" Client X-Ray",
+ chip3:" Radar Analysis", chip4:" Call Pitch", chip5:" WhatsApp Bot",
+
+ a1_tag:" Agent 01 — AI Email Agent",
+ a1_title:"Writes personalized cold emails<br/>while you sleep",
+ a1_desc:"Type any company name. The agent scrapes their website, reads their business, finds decision-maker contacts, picks your best-fit services, and writes a fully personalized outreach email — in English AND Spanish. In under 60 seconds.",
+ a1_b1:"<strong>Website scraping</strong> — reads their pages, products, and pain points automatically",
+ a1_b2:"<strong>Contact discovery</strong> — finds names, emails, and titles from the site",
+ a1_b3:"<strong>Service matching</strong> — AI picks which of your offerings fit their exact needs",
+ a1_b4:"<strong>Bilingual output</strong> — English AND Spanish email drafts, auto-generated",
+ a1_b5:"<strong>Auto-creates client</strong> — sends email and creates the CRM profile in one click",
+ a1_badge:"47 seconds to a live email",
+
+ pipe_eyebrow:"How Agent 01 Works", pipe_title:"5 steps, fully automatic",
+ pipe_sub:"You type a name. The agent handles everything else.",
+ pipe1:"Scrape Site", pipe1s:"Reads pages, products, copy",
+ pipe2:"GPT-4o Analysis", pipe2s:"Understands their industry",
+ pipe3:"Find Contacts", pipe3s:"Discovers decision makers",
+ pipe4:"Match Services", pipe4s:"Picks your best offerings",
+ pipe5:"Write Email", pipe5s:"EN + ES, personalized",
+
+ a2_tag:" Agent 02 — Client X-Ray",
+ a2_title:"Know everything about a<br/>client before they even call",
+ a2_desc:"Hawk's X-Ray agent does a deep intelligence scan of any client or prospect. Tech stack, business profile, employee count, AI-detected pain points, and an Opportunity Score 0-100 that tells you exactly how much you can help them.",
+ a2_b1:"<strong>Tech stack detection</strong> — React? Shopify? GTM? WordPress? Instantly known",
+ a2_b2:"<strong>Business profiling</strong> — industry, size, founding year, funding stage",
+ a2_b3:"<strong>AI pain points</strong> — GPT-4o reads their site and flags what they're doing wrong",
+ a2_b4:"<strong>Opportunity Score</strong> — 0-100 score showing how much room you have to help",
+ a2_b5:"<strong>Service recommendations</strong> — AI suggests exactly which services to pitch",
+ a2_badge:"Opportunity Score: 87/100",
+
+ a3_tag:" Agent 03 — Radar Analysis",
+ a3_title:"Know exactly where you<br/>stand vs. every competitor",
+ a3_desc:"The Radar agent scrapes your client's site AND their top competitors simultaneously. It maps 6 dimensions — Keywords, Backlinks, Content, Speed, Social, Trust — then generates a battle report with specific action items to win.",
+ a3_b1:"<strong>6-axis radar chart</strong> — visual head-to-head across every SEO dimension",
+ a3_b2:"<strong>Keyword gap</strong> — exactly which keywords competitors rank for that you don't",
+ a3_b3:"<strong>Backlink gap</strong> — how many more links they have and where from",
+ a3_b4:"<strong>Threat level</strong> — LOW / MEDIUM / HIGH / CRITICAL competitive threat score",
+ a3_b5:"<strong>Battle report</strong> — AI-written action plan to outrank each competitor",
+ a3_badge:"Threat Level: HIGH detected",
+
+ a4_tag:" Agent 04 — Call Pitch",
+ a4_title:"Walk into every sales call<br/>fully loaded",
+ a4_desc:"Before any call, the Pitch agent reads the prospect's website, business profile, tech stack, and pain points — then generates a custom call script. Opening hook, pain points to probe, your value proposition, objection handlers, and the exact call to action.",
+ a4_b1:"<strong>Opening hook</strong> — personalized opening that shows you did your homework",
+ a4_b2:"<strong>Pain point probes</strong> — 3-5 questions designed to surface their biggest problems",
+ a4_b3:"<strong>Value proposition</strong> — ties your services to their specific business goals",
+ a4_b4:"<strong>Objection handlers</strong> — AI pre-writes responses to \"too expensive\", \"already have someone\"",
+ a4_b5:"<strong>Confidence score</strong> — 0-100 rating on how strong this pitch is for this prospect",
+ a4_badge:"Confidence Score: 94%",
+
+ a5_tag:" Agent 05 — WhatsApp Bot",
+ a5_title:"Clients access everything<br/>through WhatsApp",
+ a5_desc:"Your clients already live on WhatsApp. SERP Hawk connects a Business API bot that knows your entire CRM. Clients type a command and instantly get their rankings, invoices, task status, and reports — no login needed, any time of day.",
+ wa1:"Get their latest performance report PDF", wa2:"See all open & paid invoices instantly",
+ wa3:"Check keyword positions right now", wa4:"See what's being worked on today",
+ wa5:"View upcoming project deliverables", wa6:"Overall project health at a glance",
+ a5_badge:"SERP Hawk Bot — Connected",
+
+ tel_tag:" Live Telemetry",
+ tel_title:"Watch every action<br/>happen in real time",
+ tel_desc:"A live telemetry feed shows every event across your entire CRM — who's viewing what, tasks completing, emails opening, WhatsApp messages arriving, API health, database performance. Zero blind spots.",
+ tel_b1:"<strong>Live activity stream</strong> — every client action, task, email, and message, real time",
+ tel_b2:"<strong>Activity heatmap</strong> — hour-by-day grid showing when your team is most active",
+ tel_b3:"<strong>API health gauges</strong> — response times, DB queries, error rate, session count",
+ tel_b4:"<strong>Zero blind spots</strong> — every agent action is logged and visible in the feed",
+ tel_b5:"<strong>Instant alerts</strong> — anomalies trigger smart notifications to your team",
+ tel_badge:"Live Feed — 847 sessions",
+
+ sum_eyebrow:"Your AI Team",
+ sum_title:"5 agents that never sleep,<br/>never take lunch, never miss",
+ sum1_title:"AI Email Agent", sum1_desc:"Scrapes any website → finds contacts → matches services → writes EN + ES personalized cold email. Sends in one click.",
+ sum2_title:"Client X-Ray Agent", sum2_desc:"Deep scans any client — tech stack, business profile, AI-detected pain points, Opportunity Score 0-100, recommended services.",
+ sum3_title:"Radar Analysis Agent", sum3_desc:"Scrapes client + competitors simultaneously, plots 6-axis radar chart, identifies keyword/backlink gaps, produces battle report.",
+ sum4_title:"Call Pitch Agent", sum4_desc:"Generates a full call script — hook, pain probes, value prop, objection handlers, CTA — personalized for each prospect. 94% confidence.",
+ sum5_title:"WhatsApp Bot Agent", sum5_desc:"Connects to WhatsApp Business API. Clients type /report, /invoice, /rankings to get real-time data 24/7 — no login, no friction.",
+
+ mod_eyebrow:"Full Platform", mod_title:"Everything else your<br/>agency needs too",
+ mod_sub:"Beyond the 5 AI agents — 22 more modules handling every part of your business.",
+ m1_t:"Live Dashboard", m1_d:"KPI cards, revenue charts, activity feed, and real-time team overview. Your agency's heartbeat at a glance.",
+ m2_t:"Client Management", m2_d:"360° client profiles — contact info, services, projects, invoices, rankings, files, and full activity history in one view.",
+ m3_t:"Projects & Kanban", m3_d:"Drag-and-drop Kanban board with 4 priority levels, task comments, due dates, team assignment, and progress bars.",
+ m4_t:"Real-Time Messaging", m4_d:"WebSocket-powered chat with typing indicators, read receipts (), and unread badges. Clients feel like VIPs.",
+ m5_t:"Proposals & Contracts", m5_d:"Rich content editor. Clients accept or reject online. Accepted proposals auto-generate an invoice instantly.",
+ m6_t:"Billing & Invoicing", m6_d:"Auto-numbered invoices (INV-2026-0001), tax, 6 payment statuses, overdue tracking, and branded PDF exports.",
+ m7_t:"Keyword Rankings", m7_d:"Track keyword positions over time across Google, Bing, and Yahoo. Show clients their rankings climbing month by month.",
+ m8_t:"OCR Business Cards", m8_d:"Snap a business card photo. Gemini Vision extracts name, email, phone, company instantly. One click to import as client.",
+ m9_t:"Smart Notifications", m9_d:"4 types, clickable action links, per-user feeds, unread badge counts. Every important event surfaces immediately.",
+ m10_t:"Zapier Webhooks", m10_d:"15 event types with HMAC-signed payloads. Connect to 5,000+ apps — Slack, Notion, HubSpot, Gmail, and more.",
+ m11_t:"Call Logging", m11_d:"Log calls with duration, AI-generated summaries, follow-up flags, and client linking. Full conversation history, always.",
+ m12_t:"NPS Surveys", m12_d:"One-click satisfaction surveys. 0-10 scores plus written feedback. Know exactly who's happy and who's at risk of leaving.",
+ m13_t:"Interactive Tours", m13_d:"Step-by-step guided tours on all 40 pages. Clients and new employees learn the full platform in minutes.",
+ m14_t:"Service Store", m14_d:"Clients browse your service catalog and request quotes. 5-stage pipeline: Quoted → Accepted → In Progress → Delivered.",
+ m15_t:"Milestones", m15_d:"Create deliverables with due dates. Clients see their milestones in the portal — builds trust and shows progress clearly.",
+
+ role_eyebrow:"Access Control", role_title:"The right view for every person",
+ role_sub:"4 roles with precise permissions. Everyone sees exactly what they need.",
+ r1_title:"Admin", r1_tag:"Full control", r1_1:"All 5 AI agents", r1_2:"Billing & invoicing", r1_3:"Employee management", r1_4:"Webhooks & settings", r1_5:"Telemetry feed",
+ r2_title:"Employee", r2_tag:"Daily operations", r2_1:"AI email + call pitch agents", r2_2:"Clients, projects, tasks", r2_3:"Messaging & files", r2_4:"Radar + X-Ray analysis", r2_5:"No billing access",
+ r3_title:"Intern", r3_tag:"Learning mode", r3_1:"Dashboard overview", r3_2:"Assigned tasks only", r3_3:"Their own projects", r3_4:"Read-only client data", r3_5:"Guided page tours",
+ r4_title:"Client", r4_tag:"Their own portal", r4_1:"Own invoices & proposals", r4_2:"Keyword rankings view", r4_3:"Milestones & files", r4_4:"Messaging with agency", r4_5:"WhatsApp commands",
+
+ tw_label:"SERP Hawk AI agents help you...",
+ tw_phrases:["win clients with AI cold emails.","know exactly what competitors do.","walk into calls fully prepared.","answer clients on WhatsApp 24/7.","see every action in real time.","close deals with personalized pitches.","detect every opportunity automatically.","automate your entire agency workflow."],
+
+ tech_eyebrow:"Built on the Best", tech_title:"Enterprise-grade tech stack",
+ tech_sub:"Every technology chosen for performance, security, and scale.",
+
+ cta_badge:"No credit card · Full access · 5 agents ready",
+ cta_title:"Put your agency on<br/>AI autopilot today",
+ cta_sub:"5 agents working around the clock. Every client served. Every competitor analysed. Every call pitch ready.",
+ cta_placeholder:"your@agency.com", cta_btn:"Get Demo Access →",
+ cta_or:"Or", cta_link:"try the live demo instantly →",
+
+ footer_copy:"© 2026 SERP Hawk · Built for SEO agencies that want to win"
+ },
+
+ es: {
+ nav_agents:"Agentes IA", nav_whatsapp:"WhatsApp", nav_telemetry:"Telemetría",
+ nav_modules:"Módulos", nav_demo:"Prueba Demo", nav_cta:"Prueba Demo →",
+
+ hero_badge:"5 Agentes IA · Para Agencias SEO · Siempre Activos",
+ hero_h1:"Tu agencia, dirigida por<br/><em>agentes de IA</em> mientras duermes.",
+ hero_sub:"SERP Hawk despliega 5 agentes de IA que conquistan clientes, analizan competidores, preparan pitches de llamada, monitorean toda tu plataforma en tiempo real y responden clientes por WhatsApp — 24 horas al día.",
+ hero_btn_primary:" Probar Demo", hero_btn_secondary:"Conoce los Agentes ↓",
+ hero_badge1:"5 agentes activos en vivo", hero_badge2:"Última acción IA: hace 12 segundos",
+
+ stat1:"Agentes IA", stat2:"Módulos", stat3:"Endpoints API",
+ stat4:"Eventos Webhook", stat5:"Páginas Frontend", stat6:"Roles de Usuario",
+
+ prob_eyebrow:"El Método Anterior",
+ prob_title:"Gestionar una agencia<br/>sin IA es lento",
+ prob_sub:"Prospección manual. Pitches manuales. Reportes manuales. Clientes esperando. Competidores ganando. Hay una forma mejor.",
+ prob1_title:"Escribir emails en frío manualmente", prob1_desc:"Horas por prospecto. Plantillas genéricas. Bajas tasas de apertura. Compitiendo contra agencias con outreach por IA.",
+ prob2_title:"Sin idea de qué hace la competencia", prob2_desc:"Tus clientes están siendo superados en rankings. No sabes por qué, qué palabras clave te faltan ni cómo contraatacar.",
+ prob3_title:"Llamadas de ventas sin preparación", prob3_desc:"Entrar a llamadas sin conocer los puntos de dolor del prospecto, su stack tecnológico o las objeciones que plantearán.",
+ prob4_title:"Clientes en espera", prob4_desc:"Los clientes te mandan WhatsApp para actualizaciones. Tú corres a buscar la info. Se sienten descuidados. Se van.",
+ prob_cta:"5 agentes de IA resuelven cada uno de estos problemas",
+
+ chip1:" Agente Email IA", chip2:" Radiografía Cliente",
+ chip3:" Análisis Radar", chip4:" Pitch de Llamada", chip5:" Bot WhatsApp",
+
+ a1_tag:" Agente 01 — Agente Email IA",
+ a1_title:"Escribe emails personalizados<br/>mientras duermes",
+ a1_desc:"Escribe el nombre de cualquier empresa. El agente escanea su web, entiende su negocio, encuentra contactos decisores, elige tus servicios más adecuados y redacta un email de outreach completamente personalizado — en inglés Y en español. En menos de 60 segundos.",
+ a1_b1:"<strong>Scraping web</strong> — lee sus páginas, productos y puntos de dolor automáticamente",
+ a1_b2:"<strong>Descubrimiento de contactos</strong> — encuentra nombres, emails y títulos del sitio",
+ a1_b3:"<strong>Matching de servicios</strong> — la IA elige cuáles de tus servicios encajan mejor",
+ a1_b4:"<strong>Salida bilingüe</strong> — borradores de email en inglés Y español, generados automáticamente",
+ a1_b5:"<strong>Crea cliente automáticamente</strong> — envía el email y crea el perfil CRM en un clic",
+ a1_badge:"47 segundos para un email en vivo",
+
+ pipe_eyebrow:"Cómo Funciona el Agente 01", pipe_title:"5 pasos, completamente automáticos",
+ pipe_sub:"Escribes un nombre. El agente hace todo lo demás.",
+ pipe1:"Escanear Web", pipe1s:"Lee páginas, productos, copy",
+ pipe2:"Análisis GPT-4o", pipe2s:"Entiende su industria",
+ pipe3:"Encontrar Contactos", pipe3s:"Descubre a los decisores",
+ pipe4:"Seleccionar Servicios", pipe4s:"Elige tus mejores ofertas",
+ pipe5:"Escribir Email", pipe5s:"EN + ES, personalizado",
+
+ a2_tag:" Agente 02 — Radiografía Cliente",
+ a2_title:"Conoce todo sobre un<br/>cliente antes de que llame",
+ a2_desc:"El agente X-Ray de Hawk hace un escaneo de inteligencia profundo de cualquier cliente o prospecto. Stack tecnológico, perfil empresarial, número de empleados, puntos de dolor detectados por IA, y una Puntuación de Oportunidad 0-100 que te dice exactamente cuánto puedes ayudarles.",
+ a2_b1:"<strong>Detección de stack tecnológico</strong> — ¿React? ¿Shopify? ¿GTM? ¿WordPress? Conocido al instante",
+ a2_b2:"<strong>Perfil empresarial</strong> — industria, tamaño, año de fundación, etapa de financiamiento",
+ a2_b3:"<strong>Puntos de dolor IA</strong> — GPT-4o lee su sitio y señala qué están haciendo mal",
+ a2_b4:"<strong>Puntuación de Oportunidad</strong> — score 0-100 que muestra cuánto margen tienes para ayudar",
+ a2_b5:"<strong>Recomendaciones de servicios</strong> — la IA sugiere exactamente qué servicios ofrecer",
+ a2_badge:"Puntuación Oportunidad: 87/100",
+
+ a3_tag:" Agente 03 — Análisis Radar",
+ a3_title:"Conoce exactamente dónde<br/>estás frente a cada competidor",
+ a3_desc:"El agente Radar escanea el sitio de tu cliente Y el de sus principales competidores simultáneamente. Mapea 6 dimensiones — Keywords, Backlinks, Contenido, Velocidad, Social, Confianza — y genera un reporte de batalla con acciones específicas para ganar.",
+ a3_b1:"<strong>Gráfico radar de 6 ejes</strong> — comparativa visual en cada dimensión SEO",
+ a3_b2:"<strong>Brecha de keywords</strong> — exactamente qué palabras clave rankea la competencia y tú no",
+ a3_b3:"<strong>Brecha de backlinks</strong> — cuántos más enlaces tienen y de dónde vienen",
+ a3_b4:"<strong>Nivel de amenaza</strong> — score de amenaza competitiva: BAJO / MEDIO / ALTO / CRÍTICO",
+ a3_b5:"<strong>Reporte de batalla</strong> — plan de acción escrito por IA para superar a cada competidor",
+ a3_badge:"Nivel de Amenaza: ALTO detectado",
+
+ a4_tag:" Agente 04 — Pitch de Llamada",
+ a4_title:"Entra a cada llamada de ventas<br/>completamente preparado",
+ a4_desc:"Antes de cualquier llamada, el agente Pitch lee el sitio del prospecto, su perfil empresarial, stack tecnológico y puntos de dolor — luego genera un script de llamada personalizado. Gancho inicial, puntos de dolor a explorar, tu propuesta de valor, manejo de objeciones y el call to action exacto.",
+ a4_b1:"<strong>Gancho de apertura</strong> — introducción personalizada que demuestra que hiciste tu tarea",
+ a4_b2:"<strong>Preguntas de dolor</strong> — 3-5 preguntas para descubrir sus mayores problemas",
+ a4_b3:"<strong>Propuesta de valor</strong> — vincula tus servicios a sus objetivos empresariales específicos",
+ a4_b4:"<strong>Manejo de objeciones</strong> — la IA pre-escribe respuestas a \"muy caro\", \"ya tengo alguien\"",
+ a4_b5:"<strong>Puntuación de confianza</strong> — rating 0-100 de qué tan sólido es este pitch para este prospecto",
+ a4_badge:"Puntuación Confianza: 94%",
+
+ a5_tag:" Agente 05 — Bot WhatsApp",
+ a5_title:"Los clientes acceden a todo<br/>por WhatsApp",
+ a5_desc:"Tus clientes ya viven en WhatsApp. SERP Hawk conecta un bot de Business API que conoce todo tu CRM. Los clientes escriben un comando y al instante obtienen sus rankings, facturas, estado de tareas y reportes — sin iniciar sesión, en cualquier momento del día.",
+ wa1:"Obtiene el último reporte PDF de rendimiento", wa2:"Ve todas las facturas abiertas y pagadas al instante",
+ wa3:"Consulta posiciones de keywords ahora mismo", wa4:"Ve en qué se está trabajando hoy",
+ wa5:"Visualiza próximos entregables del proyecto", wa6:"Estado general del proyecto de un vistazo",
+ a5_badge:"SERP Hawk Bot — Conectado",
+
+ tel_tag:" Telemetría en Vivo",
+ tel_title:"Observa cada acción<br/>en tiempo real",
+ tel_desc:"Un feed de telemetría en vivo muestra cada evento en todo tu CRM — quién ve qué, tareas completándose, emails abriéndose, mensajes de WhatsApp llegando, salud de API, rendimiento de base de datos. Cero puntos ciegos.",
+ tel_b1:"<strong>Stream de actividad en vivo</strong> — cada acción de cliente, tarea, email y mensaje, en tiempo real",
+ tel_b2:"<strong>Mapa de calor de actividad</strong> — grid hora-por-día mostrando cuándo tu equipo está más activo",
+ tel_b3:"<strong>Indicadores de salud API</strong> — tiempos de respuesta, consultas DB, tasa de error, número de sesiones",
+ tel_b4:"<strong>Cero puntos ciegos</strong> — cada acción del agente está registrada y visible en el feed",
+ tel_b5:"<strong>Alertas instantáneas</strong> — las anomalías disparan notificaciones inteligentes a tu equipo",
+ tel_badge:"Feed en Vivo — 847 sesiones",
+
+ sum_eyebrow:"Tu Equipo IA",
+ sum_title:"5 agentes que no duermen,<br/>no almuerzan, no fallan",
+ sum1_title:"Agente Email IA", sum1_desc:"Escanea cualquier web → encuentra contactos → selecciona servicios → escribe email personalizado EN + ES. Envía en un clic.",
+ sum2_title:"Agente Radiografía Cliente", sum2_desc:"Escanea profundamente a cualquier cliente — stack tecnológico, perfil empresarial, puntos de dolor IA, Puntuación Oportunidad 0-100, servicios recomendados.",
+ sum3_title:"Agente Análisis Radar", sum3_desc:"Escanea cliente + competidores simultáneamente, traza gráfico radar 6 ejes, identifica brechas de keywords/backlinks, produce reporte de batalla.",
+ sum4_title:"Agente Pitch de Llamada", sum4_desc:"Genera un script completo — gancho, preguntas de dolor, propuesta de valor, manejo de objeciones, CTA — personalizado para cada prospecto. 94% confianza.",
+ sum5_title:"Agente Bot WhatsApp", sum5_desc:"Conecta a WhatsApp Business API. Los clientes escriben /report, /invoice, /rankings para datos en tiempo real 24/7 — sin login, sin fricción.",
+
+ mod_eyebrow:"Plataforma Completa", mod_title:"Todo lo demás que tu<br/>agencia necesita también",
+ mod_sub:"Más allá de los 5 agentes IA — 22 módulos más gestionando cada parte de tu negocio.",
+ m1_t:"Dashboard en Vivo", m1_d:"Tarjetas KPI, gráficos de ingresos, feed de actividad y resumen de equipo en tiempo real. El pulso de tu agencia de un vistazo.",
+ m2_t:"Gestión de Clientes", m2_d:"Perfiles 360° — información de contacto, servicios, proyectos, facturas, rankings, archivos e historial completo de actividad en una vista.",
+ m3_t:"Proyectos y Kanban", m3_d:"Tablero Kanban de arrastrar y soltar con 4 niveles de prioridad, comentarios en tareas, fechas de entrega, asignación de equipo y barras de progreso.",
+ m4_t:"Mensajería en Tiempo Real", m4_d:"Chat con WebSocket con indicadores de escritura, confirmaciones de lectura () e insignias de no leídos. Los clientes se sienten VIPs.",
+ m5_t:"Propuestas y Contratos", m5_d:"Editor de contenido enriquecido. Los clientes aceptan o rechazan en línea. Las propuestas aceptadas generan una factura automáticamente.",
+ m6_t:"Facturación e Invoicing", m6_d:"Facturas auto-numeradas (INV-2026-0001), impuestos, 6 estados de pago, seguimiento de vencidos y exportaciones PDF con tu marca.",
+ m7_t:"Seguimiento de Rankings", m7_d:"Rastrea posiciones de keywords en el tiempo en Google, Bing y Yahoo. Muestra a tus clientes sus rankings subiendo mes a mes.",
+ m8_t:"OCR Tarjetas de Visita", m8_d:"Toma una foto de una tarjeta de visita. Gemini Vision extrae nombre, email, teléfono y empresa al instante. Un clic para importar como cliente.",
+ m9_t:"Notificaciones Inteligentes", m9_d:"4 tipos, enlaces de acción clickeables, feeds por usuario, contadores de no leídos. Cada evento importante aparece de inmediato.",
+ m10_t:"Webhooks Zapier", m10_d:"15 tipos de eventos con payloads firmados HMAC. Conecta a 5,000+ apps — Slack, Notion, HubSpot, Gmail y más.",
+ m11_t:"Registro de Llamadas", m11_d:"Registra llamadas con duración, resúmenes generados por IA, seguimientos y vinculación con clientes. Historial completo de conversaciones, siempre.",
+ m12_t:"Encuestas NPS", m12_d:"Encuestas de satisfacción en un clic. Puntuaciones 0-10 más feedback escrito. Sabe exactamente quién está feliz y quién está en riesgo de irse.",
+ m13_t:"Tours Interactivos", m13_d:"Tours guiados paso a paso en todas las 40 páginas. Clientes y empleados nuevos aprenden la plataforma completa en minutos.",
+ m14_t:"Tienda de Servicios", m14_d:"Los clientes navegan tu catálogo de servicios y solicitan presupuestos. Pipeline de 5 etapas: Cotizado → Aceptado → En Progreso → Entregado.",
+ m15_t:"Hitos", m15_d:"Crea entregables con fechas. Los clientes ven sus hitos en el portal — genera confianza y muestra el progreso claramente.",
+
+ role_eyebrow:"Control de Acceso", role_title:"La vista correcta para cada persona",
+ role_sub:"4 roles con permisos precisos. Todos ven exactamente lo que necesitan.",
+ r1_title:"Admin", r1_tag:"Control total", r1_1:"Los 5 agentes IA", r1_2:"Facturación e invoicing", r1_3:"Gestión de empleados", r1_4:"Webhooks y configuración", r1_5:"Feed de telemetría",
+ r2_title:"Empleado", r2_tag:"Operaciones diarias", r2_1:"Agentes email + pitch de llamada", r2_2:"Clientes, proyectos, tareas", r2_3:"Mensajería y archivos", r2_4:"Análisis Radar + Radiografía", r2_5:"Sin acceso a facturación",
+ r3_title:"Pasante", r3_tag:"Modo aprendizaje", r3_1:"Vista general del dashboard", r3_2:"Solo tareas asignadas", r3_3:"Sus propios proyectos", r3_4:"Datos de clientes solo lectura", r3_5:"Tours de páginas guiados",
+ r4_title:"Cliente", r4_tag:"Su propio portal", r4_1:"Sus facturas y propuestas", r4_2:"Vista de rankings de keywords", r4_3:"Hitos y archivos", r4_4:"Mensajería con la agencia", r4_5:"Comandos de WhatsApp",
+
+ tw_label:"Los agentes IA de SERP Hawk te ayudan a...",
+ tw_phrases:["ganar clientes con emails de IA.","saber exactamente qué hace la competencia.","entrar a llamadas completamente preparado.","responder clientes por WhatsApp 24/7.","ver cada acción en tiempo real.","cerrar deals con pitches personalizados.","detectar cada oportunidad automáticamente.","automatizar todo el flujo de tu agencia."],
+
+ tech_eyebrow:"Construido con lo Mejor", tech_title:"Stack tecnológico de nivel empresarial",
+ tech_sub:"Cada tecnología elegida por rendimiento, seguridad y escalabilidad.",
+
+ cta_badge:"Sin tarjeta de crédito · Acceso completo · 5 agentes listos",
+ cta_title:"Pon tu agencia en<br/>piloto automático con IA",
+ cta_sub:"5 agentes trabajando sin parar. Cada cliente atendido. Cada competidor analizado. Cada pitch de llamada listo.",
+ cta_placeholder:"tu@agencia.com", cta_btn:"Obtener Acceso Demo →",
+ cta_or:"O", cta_link:"prueba el demo en vivo al instante →",
+
+ footer_copy:"© 2026 SERP Hawk · Construido para agencias SEO que quieren ganar"
+ }
+};
+
+/* 
+ LANGUAGE ENGINE
+ */
+let currentLang = 'en';
+let twPhrases = T.en.tw_phrases;
+let twIdx = 0, twChar = 0, twDeleting = false;
+let twTimeout = null;
+
+function setLang(lang) {
+ currentLang = lang;
+ const t = T[lang];
+ document.documentElement.lang = lang;
+
+ // Update all data-i18n elements
+ document.querySelectorAll('[data-i18n]').forEach(el => {
+ const key = el.dataset.i18n;
+ if (t[key] !== undefined) el.innerHTML = t[key];
+ });
+
+ // Update placeholders
+ document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+ const key = el.dataset.i18nPlaceholder;
+ if (t[key] !== undefined) el.placeholder = t[key];
+ });
+
+ // Update typewriter phrases
+ twPhrases = t.tw_phrases;
+ twIdx = 0; twChar = 0; twDeleting = false;
+ clearTimeout(twTimeout);
+ runTypewriter();
+
+ // Update buttons
+ document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+ document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+}
+
+/* 
+ TYPEWRITER
+ */
+const twDisplay = document.getElementById('typewriter-display');
+function runTypewriter() {
+ const phrase = twPhrases[twIdx];
+ if (!twDeleting) {
+ twDisplay.textContent = phrase.substring(0, twChar + 1);
+ twChar++;
+ if (twChar === phrase.length) {
+ twDeleting = true;
+ twTimeout = setTimeout(runTypewriter, 2400);
+ return;
+ }
+ } else {
+ twDisplay.textContent = phrase.substring(0, twChar - 1);
+ twChar--;
+ if (twChar === 0) {
+ twDeleting = false;
+ twIdx = (twIdx + 1) % twPhrases.length;
+ }
+ }
+ twTimeout = setTimeout(runTypewriter, twDeleting ? 26 : 48);
+}
+runTypewriter();
+
+/* 
+ THEME TOGGLE
+ */
+function toggleTheme() {
+ const html = document.documentElement;
+ const isDark = html.getAttribute('data-theme') === 'dark';
+ html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+ document.getElementById('icon-sun').style.display  = isDark ? 'block' : 'none';
+ document.getElementById('icon-moon').style.display = isDark ? 'none'  : 'block';
+ document.getElementById('particle-canvas').style.opacity = isDark ? '0.08' : '0.15';
+}
+// Initial: dark mode = show moon icon
+document.getElementById('icon-moon').style.display = 'block';
+document.getElementById('icon-sun').style.display  = 'none';
+
+/* 
+ PARTICLES
+ */
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+function mkP() {
+ return { x: Math.random()*W, y: Math.random()*H, vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25, s: Math.random()*1.2+.4, o: Math.random()*.4+.1 };
+}
+for (let i = 0; i < 60; i++) particles.push(mkP());
+
+function drawParticles() {
+ ctx.clearRect(0, 0, W, H);
+ const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+ const col = dark ? '255,255,255' : '0,0,0';
+ particles.forEach((p, i) => {
+ p.x += p.vx; p.y += p.vy;
+ if (p.x < 0 || p.x > W) p.vx *= -1;
+ if (p.y < 0 || p.y > H) p.vy *= -1;
+ ctx.beginPath();
+ ctx.arc(p.x, p.y, p.s, 0, Math.PI*2);
+ ctx.fillStyle = `rgba(${col},${p.o})`;
+ ctx.fill();
+ for (let j = i+1; j < particles.length; j++) {
+ const q = particles[j], dx = p.x-q.x, dy = p.y-q.y, d = Math.sqrt(dx*dx+dy*dy);
+ if (d < 130) {
+ ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+ ctx.strokeStyle = `rgba(${col},${0.05*(1-d/130)})`;
+ ctx.lineWidth = .5; ctx.stroke();
+ }
+ }
+ });
+ requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* 
+ SCROLL PROGRESS
+ */
+const pb = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+ pb.style.width = (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%';
+ document.getElementById('navbar').style.background =
+ window.scrollY > 60 ? (document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(0,0,0,.98)' : 'rgba(255,255,255,.98)') : '';
+});
+
+/* 
+ SCROLL REVEAL
+ */
+const observer = new IntersectionObserver(entries => {
+ entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el => observer.observe(el));
+
+/* 
+ COUNTERS
+ */
+document.querySelectorAll('.counter').forEach(el => {
+ const co = new IntersectionObserver(([e]) => {
+ if (!e.isIntersecting) return;
+ const target = parseInt(el.dataset.target);
+ let count = 0;
+ const step = target / 55;
+ const timer = setInterval(() => {
+ count = Math.min(count + step, target);
+ el.textContent = Math.floor(count) + '+';
+ if (count >= target) { el.textContent = target + '+'; clearInterval(timer); }
+ }, 16);
+ co.unobserve(el);
+ }, { threshold: 0.5 });
+ co.observe(el);
+});
+
+/* 
+ MODULE CARD HOVER GLOW
+ */
+document.querySelectorAll('.module-card').forEach(card => {
+ card.addEventListener('mousemove', e => {
+ const r = card.getBoundingClientRect();
+ const x = ((e.clientX - r.left) / r.width) * 100;
+ const y = ((e.clientY - r.top) / r.height) * 100;
+ const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+ card.style.background = `radial-gradient(circle at ${x}% ${y}%, ${dark?'rgba(255,255,255,.06)':'rgba(0,0,0,.04)'}, var(--bg) 60%)`;
+ });
+ card.addEventListener('mouseleave', () => { card.style.background = ''; });
+});
+
+/* 
+ PARALLAX ON HERO MOCKUP
+ */
+const heroMockup = document.querySelector('.hero-mockup');
+window.addEventListener('mousemove', e => {
+ if (!heroMockup) return;
+ const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+ const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+ heroMockup.style.transform = `perspective(1200px) rotateY(${dx * 2}deg) rotateX(${-dy * 1.5}deg)`;
+});
+
+/* 
+ CTA FORM
+ */
+function handleCTA(e) {
+ e.preventDefault();
+ const email = encodeURIComponent(document.getElementById('ctaEmail').value);
+ window.location.href = '/login?ref=pitch&email=' + email;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+A CRM sales funnel tracks a prospect from first contact to becoming a customer and beyond. The exact stages vary by company, but a common funnel looks like this:
+
+Stage	Description	CRM Activities	KPI
+1. Lead Capture	New lead enters the system	Web forms, ads, referrals, events, imports	Number of Leads
+2. Lead Qualification	Determine if the lead fits your target profile	BANT, lead scoring, discovery questions	Qualified Lead Rate
+3. Initial Contact	First outreach to the lead	Calls, emails, WhatsApp, SMS	Contact Rate
+4. Needs Assessment	Understand business requirements and pain points	Discovery meetings, surveys, demos	Meeting Conversion Rate
+5. Opportunity Creation	Qualified lead becomes a sales opportunity	Create deal/opportunity record	Opportunities Created
+6. Solution Presentation	Demonstrate product/service value	Product demo, proposal, presentation	Demo-to-Proposal Rate
+7. Proposal/Quotation	Send pricing and commercial terms	Generate quote, proposal tracking	Proposal Acceptance Rate
+8. Negotiation	Handle objections and finalize terms	Follow-ups, contract revisions	Negotiation Success Rate
+9. Closing (Won/Lost)	Deal is won or lost	Contract signing, payment collection	Close Rate
+10. Onboarding	Customer implementation begins	Training, setup, project kickoff	Time to Go-Live
+11. Customer Success	Ensure customer receives value	Support, health checks, reviews	Customer Satisfaction
+12. Upsell & Renewal	Expand revenue from existing customers	Cross-sell, upsell, renewals	Customer Lifetime Value
+
+Visual Funnel
+Lead Capture
+      ↓
+Lead Qualification
+      ↓
+Initial Contact
+      ↓
+Needs Assessment
+      ↓
+Opportunity Created
+      ↓
+Demo / Presentation
+      ↓
+Proposal / Quote
+      ↓
+Negotiation
+      ↓
+Closed Won
+      ↓
+Onboarding
+      ↓
+Customer Success
+      ↓
+Upsell / Renewal
+
+CRM Fields to Track at Each Stage
+Category	Fields
+Lead Info	Name, Company, Email, Phone
+Qualification	Budget, Authority, Need, Timeline
+Sales Activity	Calls, Emails, Meetings
+Opportunity	Deal Value, Probability, Expected Close Date
+Proposal	Proposal Date, Quote Amount
+Closing	Won/Lost Reason
+Customer Success	Onboarding Status, Renewal Date, NPS
+AI-Powered CRM Funnel (Recommended for 2026)
+Lead Capture
+AI Lead Scoring
+Automated Outreach
+Meeting Booking
+Discovery Analysis (AI call summaries)
+Proposal Generation
+Deal Risk Prediction
+Contract Signing
+Automated Onboarding
+Customer Health Monitoring
+Upsell Recommendations
+Renewal Automation

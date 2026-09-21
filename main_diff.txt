@@ -1,0 +1,64 @@
+diff --cc main.py
+index ad23221,8dec0bc..0000000
+--- a/main.py
++++ b/main.py
+@@@ -684,19 -733,17 +733,33 @@@ app.mount("/static", StaticFiles(direct
+  # ─────────────────────────────────────────────────────────────────────────────
+  def _send_notification_email(to_email: str, subject: str, body_html: str):
+      """Best-effort email notification. Fails silently so it never blocks API responses."""
+++<<<<<<< HEAD
+ +    def _send():
+ +        try:
+ +            from modules.email_sender import send_email_outlook
+ +            import os
+ +            sender = os.environ.get("EMAIL_SENDER") or os.environ.get("OUTLOOK_EMAIL") or ""
+ +            password = os.environ.get("EMAIL_PASSWORD") or os.environ.get("OUTLOOK_PASSWORD") or ""
+ +            if sender and password:
+ +                send_email_outlook(to_email, subject, body_html, sender, password)
+ +        except Exception as e:
+ +            print(f"[Notification email failed] {e}")
+ +            
+ +    import threading
+ +    threading.Thread(target=_send).start()
+++=======
++     try:
++         from modules.email_sender import send_email_outlook
++         sender = os.environ.get("EMAIL_SENDER") or os.environ.get("OUTLOOK_EMAIL") or ""
++         password = os.environ.get("EMAIL_PASSWORD") or os.environ.get("OUTLOOK_PASSWORD") or ""
++         smtp_server = os.environ.get("EMAIL_HOST") or os.environ.get("SMTP_SERVER", "smtp.gmail.com")
++         smtp_port = int(os.environ.get("EMAIL_PORT") or os.environ.get("SMTP_PORT", 587))
++         if sender and password:
++             send_email_outlook(to_email, subject, body_html, sender, password,
++                                smtp_server=smtp_server, smtp_port=smtp_port)
++     except Exception as e:
++         print(f"[Notification email failed] {e}")
+++>>>>>>> origin/main
+  
+  
+  
+@@@ -10542,17 -10655,11 +10853,25 @@@ def create_meeting(body: MeetingCreateR
+      session.commit()
+      session.refresh(m)
+  
+++<<<<<<< HEAD
+ +    try:
+ +        dt_str = m.scheduled_at.strftime("%b %d, %I:%M %p") if m.scheduled_at else "TBD"
+ +        _notify_admins(
+ +            session, current_tenant_id.get(),
+ +            title=f"📅 Meeting Scheduled: {m.title}",
+ +            message=f"Time: {dt_str} | Status: {m.status}",
+ +            notif_type="info",
+ +            link=f"/meetings"
+ +        )
+ +    except Exception:
+ +        pass
+++=======
++     # ── EMAIL NOTIFICATION TO ATTENDEES ──
++     dt_str = m.scheduled_at.strftime("%Y-%m-%d %H:%M") if m.scheduled_at else "TBD"
++     subject = f"Meeting Scheduled: {m.title}"
++     notes = (m.notes or "").strip()
++     recips = [a.strip() for a in (m.attendees or []) if a and a.strip()]
+++>>>>>>> origin/main
+  
+      to_email = None
+      if m.client_id:

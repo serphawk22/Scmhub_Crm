@@ -1,0 +1,81 @@
+/* ---- Google Fonts ---- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ---- Global ---- */
+html { scroll-behavior: smooth; cursor: none; }
+body { cursor: none; background-color: #f8f9fa; color: #111827; }
+::selection { background: #111827; color: #f8f9fa; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f8f9fa; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ---- Custom Cursor ---- */
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #000000;
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s ease-out;
+}
+
+.cursor-outline {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9998;
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, transform 0.15s ease-out;
+}
+
+/* Hover effect on interactive elements */
+a, button, .nav-link, .group {
+  cursor: none !important;
+}
+.cursor-outline.hover {
+  width: 70px;
+  height: 70px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ---- Animations ---- */
+@keyframes scroll-down {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+.animate-scroll-down {
+  animation: scroll-down 2s infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ---- Smooth Scrolling Fixes ---- */
+.smooth-scroll-wrapper {
+  overflow: hidden;
+}
+
+/* ---- Mobile/Touch Fallbacks ---- */
+@media (hover: none) and (pointer: coarse) {
+  html, body, a, button, .nav-link, .group {
+    cursor: auto !important;
+  }
+  .cursor-dot, .cursor-outline {
+    display: none !important;
+  }
+}
+
+/* ---- Mobile Menu Animations ---- */
+#mobile-menu.menu-active .mobile-link {
+  opacity: 1;
+  transform: translateY(0);
+}

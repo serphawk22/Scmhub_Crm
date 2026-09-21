@@ -1,0 +1,76 @@
+diff --cc frontend/src/components/Sidebar.tsx
+index e416be0,a891c18..0000000
+--- a/frontend/src/components/Sidebar.tsx
++++ b/frontend/src/components/Sidebar.tsx
+@@@ -117,8 -117,7 +117,12 @@@ const defaultSidebarSections = 
+      id: "section-system",
+      heading: "SYSTEM",
+      items: [
+++<<<<<<< HEAD
+ +      { id: "item-import", name: "Import Data", icon: "FileBarChart2", href: "/import", roles: ["Admin", "SalesManager"] },
+ +      { id: "item-api-intelligence", name: "API Intelligence", icon: "Activity", href: "/admin/api-intelligence", roles: ["Admin", "SuperAdmin"] },
+++=======
++       { id: "item-import", name: "Import Data", icon: "FileBarChart2", href: "/import", roles: ["Admin", "SalesManager", "Demo"] },
+++>>>>>>> origin/main
+        { id: "item-demo-accounts", name: "Demo Account Data", icon: "Users", href: "/admin/telemetry", roles: ["Admin", "SuperAdmin"] },
+      ],
+    },
+@@@ -272,7 -314,54 +319,58 @@@ export function Sidebar({ role }: Sideb
+    const [sections, setSections] = useState<any[]>(defaultSidebarSections);
+    const [favourites, setFavourites] = useState<string[]>([]);
+    const [isEditMode, setIsEditMode] = useState(false);
+++<<<<<<< HEAD
+ +  const { unreadCount } = useNotifications();
+++=======
++   const [unreadCount, setUnreadCount] = useState(0);
++   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
++     // Default: all sections with headings start open
++     const initial: Record<string, boolean> = {};
++     for (const sec of defaultSidebarSections) {
++       if (sec.heading !== null) initial[sec.id] = true;
++     }
++     return initial;
++   });
++ 
++   // Auto-expand the section containing the current route
++   useEffect(() => {
++     if (!pathname) return;
++     setOpenSections(prev => {
++       const next = { ...prev };
++       let changed = false;
++       for (const sec of sections) {
++         if (sec.heading === null) continue;
++         const hasActive = sec.items?.some((item: any) =>
++           pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href))
++         );
++         if (hasActive && !next[sec.id]) {
++           next[sec.id] = true;
++           changed = true;
++         }
++       }
++       return changed ? next : prev;
++     });
++   }, [pathname, sections]);
++ 
++   const toggleSection = (sectionId: string) => {
++     setOpenSections(prev => {
++       const next = { ...prev, [sectionId]: !prev[sectionId] };
++       try { localStorage.setItem(`crm_sections_open_${user?.id || 'default'}`, JSON.stringify(next)); } catch {}
++       return next;
++     });
++   };
++ 
++   // Load saved section open state on mount
++   useEffect(() => {
++     try {
++       const saved = localStorage.getItem(`crm_sections_open_${user?.id || 'default'}`);
++       if (saved) {
++         const parsed = JSON.parse(saved);
++         setOpenSections(prev => ({ ...prev, ...parsed }));
++       }
++     } catch {}
++   }, [user?.id]);
+++>>>>>>> origin/main
+  
+    const fetchSidebarPrefs = useCallback(async () => {
+      const localFavKey = `crm_favourites_${user?.id || 'default'}`;
