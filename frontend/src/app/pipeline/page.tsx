@@ -27,7 +27,7 @@ const STAGES = ["Lead", "Discovery", "Demo", "Negotiation", "Closed Won", "Close
 
 export default function PipelinePage() {
   const { t } = useLanguage();
-  const { role, userId } = useRole();
+  const { role, user } = useRole();
   const router = useRouter();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function PipelinePage() {
 
   const fetchDeals = async () => {
     try {
-      const url = role === "SalesManager" ? `${API_BASE_URL}/deals?user_id=${userId}` : `${API_BASE_URL}/deals`;
+      const url = role === "SalesManager" ? `${API_BASE_URL}/deals?user_id=${user?.id || ""}` : `${API_BASE_URL}/deals`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch deals");
       const data = await res.json();
@@ -119,7 +119,7 @@ export default function PipelinePage() {
           title: newDeal.title,
           value: parseFloat(newDeal.value) || 0.0,
           client_id: parseInt(newDeal.client_id),
-          assigned_to: role === "SalesManager" ? userId : null,
+          assigned_to: role === "SalesManager" ? user?.id || null : null,
           stage: newDeal.stage,
           expected_close_date: newDeal.expected_close_date || null
         })
@@ -145,7 +145,7 @@ export default function PipelinePage() {
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-zinc-950">
-      <Sidebar />
+      <Sidebar role={role} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <AdminTopbar />
         

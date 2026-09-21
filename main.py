@@ -8822,7 +8822,10 @@ from database import Deal
 @app.get("/deals")
 def get_deals(user_id: Optional[int] = None, session: Session = Depends(get_session)):
     q = select(Deal).order_by(Deal.created_at.desc())
-    if user_id:
+    caller = session.get(User, current_salesperson_id.get()) if current_salesperson_id.get() else None
+    if caller and caller.role == "SalesManager":
+        q = q.where(Deal.assigned_to == caller.id)
+    elif user_id:
         q = q.where(Deal.assigned_to == user_id)
     deals = session.exec(q).all()
     
