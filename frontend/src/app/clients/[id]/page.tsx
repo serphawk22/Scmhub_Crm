@@ -40,6 +40,7 @@ import { useRole } from '@/context/RoleContext';
 import LinkedContacts from '@/components/LinkedContacts';
 import { cn } from '@/lib/utils';
 import PageGuide from '@/components/PageGuide';
+import ClientDealsTab from './ClientDealsTab';
 import axios from 'axios';
 import { DollarSign, XCircle, Radar, Navigation } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -259,7 +260,7 @@ export default function ClientDetailPage() {
   const [isKeywordModalOpen, setIsKeywordModalOpen] = useState(false);
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [newKeyword, setNewKeyword] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'deals'>('overview');
   const { role } = useRole();
   const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
   const [milestoneData, setMilestoneData] = useState({
@@ -658,7 +659,21 @@ const handleSaveMetrics = async () => {
   return (
     <>
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto mb-8 flex max-w-7xl gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={cn("rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all", activeTab === 'overview' ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800")}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('deals')}
+          className={cn("rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all", activeTab === 'deals' ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800")}
+        >
+          Deals
+        </button>
+      </div>
+      <div className={cn("max-w-7xl mx-auto", activeTab === 'deals' && "hidden")}>
         {/* EPIC WELCOME HERO */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }} 
@@ -1432,6 +1447,11 @@ const handleSaveMetrics = async () => {
         </AnimatePresence>
 
       </div>
+      {activeTab === 'deals' && (
+        <div className="mx-auto max-w-7xl">
+          <ClientDealsTab clientId={String(client.id)} />
+        </div>
+      )}
     </motion.div>
 
     {/* ── Edit Metrics Modal ── */}

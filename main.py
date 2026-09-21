@@ -8936,13 +8936,15 @@ def delete_competitor(analysis_id: int, session: Session = Depends(get_session))
 from database import Deal
 
 @app.get("/deals")
-def get_deals(user_id: Optional[int] = None, session: Session = Depends(get_session)):
+def get_deals(user_id: Optional[int] = None, client_id: Optional[int] = None, session: Session = Depends(get_session)):
     q = select(Deal).order_by(Deal.created_at.desc())
     caller = session.get(User, current_salesperson_id.get()) if current_salesperson_id.get() else None
     if caller and caller.role == "SalesManager":
         q = q.where(Deal.assigned_to == caller.id)
     elif user_id:
         q = q.where(Deal.assigned_to == user_id)
+    if client_id:
+        q = q.where(Deal.client_id == client_id)
     deals = session.exec(q).all()
     
     # We fetch client names for the UI manually
