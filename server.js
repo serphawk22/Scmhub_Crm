@@ -127,35 +127,7 @@ app.post('/api/ai-agent/dispatch', async (req, res) => {
   }
 });
 
-// POST /api/auth/signin - authenticate and record session in users table
-app.post('/api/auth/signin', async (req, res) => {
-  const { email } = req.body;
-  const userEmail = (email || 'user@organization.com').trim().toLowerCase();
 
-  try {
-    const result = await pool.query(`
-      INSERT INTO users (email, last_login)
-      VALUES ($1, CURRENT_TIMESTAMP)
-      ON CONFLICT (email)
-      DO UPDATE SET last_login = CURRENT_TIMESTAMP
-      RETURNING *;
-    `, [userEmail]);
-
-    res.json({
-      success: true,
-      message: 'Workspace authenticated via Neon PostgreSQL.',
-      user: result.rows[0]
-    });
-  } catch (err) {
-    console.error('Error during user sign in:', err);
-    res.status(500).json({ success: false, error: 'Authentication query failed' });
-  }
-});
-
-// Guard route for direct /signup requests
-app.get('/signup', (req, res) => {
-  res.sendFile(path.join(__dirname, 'signup.html'));
-});
 
 // Start Server after initializing Database
 async function startServer() {
