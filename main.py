@@ -12882,6 +12882,9 @@ def _case_dict(c: Case, session: Session) -> dict:
 @app.get("/cases")
 def list_cases(status: Optional[str] = None, priority: Optional[str] = None, client_id: Optional[int] = None, assigned_to: Optional[int] = None, session: Session = Depends(get_session)):
     q = select(Case).order_by(Case.created_at.desc())
+    caller = session.get(User, current_salesperson_id.get()) if current_salesperson_id.get() else None
+    if caller and caller.role not in ("Admin", "SuperAdmin"):
+        assigned_to = caller.id
     if status:
         q = q.where(Case.status == status)
     if priority:

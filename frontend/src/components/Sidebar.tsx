@@ -83,7 +83,7 @@ const defaultSidebarSections = [
     id: "section-teams",
     heading: "TEAMS",
     items: [
-      { id: "item-teams", name: "Team Directory", icon: "Users", href: "/teams", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-teams", name: "Team Directory", icon: "Users", href: "/teams", roles: ["Admin", "Demo"] },
       { id: "item-leaderboard", name: "Leaderboard", icon: "Trophy", href: "/admin/leaderboard", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },

@@ -31,7 +31,7 @@ export default function CasesPage() {
 
   const load = () => {
     setLoading(true);
-    const assignedOnly = (role === "ProjectMember" || role === "Employee" || role === "Intern") && user?.id;
+    const assignedOnly = role !== "Admin" && role !== "SuperAdmin" && user?.id;
     fetch(`${API_BASE_URL}/cases${assignedOnly ? `?assigned_to=${user.id}` : ""}`).then(r => r.json()).then(cd => {
       setCases(Array.isArray(cd.cases) ? cd.cases : []);
     }).finally(() => setLoading(false));
