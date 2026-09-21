@@ -328,7 +328,7 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
 
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-700 dark:border-slate-800 pb-4 overflow-x-auto">
         {[
-          { id: 'presales', label: language === 'es' ? 'Análisis del Agente IA' : 'AI Agent Analysis', icon: Brain },
+          { id: 'presales', label: language === 'es' ? 'Investigación IA' : 'AI Research', icon: Brain },
           ...(hasEmailAgentData ? [{ id: 'emails', label: language === 'es' ? 'Correos Salientes' : 'Outbound Emails', icon: Mail }] : []),
 
         ].map(t => (
@@ -367,7 +367,7 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
                 className="flex-1 py-2 px-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-colors disabled:opacity-50"
               >
                 {isAutoResearching ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
-                {isAutoResearching ? (language === 'es' ? 'Investigando Empresa...' : 'Researching Company...') : (language === 'es' ? 'Analizar Cliente con IA' : 'Analyze Client with AI')}
+                {isAutoResearching ? (language === 'es' ? 'Investigando Empresa...' : 'Researching Company...') : (language === 'es' ? 'Ejecutar investigacion IA' : 'Run AI Research')}
               </button>
               <button
                 onClick={handleExtractServices}

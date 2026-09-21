@@ -121,17 +121,19 @@ function TicketsPodium({ top3 }: { top3: LeaderboardEntry[] }) {
 
 export default function LeaderboardPage() {
   const { t } = useLanguage();
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [salesLeaderboard, setSalesLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [ticketsLeaderboard, setTicketsLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/leaderboard`);
-        if (response.ok) {
-          const data = await response.json();
-          setLeaderboard(data);
-        }
+        const [salesResponse, ticketsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/leaderboard?kind=sales`),
+          fetch(`${API_BASE_URL}/leaderboard?kind=tickets`),
+        ]);
+        if (salesResponse.ok) setSalesLeaderboard(await salesResponse.json());
+        if (ticketsResponse.ok) setTicketsLeaderboard(await ticketsResponse.json());
       } catch (error) {
         console.error("Failed to fetch leaderboard", error);
       } finally {
@@ -149,9 +151,9 @@ export default function LeaderboardPage() {
     );
   }
 
-  const salesBoard = [...leaderboard].sort((a, b) => b.revenue_closed - a.revenue_closed);
+  const salesBoard = [...salesLeaderboard].sort((a, b) => b.revenue_closed - a.revenue_closed);
   const salesTop3 = salesBoard.slice(0, 3);
-  const ticketsBoard = [...leaderboard].sort((a, b) => (b.tickets_assigned ?? 0) - (a.tickets_assigned ?? 0));
+  const ticketsBoard = [...ticketsLeaderboard].sort((a, b) => (b.tickets_assigned ?? 0) - (a.tickets_assigned ?? 0));
   const ticketsTop3 = ticketsBoard.slice(0, 3);
 
   return (

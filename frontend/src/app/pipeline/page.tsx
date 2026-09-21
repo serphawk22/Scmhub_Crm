@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useRole } from "@/context/RoleContext";
 import { API_BASE_URL } from "@/config";
 import { useLanguage } from "@/context/LanguageContext";
-import { AdminTopbar } from "@/components/AdminTopbar";
 import { Sidebar } from "@/components/Sidebar";
 import { 
   Kanban, Plus, MoreVertical, DollarSign, Calendar, Clock, MapPin, Search, Pencil
@@ -168,8 +167,6 @@ export default function PipelinePage() {
     <div className="flex h-screen bg-slate-50 dark:bg-zinc-950">
       <Sidebar role={role} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <AdminTopbar />
-        
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 relative">
           <div className="flex items-center justify-between mb-6">
             <div>

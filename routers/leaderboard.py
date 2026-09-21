@@ -26,8 +26,9 @@ class LeaderboardEntry(BaseModel):
     tickets_completed: int = 0
 
 @router.get("", response_model=List[LeaderboardEntry])
-def get_leaderboard(session: Session = Depends(get_session)):
-    query = select(User).where(User.role.in_(["Employee", "SalesManager", "ProjectMember", "Intern"]))
+def get_leaderboard(kind: str = "all", session: Session = Depends(get_session)):
+    roles = ["Employee", "SalesManager"] if kind == "sales" else ["ProjectMember", "Intern"] if kind == "tickets" else ["Employee", "SalesManager", "ProjectMember", "Intern"]
+    query = select(User).where(User.role.in_(roles))
     requester_id = current_salesperson_id.get()
     if requester_id:
         requester = session.get(User, requester_id)

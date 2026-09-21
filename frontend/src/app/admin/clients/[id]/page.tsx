@@ -31,7 +31,7 @@ import TicketsTab from './components/tabs/TicketsTab';
 // ─── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'overview',       label: 'Overview',       icon: LayoutDashboard },
-  { key: 'opportunities',  label: 'Opportunities',  icon: Target          },
+  { key: 'ai_research',    label: 'AI Research',    icon: Brain           },
   { key: 'timeline',       label: 'Timeline',        icon: Activity        },
   { key: 'tasks',          label: 'Tasks',           icon: CheckSquare     },
   { key: 'tickets',        label: 'Tickets',         icon: Ticket          },
@@ -545,31 +545,7 @@ function OverviewTab({ client, employees, serviceRequests, activities, timeline,
               <Brain size={28} color="var(--text-secondary)" />
             </div>
             <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>Agent Analysis is pending</p>
-            <p style={{ fontSize: 13, marginTop: 4, maxWidth: 400, margin: '8px auto 24px' }}>Click below to manually trigger a deep, comprehensive AI investigation of this client. This will analyze their website, discover their core ICPs, find competitors, and write a detailed GTM markdown report.</p>
-            <button 
-              onClick={handleGenerateAnalysis}
-              disabled={isGeneratingResearch}
-              style={{
-                padding: '10px 24px',
-                background: isGeneratingResearch ? '#94a3b8' : '#4f46e5',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: isGeneratingResearch ? 'not-allowed' : 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                transition: 'all 0.2s'
-              }}
-            >
-              {isGeneratingResearch ? (
-                <>Generating... Please wait</>
-              ) : (
-                <><Target size={16} /> Generate Comprehensive Analysis</>
-              )}
-            </button>
+            <p style={{ fontSize: 13, marginTop: 4, maxWidth: 400, margin: '8px auto 24px' }}>Open AI Research to run the full company investigation and review the results in one place.</p>
           </div>
           );
         }})()}
@@ -1073,7 +1049,7 @@ export default function AdminClientDetailPage() {
                     onRefresh={fetchClient}
                   />
                 )}
-                {activeTab === 'opportunities' && (
+                {activeTab === 'ai_research' && (
                   <OpportunitiesTab
                     client={client}
                     timeline={timeline}

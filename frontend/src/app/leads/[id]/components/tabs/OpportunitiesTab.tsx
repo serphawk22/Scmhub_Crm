@@ -253,7 +253,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
             activeSubTab === 'presales' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800' : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-slate-800/50 border border-transparent'
           }`}
         >
-          <Brain size={16} /> {language === 'es' ? 'Análisis del Agente IA' : 'AI Agent Analysis'}
+            <Brain size={16} /> {language === 'es' ? 'Investigación IA' : 'AI Research'}
         </button>
       </div>
 
@@ -279,7 +279,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                 className="flex-1 py-2 px-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-colors disabled:opacity-50"
               >
                 {isAutoResearching ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
-                {isAutoResearching ? (language === 'es' ? 'Investigando Empresa...' : 'Researching Company...') : (language === 'es' ? 'Analizar Cliente con IA' : 'Analyze Client with AI')}
+                {isAutoResearching ? (language === 'es' ? 'Investigando Empresa...' : 'Researching Company...') : (language === 'es' ? 'Ejecutar investigacion IA' : 'Run AI Research')}
               </button>
               <button
                 onClick={handleExtractServices}
