@@ -154,7 +154,7 @@ export default function PipelinePage() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <AdminTopbar />
         
-        <main className="flex-1 overflow-x-auto overflow-y-hidden p-6 relative">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 relative">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
@@ -184,11 +184,11 @@ export default function PipelinePage() {
           {role === "Admin" && salesPerformance.length > 0 && <div className="mb-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-zinc-800"><tr><th className="px-4 py-3">Salesperson</th><th className="px-4 py-3">Deals</th><th className="px-4 py-3">Pipeline</th><th className="px-4 py-3">Won Revenue</th><th className="px-4 py-3">Lead</th><th className="px-4 py-3">Negotiation</th><th className="px-4 py-3">Won</th></tr></thead><tbody>{salesPerformance.map(item => <tr key={item.assigned_to || "unassigned"} className="border-t border-slate-100 dark:border-zinc-800"><td className="px-4 py-3 font-bold dark:text-white">{item.salesperson}</td><td className="px-4 py-3">{item.deals}</td><td className="px-4 py-3">${Number(item.pipeline_value).toLocaleString()}</td><td className="px-4 py-3 font-bold text-emerald-600">${Number(item.won_revenue).toLocaleString()}</td><td className="px-4 py-3">{item.stages.Lead || 0}</td><td className="px-4 py-3">{item.stages.Negotiation || 0}</td><td className="px-4 py-3">{item.stages["Closed Won"] || 0}</td></tr>)}</tbody></table></div>}
 
           {/* Kanban Board */}
-          <div className="flex gap-6 h-[calc(100vh-180px)] pb-4 overflow-x-auto snap-x">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 gap-4 pb-6">
             {STAGES.map(stage => (
               <div 
                 key={stage}
-                className="flex-shrink-0 w-80 bg-slate-100 dark:bg-zinc-800/50 rounded-2xl border border-slate-200 dark:border-zinc-700 flex flex-col snap-start"
+                className="min-w-0 min-h-[360px] bg-slate-100 dark:bg-zinc-800/50 rounded-2xl border border-slate-200 dark:border-zinc-700 flex flex-col"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, stage)}
               >
@@ -204,7 +204,7 @@ export default function PipelinePage() {
                   </span>
                 </div>
                 
-                <div className="p-3 flex-1 overflow-y-auto space-y-3">
+                <div className="p-3 flex-1 overflow-y-auto space-y-3 max-h-[calc(100vh-270px)]">
                   {dealsByStage[stage].map(deal => (
                     <div
                       key={deal.id}
