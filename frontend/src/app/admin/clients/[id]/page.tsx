@@ -23,10 +23,12 @@ import TimelineTab from './components/tabs/TimelineTab';
 import ConversationsTab from './components/tabs/ConversationsTab';
 import NotesTab from './components/tabs/NotesTab';
 import HealthTab from './components/tabs/HealthTab';
+import AiDataTab from './components/tabs/AiDataTab';
 
 // ─── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'overview',       label: 'Overview',       icon: LayoutDashboard },
+  { key: 'ai_data',        label: 'AI DATA',         icon: Brain           },
   { key: 'timeline',       label: 'Timeline',        icon: Activity        },
   { key: 'health',         label: 'Health',          icon: HeartPulse      },
   { key: 'conversations',  label: 'Conversations',   icon: MessageSquare   },
@@ -964,6 +966,13 @@ export default function AdminClientDetailPage() {
                     onConversationsRefresh={() => fetch(`${API_BASE_URL}/clients/${id}/conversations`).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => setConversations(d.conversations || []))}
                     onActivitySelect={setSelectedActivity}
                     onRefresh={fetchClient}
+                  />
+                )}
+                {activeTab === 'ai_data' && (
+                  <AiDataTab
+                    clientId={id}
+                    websiteUrl={client.websiteUrl || client.website}
+                    onClientRefresh={fetchClient}
                   />
                 )}
                 {activeTab === 'timeline' && (
