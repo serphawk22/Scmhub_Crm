@@ -1470,6 +1470,7 @@ class DealCreateRequest(BaseModel):
 class DealUpdateRequest(BaseModel):
     title: Optional[str] = None
     value: Optional[float] = None
+    client_id: Optional[int] = None
     assigned_to: Optional[int] = None
     stage: Optional[str] = None
     expected_close_date: Optional[str] = None
@@ -8884,6 +8885,7 @@ def update_deal(deal_id: int, body: DealUpdateRequest, session: Session = Depend
         raise HTTPException(status_code=404, detail="Deal not found")
     if body.title is not None: deal.title = body.title
     if body.value is not None: deal.value = body.value
+    if body.client_id is not None: deal.client_id = body.client_id
     if body.assigned_to is not None: deal.assigned_to = body.assigned_to
     if body.stage is not None: deal.stage = body.stage
     if body.expected_close_date is not None: deal.expected_close_date = body.expected_close_date

@@ -8,7 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { Sidebar } from "@/components/Sidebar";
 import { 
-  Kanban, Plus, MoreVertical, DollarSign, Calendar, Clock, MapPin, Search
+  Kanban, Plus, MoreVertical, DollarSign, Calendar, Clock, MapPin, Search, Pencil
 } from "lucide-react";
 
 interface Deal {
@@ -38,6 +38,7 @@ export default function PipelinePage() {
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [newDeal, setNewDeal] = useState({ title: "", value: "", client_id: "", assigned_to: "", stage: "Lead", expected_close_date: "" });
   const [clients, setClients] = useState<{ id: number; email: string; companyName?: string }[]>([]);
   const [salesUsers, setSalesUsers] = useState<{ id: number; name: string; email: string }[]>([]);
@@ -117,8 +118,9 @@ export default function PipelinePage() {
   const handleAddDeal = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/deals`, {
-        method: "POST",
+      const isEditing = Boolean(editingDeal);
+      const res = await fetch(`${API_BASE_URL}/deals${isEditing ? `/${editingDeal?.id}` : ""}`, {
+        method: isEditing ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newDeal.title,
@@ -131,12 +133,26 @@ export default function PipelinePage() {
       });
       if (res.ok) {
         setShowAddModal(false);
+        setEditingDeal(null);
         setNewDeal({ title: "", value: "", client_id: "", assigned_to: "", stage: "Lead", expected_close_date: "" });
         fetchDeals();
       }
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const openEditDeal = (deal: Deal) => {
+    setEditingDeal(deal);
+    setNewDeal({
+      title: deal.title,
+      value: String(deal.value ?? ""),
+      client_id: String(deal.client_id),
+      assigned_to: String(deal.assigned_to || ""),
+      stage: deal.stage,
+      expected_close_date: deal.expected_close_date || "",
+    });
+    setShowAddModal(true);
   };
 
   const dealsByStage = STAGES.reduce((acc, stage) => {
@@ -170,7 +186,7 @@ export default function PipelinePage() {
                 <span className="text-lg font-bold text-slate-800 dark:text-zinc-100">${totalValue.toLocaleString()}</span>
               </div>
               <button 
-                onClick={() => setShowAddModal(true)}
+                onClick={() => { setEditingDeal(null); setNewDeal({ title: "", value: "", client_id: "", assigned_to: "", stage: "Lead", expected_close_date: "" }); setShowAddModal(true); }}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm font-medium"
               >
                 <Plus className="w-4 h-4" />
@@ -214,7 +230,10 @@ export default function PipelinePage() {
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-semibold text-slate-800 dark:text-zinc-100 line-clamp-1" title={deal.title}>{deal.title}</h4>
-                        <button className="text-slate-400 hover:text-slate-600 dark:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button type="button" onClick={() => openEditDeal(deal)} title="Edit deal" className="text-slate-400 hover:text-indigo-600 dark:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button type="button" className="hidden text-slate-400 hover:text-slate-600 dark:text-zinc-300">
                           <MoreVertical className="w-4 h-4" />
                         </button>
                       </div>
@@ -250,7 +269,7 @@ export default function PipelinePage() {
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
               <div className="p-6 border-b border-slate-100 dark:border-zinc-800">
-                <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">{t("pipeline.create_new_deal")}</h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-100">{editingDeal ? "Edit Deal" : t("pipeline.create_new_deal")}</h2>
               </div>
               <form onSubmit={handleAddDeal} className="p-6 space-y-4">
                 <div>
@@ -292,7 +311,7 @@ export default function PipelinePage() {
                 
                 <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-zinc-800">
                   <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 font-medium rounded-xl hover:bg-slate-50 dark:bg-zinc-950 transition-colors">{t("pipeline.cancel")}</button>
-                  <button type="submit" className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm">{t("pipeline.create_deal")}</button>
+                  <button type="submit" className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors shadow-sm">{editingDeal ? "Save Changes" : t("pipeline.create_deal")}</button>
                 </div>
               </form>
             </div>
