@@ -13198,12 +13198,17 @@ Instructions:
 
 @app.get("/work-queue")
 def get_work_queue(
-    user_id: int = Query(...),
-    role: str = Query(...),
+    user_id: Optional[int] = Query(None),
+    role: Optional[str] = Query(None),
     date_filter: str = Query("today"),
     session: Session = Depends(get_session)
 ):
     try:
+        user_id = user_id or current_salesperson_id.get()
+        if not user_id:
+            raise HTTPException(status_code=401, detail="User identity is required")
+        current_user = session.get(User, user_id)
+        role = role or (current_user.role if current_user else "Employee")
         today_date = date.today()
         if date_filter == "yesterday":
             target_date = today_date - timedelta(days=1)
@@ -13234,7 +13239,6 @@ def get_work_queue(
         # 3. Scheduled Calls
         calls_q = session.query(ScheduledCall)
         user_owner_names = {str(user_id).lower()}
-        current_user = session.get(User, user_id)
         if current_user:
             user_owner_names.update({(current_user.name or "").strip().lower(), (current_user.email or "").strip().lower()})
         calls = [call for call in calls_q.all() if call.scheduled_at and start_dt <= call.scheduled_at <= end_dt and (call.assigned_to or "").strip().lower() in user_owner_names]
@@ -13255,7 +13259,7 @@ def get_work_queue(
         # 6. Deals
         deals_q = session.query(Deal).filter(Deal.created_at >= start_dt, Deal.created_at <= end_dt)
         if not is_admin:
-            deals_q = deals_q.filter(Deal.owner_id == user_id)
+            deals_q = deals_q.filter(Deal.assigned_to == user_id)
         deals = deals_q.all()
         
         # 7. Tickets (developer/intern ownership, split by selected date)

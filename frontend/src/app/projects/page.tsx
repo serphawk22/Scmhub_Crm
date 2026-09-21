@@ -43,7 +43,7 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       const url = new URL(`${API_BASE_URL}/projects`);
-      if (role === 'Employee' && user?.id) {
+      if (['Employee', 'Intern', 'ProjectMember'].includes(role) && user?.id) {
         url.searchParams.append('member_id', String(user.id));
       }
       const res = await fetch(url.toString());
