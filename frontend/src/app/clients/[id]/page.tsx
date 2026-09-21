@@ -483,11 +483,27 @@ const handleSaveMetrics = async () => {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.detail || 'Failed to generate research.');
       }
-      await fetchResearch();
+      // Poll every 5s until research data appears (background job)
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch(`${API_BASE_URL}/clients/${id}/research`);
+          if (r.ok) {
+            const d = await r.json();
+            if (d.research?.company_overview) {
+              setResearch(d.research);
+              clearInterval(poll);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {}
+        if (attempts >= 24) { clearInterval(poll); setLoading(false); }
+      }, 5000);
     } catch (err) {
       console.error(err);
       alert('Error generating AI research.');
-    } finally {
       setLoading(false);
     }
   };

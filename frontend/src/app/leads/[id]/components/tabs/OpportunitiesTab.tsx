@@ -194,27 +194,54 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
   const [extractResult, setExtractResult] = React.useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = React.useState<string | null>(null);
   const [autoResearchMsg, setAutoResearchMsg] = React.useState<string | null>(null);
+  const [liveResearch, setLiveResearch] = React.useState<any>(research || null);
+
+  React.useEffect(() => { setLiveResearch(research || null); }, [research]);
+
+  const pollResearch = React.useCallback((leadId: number) => {
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const r = await fetch(`${API_BASE_URL}/leads/${leadId}/research`);
+        if (r.ok) {
+          const d = await r.json();
+          if (d.research?.company_overview) {
+            setLiveResearch(d.research);
+            setAutoResearchMsg('done');
+            setIsAutoResearching(false);
+            clearInterval(interval);
+            return;
+          }
+        }
+      } catch {}
+      if (attempts >= 24) { // 2 min max
+        clearInterval(interval);
+        setAutoResearchMsg('timeout');
+        setIsAutoResearching(false);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleAutoResearch = async () => {
     try {
       setIsAutoResearching(true);
-      setAutoResearchMsg(null);
-      const res = await fetch(`${API_BASE_URL}/leads/${lead?.id}/auto-research`, {
-        method: 'POST'
-      });
+      setAutoResearchMsg('running');
+      const res = await fetch(`${API_BASE_URL}/leads/${lead?.id}/auto-research`, { method: 'POST' });
       if (res.ok) {
-        setAutoResearchMsg('running');
-        setIsAutoResearching(false);
-        return;
+        pollResearch(lead?.id);
       } else {
         const text = await res.text().catch(() => "");
         let err: any = {};
         try { err = JSON.parse(text); } catch (e) {}
         setAutoResearchMsg(`error:${err.detail || text || 'Failed to start research'}`);
+        setIsAutoResearching(false);
       }
     } catch (e: any) {
       setAutoResearchMsg(`error:Network error`);
+      setIsAutoResearching(false);
     }
-    setIsAutoResearching(false);
   };
 
   const handleExtractServices = async () => {
@@ -307,14 +334,20 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
               </div>
             )}
             {autoResearchMsg === 'running' && (
-              <div className="mb-4 flex items-center justify-between gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl">
-                <p className="text-xs font-bold text-indigo-700">⏳ Analysis running in background (~2 min). Click below when ready.</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors"
-                >
-                  Check Results
-                </button>
+              <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+                <Loader2 size={14} className="animate-spin text-indigo-600 shrink-0" />
+                <p className="text-xs font-bold text-indigo-700">⏳ AI is researching... results will appear automatically.</p>
+              </div>
+            )}
+            {autoResearchMsg === 'done' && (
+              <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                <p className="text-xs font-bold text-emerald-700">Research complete! Results loaded below.</p>
+              </div>
+            )}
+            {autoResearchMsg === 'timeout' && (
+              <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-xs font-bold text-amber-700">Research is taking longer than expected. Try refreshing the page in a minute.</p>
               </div>
             )}
             {autoResearchMsg && autoResearchMsg.startsWith('error:') && (
@@ -322,17 +355,17 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                 <p className="text-xs font-bold text-red-600">{autoResearchMsg.replace('error:', '')}</p>
               </div>
             )}
-            {research ? (
+            {liveResearch ? (
             <div className="space-y-4">
-              {research.company_overview && (
+              {liveResearch.company_overview && (
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-wider text-indigo-500 mb-1">Company Overview</p>
-                  <p className="text-sm text-slate-600 dark:text-zinc-300 dark:text-slate-300 leading-relaxed">{research.company_overview}</p>
+                  <p className="text-sm text-slate-600 dark:text-zinc-300 dark:text-slate-300 leading-relaxed">{liveResearch.company_overview}</p>
                 </div>
               )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {research.pain_points && (
+                {liveResearch.pain_points && (
                   <div className="p-4 bg-white dark:bg-zinc-900 dark:bg-slate-800/80 rounded-xl border border-indigo-50 dark:border-indigo-900/30">
                     <p className="text-[10px] font-black uppercase tracking-wider text-amber-500 mb-2">Pain Points</p>
                     {Array.isArray(parsedPainPoints) ? (
@@ -351,7 +384,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                     )}
                   </div>
                 )}
-                {research.competitors && (
+                {liveResearch.competitors && (
                   <div className="p-4 bg-white dark:bg-zinc-900 dark:bg-slate-800/80 rounded-xl border border-indigo-50 dark:border-indigo-900/30">
                     <p className="text-[10px] font-black uppercase tracking-wider text-rose-500 mb-2">Competitors</p>
                     {typeof parsedCompetitors === 'object' && parsedCompetitors !== null && !Array.isArray(parsedCompetitors) ? (
@@ -374,7 +407,7 @@ export default function OpportunitiesTab({ lead, timeline, serviceRequests, rese
                     )}
                   </div>
                 )}
-                {research.business_goals && (
+                {liveResearch.business_goals && (
                   <div className="p-4 bg-white dark:bg-zinc-900 dark:bg-slate-800/80 rounded-xl border border-indigo-50 dark:border-indigo-900/30 md:col-span-2">
                     <p className="text-[10px] font-black uppercase tracking-wider text-emerald-500 mb-2">Business Goals</p>
                     {typeof parsedBusinessGoals === 'object' && parsedBusinessGoals !== null && !Array.isArray(parsedBusinessGoals) ? (
