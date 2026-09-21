@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -115,6 +115,128 @@ function PaymentStatusWidget({ status }: { status: string }) {
         <div className={`text-lg font-bold ${config.text}`}>{config.label}</div>
       </div>
     </div>
+  );
+}
+
+// ─── Full AI Analysis Component ──────────────────────────────────────────────
+function FullAIAnalysis({ clientId }: { clientId: string }) {
+  const [status, setStatus] = useState<'idle'|'pending'|'done'|'error'>('idle');
+  const [report, setReport] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // On mount: check if report already exists
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/clients/${clientId}/full-analysis`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.status === 'done' && d?.report) {
+          setReport(d.report);
+          setStatus('done');
+        } else if (d?.status === 'pending') {
+          setStatus('pending');
+          startPolling();
+        }
+      })
+      .catch(() => {});
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [clientId]);
+
+  const startPolling = useCallback(() => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    let attempts = 0;
+    pollRef.current = setInterval(async () => {
+      attempts++;
+      try {
+        const r = await fetch(`${API_BASE_URL}/clients/${clientId}/full-analysis`);
+        if (r.ok) {
+          const d = await r.json();
+          if (d.status === 'done' && d.report) {
+            setReport(d.report);
+            setStatus('done');
+            clearInterval(pollRef.current!);
+            return;
+          }
+          if (d.status === 'error') {
+            setStatus('error');
+            clearInterval(pollRef.current!);
+            return;
+          }
+        }
+      } catch {}
+      if (attempts >= 36) { // 3 min max
+        setStatus('error');
+        clearInterval(pollRef.current!);
+      }
+    }, 5000);
+  }, [clientId]);
+
+  const handleRun = async () => {
+    setStatus('pending');
+    setReport(null);
+    try {
+      const r = await fetch(`${API_BASE_URL}/clients/${clientId}/full-analysis`, { method: 'POST' });
+      if (!r.ok) { setStatus('error'); return; }
+      startPolling();
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.85 }} className="mb-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="h-1 w-12 bg-gradient-to-r from-violet-400 to-indigo-500 rounded-full"></div>
+          <h2 className="text-2xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider">AI Deep Analysis</h2>
+        </div>
+        <button
+          onClick={handleRun}
+          disabled={status === 'pending'}
+          className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50"
+        >
+          {status === 'pending' ? <Loader2 size={16} className="animate-spin" /> : <Brain className="w-4 h-4" />}
+          {status === 'pending' ? 'Analyzing...' : (report ? 'Re-run Analysis' : 'Run Full AI Analysis')}
+        </button>
+      </div>
+
+      {status === 'pending' && (
+        <div className="flex items-center gap-3 px-5 py-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl mb-4">
+          <Loader2 size={18} className="animate-spin text-indigo-600 shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-indigo-700 dark:text-indigo-300">AI is researching this company...</p>
+            <p className="text-xs text-indigo-500 mt-0.5">Scraping website, running deep investigation. Takes ~2 min. Results will appear automatically.</p>
+          </div>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="px-5 py-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-2xl mb-4">
+          <p className="text-sm font-bold text-red-700 dark:text-red-300">Analysis failed or timed out. Try again.</p>
+        </div>
+      )}
+
+      {status === 'done' && report && (
+        <div className="p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-3xl shadow-sm">
+          <pre className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed font-sans">{report}</pre>
+        </div>
+      )}
+
+      {status === 'idle' && !report && (
+        <div className="flex flex-col items-center justify-center py-16 px-6 bg-slate-50 dark:bg-zinc-900/50 border border-dashed border-slate-300 dark:border-zinc-700 rounded-3xl">
+          <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-sm mb-4">
+            <Brain className="w-7 h-7 text-violet-500" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">No analysis yet</h3>
+          <p className="text-sm text-slate-500 text-center max-w-md mb-6">Run a full AI deep analysis combining website scraping, competitor intelligence, ICP mapping, GTM strategy, and a complete markdown report.</p>
+          <button
+            onClick={handleRun}
+            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center gap-2"
+          >
+            <Brain className="w-4 h-4" /> Run Full AI Analysis
+          </button>
+        </div>
+      )}
+    </motion.div>
   );
 }
 
@@ -1061,97 +1183,8 @@ const handleSaveMetrics = async () => {
           </div>
         </motion.div>
 
-        {/* ─── AI RESEARCH + REPORT ─── */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.85 }} className="mb-16">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="h-1 w-12 bg-gradient-to-r from-violet-400 to-indigo-500 rounded-full"></div>
-              <h2 className="text-2xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-wider">AI Client Research</h2>
-            </div>
-            <button
-              onClick={handleGenerateResearch}
-              disabled={loading}
-              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-violet-500/30 transition-all disabled:opacity-50"
-            >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Brain className="w-4 h-4" />}
-              {loading ? 'Analyzing...' : 'Generate Research'}
-            </button>
-          </div>
-
-          {research && (
-            <div className="space-y-6">
-              {research.company_overview && (
-                <div className="p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-3xl shadow-sm">
-                  <h3 className="text-lg font-black text-slate-800 dark:text-zinc-100 mb-3">Company Overview</h3>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300 whitespace-pre-wrap">{research.company_overview}</p>
-                </div>
-              )}
-
-              {(research.pain_points || research.business_goals || research.competitors) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {research.pain_points && (
-                    <div className="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-3xl">
-                      <h3 className="text-lg font-black text-red-800 dark:text-red-400 mb-3">Pain Points</h3>
-                      <p className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap">{research.pain_points}</p>
-                    </div>
-                  )}
-                  {research.business_goals && (
-                    <div className="p-6 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-3xl">
-                      <h3 className="text-lg font-black text-green-800 dark:text-green-400 mb-3">Business Goals</h3>
-                      <p className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">{research.business_goals}</p>
-                    </div>
-                  )}
-                  {research.competitors && (
-                    <div className="p-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-3xl">
-                      <h3 className="text-lg font-black text-blue-800 dark:text-blue-400 mb-3">Competitors</h3>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 whitespace-pre-wrap">{research.competitors}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {research.email_agent_data && (() => {
-                try {
-                  const parsed = typeof research.email_agent_data === 'string'
-                    ? JSON.parse(research.email_agent_data)
-                    : research.email_agent_data;
-
-                  if (parsed?.full_markdown_report) {
-                    return (
-                      <div className="p-6 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-3xl shadow-sm">
-                        <h3 className="text-lg font-black text-slate-800 dark:text-zinc-100 mb-4">Comprehensive AI Report</h3>
-                        <div className="prose prose-slate dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
-                          {parsed.full_markdown_report}
-                        </div>
-                      </div>
-                    );
-                  }
-                } catch (err) {
-                  console.error('Failed to parse research report', err);
-                }
-                return null;
-              })()}
-            </div>
-          )}
-
-          {!research && (
-            <div className="flex flex-col items-center justify-center py-16 px-6 bg-slate-50 dark:bg-zinc-900/50 border border-dashed border-slate-300 dark:border-zinc-700 rounded-3xl">
-              <div className="w-16 h-16 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center shadow-sm mb-4">
-                <Brain className="w-7 h-7 text-violet-500" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">No AI research yet</h3>
-              <p className="text-sm text-slate-500 text-center max-w-md mb-6">Generate a deep client analysis to unlock the company overview, opportunity gaps, and full report.</p>
-              <button
-                onClick={handleGenerateResearch}
-                disabled={loading}
-                className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-200 dark:text-slate-900 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <Brain className="w-4 h-4" />}
-                {loading ? 'Generating...' : 'Generate AI Analysis'}
-              </button>
-            </div>
-          )}
-        </motion.div>
+        {/* ─── FULL AI ANALYSIS ─── */}
+        <FullAIAnalysis clientId={id} />
 
         {/* ─── AI SWOT ANALYSIS ─── */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.85 }} className="mb-16">
