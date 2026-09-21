@@ -73,6 +73,7 @@ const defaultSidebarSections = [
     heading: "PROJECTS & ACTIVITIES",
     items: [
       { id: "item-projects", name: "Projects", icon: "FolderOpen", href: "/projects", roles: ["Admin", "Employee", "Intern", "Demo"] },
+      { id: "item-task-sheet", name: "Task Sheet", icon: "FileBarChart2", href: "/task-sheet", roles: ["Admin", "Employee", "SalesManager", "ProjectMember", "Demo"] },
       { id: "item-meetings", name: "Meetings", icon: "Calendar", href: "/meetings", roles: ["Admin", "SalesManager", "Demo"] },
       { id: "item-calls", name: "Calls", icon: "Phone", href: "/calls", roles: ["Admin", "SalesManager", "Demo"] },
     ],
@@ -89,14 +90,14 @@ const defaultSidebarSections = [
     id: "section-ai-agents",
     heading: "AI AGENTS",
     items: [
-      { id: "item-email-agent", name: "Email Agent", icon: "Mail", href: "/email-agent", roles: ["Admin", "Demo"] },
+      { id: "item-email-agent", name: "Email Agent", icon: "Mail", href: "/email-agent", roles: ["Admin", "Employee", "SalesManager", "Demo"] },
     ],
   },
   {
     id: "section-support",
     heading: "SUPPORT",
     items: [
-      { id: "item-cases", name: "Cases", icon: "HeadphonesIcon", href: "/support/cases", roles: ["Admin", "SalesManager", "Demo"] },
+      { id: "item-cases", name: "Cases", icon: "HeadphonesIcon", href: "/support/cases", roles: ["Admin", "Employee", "SalesManager", "ProjectMember", "Demo"] },
       { id: "item-solutions", name: "Solutions", icon: "BookOpen", href: "/support/solutions", roles: ["Admin", "SalesManager", "Demo"] },
     ],
   },

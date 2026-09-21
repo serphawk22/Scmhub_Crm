@@ -48,7 +48,11 @@ export function DeveloperHeader() {
             <h1 className="text-sm font-black text-slate-900 dark:text-zinc-50 tracking-tight leading-tight">{t("dev_header.workspace")}</h1>
             <p className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{user?.name || t("dev_header.developer")}</p>
           </div>
-          <Link href="/work-queue" className="ml-4 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-xs font-black">My Work Queue</Link>
+          <div className="ml-4 flex items-center gap-2">
+            <Link href="/work-queue" className="px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 text-xs font-black">My Work Queue</Link>
+            <Link href="/task-sheet" className="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-black">Task Sheet</Link>
+            <Link href="/support/cases" className="px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300 text-xs font-black">Cases</Link>
+          </div>
         </div>
 
         {/* Right Actions */}

@@ -7,6 +7,8 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 
 type ProjectTicket = {
   id?: number;
+  project_id?: number;
+  created_at?: string;
   competitor?: string;
   category?: string;
   task: string;
@@ -101,13 +103,25 @@ export function DeveloperDashboard() {
     });
   }, [tickets, sortOption]);
 
+  const projectGroups = useMemo(() => {
+    const assignedProjects = projects.map(project => ({ id: project.id, name: project.name }));
+    const knownIds = new Set(assignedProjects.map(project => project.id));
+    tickets.forEach(ticket => {
+      if (ticket.project_id && !knownIds.has(ticket.project_id)) {
+        assignedProjects.push({ id: ticket.project_id, name: (ticket as any).project_name || `Project ${ticket.project_id}` });
+        knownIds.add(ticket.project_id);
+      }
+    });
+    return assignedProjects;
+  }, [projects, tickets]);
+
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
     const { source, destination, draggableId } = result;
     if (source.droppableId === destination.droppableId) return; // Same column
 
     const ticketId = Number(draggableId);
-    const newStatus = destination.droppableId;
+    const newStatus = destination.droppableId.split("::").pop() || destination.droppableId;
     
     // Find the ticket to send its required 'task' field
     const ticket = tickets.find(t => t.id === ticketId);
@@ -265,9 +279,16 @@ export function DeveloperDashboard() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start overflow-x-auto pb-4">
+        <div className="space-y-6 overflow-x-auto pb-4">
+          {projectGroups.map(project => (
+            <section key={project.id} className="rounded-3xl border border-slate-200/70 bg-white/50 p-4 dark:border-zinc-800/70 dark:bg-zinc-950/30">
+              <div className="mb-4 flex items-center justify-between px-2">
+                <div><p className="text-[10px] font-black uppercase tracking-widest text-indigo-500">Assigned project</p><h4 className="text-lg font-black text-slate-900 dark:text-white">{project.name}</h4></div>
+                <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300">{tickets.filter(ticket => ticket.project_id === project.id).length} tickets</span>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-4 items-start">
           {KANBAN_COLUMNS.map(col => (
-            <Droppable key={col} droppableId={col}>
+            <Droppable key={`${project.id}::${col}`} droppableId={`${project.id}::${col}`}>
               {(provided) => (
                 <div 
                   ref={provided.innerRef} 
@@ -277,12 +298,12 @@ export function DeveloperDashboard() {
                   <h4 className="text-xs font-black text-slate-600 dark:text-zinc-400 mb-5 px-2 uppercase tracking-widest flex items-center justify-between">
                     {col}
                     <span className="bg-white/60 dark:bg-zinc-800/60 text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-full text-[10px] shadow-sm border border-slate-200 dark:border-zinc-700">
-                      {sortedTickets.filter(t => t.current_state === col).length}
+                      {sortedTickets.filter(t => t.project_id === project.id && t.current_state === col).length}
                     </span>
                   </h4>
                   
                   <div className="space-y-3">
-                    {sortedTickets.filter(t => t.current_state === col).map((ticket, index) => (
+                    {sortedTickets.filter(t => t.project_id === project.id && t.current_state === col).map((ticket, index) => (
                       <Draggable key={ticket.id} draggableId={String(ticket.id)} index={index}>
                         {(provided) => (
                             <div
@@ -340,6 +361,9 @@ export function DeveloperDashboard() {
                 </div>
               )}
             </Droppable>
+          ))}
+              </div>
+            </section>
           ))}
         </div>
       </DragDropContext>

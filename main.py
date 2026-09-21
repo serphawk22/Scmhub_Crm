@@ -113,6 +113,7 @@ from database import (
     SocialProfile,
     Task,
     TaskComment,
+    TaskSheetEntry,
     Tenant,
     PageVisitTelemetry,
     User,
@@ -1675,6 +1676,16 @@ class TaskUpdateRequest(BaseModel):
     due_date: Optional[str] = None
     assigned_to: Optional[int] = None
     lead_id: Optional[int] = None
+
+
+class TaskSheetEntryRequest(BaseModel):
+    user_id: int
+    work_date: str
+    area: str = "General"
+    project_id: Optional[int] = None
+    ticket_id: Optional[int] = None
+    summary: str
+    status: str = "Done"
 
 
 class TaskCommentCreateRequest(BaseModel):
@@ -6922,6 +6933,66 @@ def delete_task(task_id: int, session: Session = Depends(get_session)):
     session.delete(t)
     session.commit()
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Daily task sheet
+# ─────────────────────────────────────────────────────────────────────────────
+def _task_sheet_dict(entry: TaskSheetEntry, session: Session) -> dict:
+    user = session.get(User, entry.user_id)
+    project = session.get(Project, entry.project_id) if entry.project_id else None
+    ticket = session.get(ProjectTicket, entry.ticket_id) if entry.ticket_id else None
+    return {
+        **entry.model_dump(),
+        "user_name": user.name if user else "Unknown user",
+        "user_email": user.email if user else None,
+        "project_name": project.name if project else None,
+        "ticket_name": ticket.task if ticket else None,
+        "created_at": entry.created_at.isoformat(),
+        "updated_at": entry.updated_at.isoformat(),
+    }
+
+
+@app.get("/task-sheet")
+def list_task_sheet_entries(
+    user_id: Optional[int] = None,
+    work_date: Optional[str] = None,
+    session: Session = Depends(get_session),
+):
+    q = select(TaskSheetEntry).order_by(TaskSheetEntry.work_date.desc(), TaskSheetEntry.updated_at.desc())
+    if user_id:
+        q = q.where(TaskSheetEntry.user_id == user_id)
+    if work_date:
+        q = q.where(TaskSheetEntry.work_date == work_date)
+    entries = session.exec(q).all()
+    return {"entries": [_task_sheet_dict(entry, session) for entry in entries]}
+
+
+@app.post("/task-sheet")
+def create_task_sheet_entry(body: TaskSheetEntryRequest, session: Session = Depends(get_session)):
+    today = datetime.utcnow().date().isoformat()
+    if body.work_date != today:
+        raise HTTPException(status_code=400, detail="New task-sheet entries can only be added for today")
+    entry = TaskSheetEntry(**body.model_dump(), tenant_id=current_tenant_id.get())
+    session.add(entry)
+    session.commit()
+    session.refresh(entry)
+    return {"entry": _task_sheet_dict(entry, session)}
+
+
+@app.put("/task-sheet/{entry_id}")
+def update_task_sheet_entry(entry_id: int, body: TaskSheetEntryRequest, session: Session = Depends(get_session)):
+    entry = session.get(TaskSheetEntry, entry_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Task-sheet entry not found")
+    for field, value in body.model_dump().items():
+        if field != "work_date":
+            setattr(entry, field, value)
+    entry.updated_at = datetime.utcnow()
+    session.add(entry)
+    session.commit()
+    session.refresh(entry)
+    return {"entry": _task_sheet_dict(entry, session)}
 
 
 @app.delete("/notifications/clear-all/{user_id}")
@@ -12632,7 +12703,7 @@ def _case_dict(c: Case, session: Session) -> dict:
     return d
 
 @app.get("/cases")
-def list_cases(status: Optional[str] = None, priority: Optional[str] = None, client_id: Optional[int] = None, session: Session = Depends(get_session)):
+def list_cases(status: Optional[str] = None, priority: Optional[str] = None, client_id: Optional[int] = None, assigned_to: Optional[int] = None, session: Session = Depends(get_session)):
     q = select(Case).order_by(Case.created_at.desc())
     if status:
         q = q.where(Case.status == status)
@@ -12640,6 +12711,8 @@ def list_cases(status: Optional[str] = None, priority: Optional[str] = None, cli
         q = q.where(Case.priority == priority)
     if client_id:
         q = q.where(Case.client_id == client_id)
+    if assigned_to:
+        q = q.where(Case.assigned_to == assigned_to)
     cases = session.exec(q).all()
     return {"cases": [_case_dict(c, session) for c in cases]}
 

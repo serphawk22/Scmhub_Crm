@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HeadphonesIcon, Plus, X, Search, Loader2, Trash2, Edit2, AlertCircle, CheckCircle2, Clock, Globe, Bug, Lightbulb } from "lucide-react";
 import { API_BASE_URL } from "@/config";
 import { useLanguage } from "@/context/LanguageContext";
+import { useRole } from "@/context/RoleContext";
 
 interface Case { id: number; case_number?: string; subject: string; description?: string; status: string; priority: string; category?: string; case_type?: string; url?: string; client_name?: string; lead_name?: string; assignee_name?: string; assigned_to?: number | null; created_at: string; resolved_at?: string; }
 const STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
@@ -16,6 +17,7 @@ const TYPE_COLORS: Record<string, string> = { Bug: "bg-red-500/10 text-red-600",
 
 export default function CasesPage() {
   const { t } = useLanguage();
+  const { role, user } = useRole();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -29,11 +31,12 @@ export default function CasesPage() {
 
   const load = () => {
     setLoading(true);
-    fetch(`${API_BASE_URL}/cases`).then(r => r.json()).then(cd => {
+    const assignedOnly = (role === "ProjectMember" || role === "Employee" || role === "Intern") && user?.id;
+    fetch(`${API_BASE_URL}/cases${assignedOnly ? `?assigned_to=${user.id}` : ""}`).then(r => r.json()).then(cd => {
       setCases(Array.isArray(cd.cases) ? cd.cases : []);
     }).finally(() => setLoading(false));
   };
-  useEffect(() => { load(); fetch(`${API_BASE_URL}/users`).then(r => r.json()).then(d => setUsers(d.users || [])).catch(() => {}); }, []);
+  useEffect(() => { if (user?.id) { load(); fetch(`${API_BASE_URL}/users`).then(r => r.json()).then(d => setUsers(d.users || [])).catch(() => {}); } }, [user?.id, role]);
 
   const filtered = useMemo(() => cases.filter(c => {
     const s = search.toLowerCase();
