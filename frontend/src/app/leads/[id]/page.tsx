@@ -744,15 +744,27 @@ export default function LeadDetailsPage() {
     setIsGeneratingResearch(true);
     try {
       const res = await fetch(`${API_BASE_URL}/leads/${id}/auto-research`, { method: 'POST' });
-      if (res.ok) {
-        // Research runs in background — no auto-refresh, keep UI in generating state
-        return;
-      }
-    } catch (e) {
-      // silent
+      if (!res.ok) { setIsGeneratingResearch(false); return; }
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        try {
+          const r = await fetch(`${API_BASE_URL}/leads/${id}/research`);
+          if (r.ok) {
+            const d = await r.json();
+            if (d.research?.company_overview) {
+              setResearch(d.research);
+              clearInterval(poll);
+              setIsGeneratingResearch(false);
+              return;
+            }
+          }
+        } catch {}
+        if (attempts >= 24) { clearInterval(poll); setIsGeneratingResearch(false); }
+      }, 5000);
+    } catch {
+      setIsGeneratingResearch(false);
     }
-    // Only reset on error
-    setIsGeneratingResearch(false);
   };
 
   // ─── Loading & Auth Guards ────────────────────────────────────────────────
