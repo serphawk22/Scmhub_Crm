@@ -4964,7 +4964,13 @@ def get_project(project_id: int, session: Session = Depends(get_session)):
     p = session.get(Project, project_id)
     if not p:
         raise HTTPException(status_code=404, detail="Project not found")
-    remarks = session.exec(select(Remark).where(Remark.projectId == project_id)).all()
+    try:
+        remarks = session.exec(select(Remark).where(Remark.projectId == project_id)).all()
+    except Exception as exc:
+        # Older tenants may not have the projectId column until startup migration runs.
+        session.rollback()
+        print(f"Project remarks unavailable for project {project_id}: {exc}")
+        remarks = []
     
     employees = []
     if p.employeeIds:
