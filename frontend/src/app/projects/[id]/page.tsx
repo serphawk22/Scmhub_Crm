@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { 
-  StickyNote, Users, Check, Loader2, ArrowLeft, 
-   MessageSquare, Plus, Clock, UserPlus, Trash2,
-   ChevronRight, Activity, Target, Shield, Briefcase, X, User,
+  Check, Loader2, ArrowLeft,
+   MessageSquare, Plus, UserPlus,
+    ChevronRight, Activity, Target, Shield, X, User,
    CheckCircle2, BarChart3, ListChecks, AlertCircle
 } from "lucide-react";
 import { API_BASE_URL } from '@/config';
@@ -64,22 +64,6 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     fetchData();
   }, [id]);
-
-  const updateProgress = async (val: number) => {
-    setIsUpdating(true);
-    try {
-      await fetch(`${API_BASE_URL}/projects/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progress: val })
-      });
-      fetchData();
-    } catch (error) {
-      console.error("Failed to update progress:", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
   const updateStatus = async (status: string) => {
     setIsUpdating(true);
@@ -157,6 +141,13 @@ export default function ProjectDetailPage() {
   );
 
   const { project, remarks, team } = data;
+   const totalTickets = dashboard?.tickets?.total || 0;
+   const progressedTickets = (dashboard?.tickets?.in_dev || 0) +
+      (dashboard?.tickets?.in_qa || 0) +
+      (dashboard?.tickets?.in_production || 0);
+   const ticketProgress = totalTickets > 0
+      ? Math.min(100, Math.round((progressedTickets / totalTickets) * 100))
+      : 0;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
@@ -331,7 +322,7 @@ export default function ProjectDetailPage() {
                    </div>
                 )}
 
-           {/* Progress Card */}
+           {/* Ticket-based progress card */}
            <div className="bg-white dark:bg-zinc-900 p-8 md:p-10 rounded-[3rem] border shadow-sm relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:rotate-12 transition-transform">
                  <Activity className="w-32 h-32" />
@@ -342,22 +333,19 @@ export default function ProjectDetailPage() {
                     <h2 className="text-xl font-black text-gray-900 dark:text-zinc-50 mb-1">{t("project_detail.realtime_progress")}</h2>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("project_detail.progress_sub")}</p>
                  </div>
-                 <div className="text-4xl font-black text-blue-600">{project.progress}%</div>
+                         <div className="text-4xl font-black text-blue-600">{ticketProgress}%</div>
               </div>
               
-              <input 
-                type="range"
-                min="0"
-                max="100"
-                value={project.progress}
-                onChange={(e) => updateProgress(Number(e.target.value))}
-                className="w-full h-4 bg-gray-100 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer accent-blue-600 mb-4"
-              />
+                     <div className="w-full h-4 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
+                        <div
+                           className="h-full bg-blue-600 rounded-full transition-all duration-500"
+                           style={{ width: `${ticketProgress}%` }}
+                        />
+                     </div>
               
-              <div className="flex justify-between text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                 <span>{t("project_detail.progress_initiation")}</span>
-                 <span>{t("project_detail.progress_midway")}</span>
-                 <span>{t("project_detail.progress_final")}</span>
+                     <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                         <span>{totalTickets} total tickets</span>
+                         <span>{progressedTickets} moved to Dev, QA, or Production</span>
               </div>
            </div>
 
@@ -434,146 +422,6 @@ export default function ProjectDetailPage() {
            </div>
         </div>
 
-        {/* Right Column: Team Management */}
-        <div className="space-y-8 font-poppins">
-           {/* Team Card */}
-           <div className="bg-white dark:bg-zinc-900 p-8 rounded-[3.5rem] border shadow-sm">
-              <div className="flex justify-between items-center mb-10">
-                 <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                   <Users className="w-4 h-4 text-blue-600" /> {t("project_detail.core_team")}
-                 </h2>
-                 <button 
-                   onClick={() => setShowAssignModal(true)}
-                   className="p-3 bg-gray-50 dark:bg-zinc-950 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-2xl transition-all shadow-sm border border-gray-100 dark:border-zinc-800"
-                 >
-                    <UserPlus className="w-5 h-5" />
-                 </button>
-              </div>
-
-              <div className="space-y-8">
-                 {/* Employees */}
-                 <div>
-                    <h3 className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                       <Briefcase className="w-3 h-3" /> {t("project_detail.senior_members")} ({(team?.employees?.length || 0)})
-                    </h3>
-                    <div className="space-y-3">
-                       {team?.employees?.map((e: any) => (
-                          <div key={e.id} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-zinc-950 rounded-3xl border border-gray-100 dark:border-zinc-800 group hover:border-blue-100 transition-all">
-                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-white dark:bg-zinc-900 rounded-2xl border shadow-sm flex items-center justify-center font-black text-gray-900 dark:text-zinc-50">
-                                   {e.name.charAt(0)}
-                                </div>
-                                <div className="leading-tight">
-                                   <p className="text-sm font-black text-gray-900 dark:text-zinc-50">{e.name}</p>
-                                   <p className="text-[10px] font-bold text-gray-400 italic">{t("project_detail.project_manager")}</p>
-                                </div>
-                             </div>
-                             <button className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                                <Trash2 className="w-4 h-4" />
-                             </button>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
-
-                 {/* Interns */}
-                 <div>
-                    <h3 className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                       <Activity className="w-3 h-3" /> {t("project_detail.supporting_interns")} ({(team?.interns?.length || 0)})
-                    </h3>
-                    <div className="space-y-3">
-                       {team?.interns?.map((i: any) => (
-                          <div key={i.id} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-zinc-950 rounded-3xl border border-gray-100 dark:border-zinc-800 group hover:border-blue-100 transition-all">
-                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-white dark:bg-zinc-900 rounded-2xl border shadow-sm flex items-center justify-center font-black text-blue-600">
-                                   {i.name.charAt(0)}
-                                </div>
-                                <div className="leading-tight">
-                                   <p className="text-sm font-black text-gray-900 dark:text-zinc-50">{i.name}</p>
-                                   <p className="text-[10px] font-bold text-gray-400 tracking-tighter italic">{i.email}</p>
-                                </div>
-                             </div>
-                             <button className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                                <Trash2 className="w-4 h-4" />
-                             </button>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
-                 
-                 {/* Project Members */}
-                 <div>
-                    <h3 className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-                       <User size={12} className="w-3 h-3" /> {t("project_detail.project_members")} ({(team?.projectMembers?.length || 0)})
-                    </h3>
-                    <div className="space-y-3">
-                       {team?.projectMembers?.map((pm: any) => (
-                          <div key={pm.id} className="flex justify-between items-center p-4 bg-gray-50 dark:bg-zinc-950 rounded-3xl border border-gray-100 dark:border-zinc-800 group hover:border-blue-100 transition-all">
-                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-white dark:bg-zinc-900 rounded-2xl border shadow-sm flex items-center justify-center font-black text-purple-600">
-                                   {pm.name.charAt(0)}
-                                </div>
-                                <div className="leading-tight">
-                                   <p className="text-sm font-black text-gray-900 dark:text-zinc-50">{pm.name}</p>
-                                   <p className="text-[10px] font-bold text-gray-400 tracking-tighter italic">{pm.email}</p>
-                                </div>
-                             </div>
-                             <button className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100">
-                                <Trash2 className="w-4 h-4" />
-                             </button>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
-                 
-                 {(team?.employees?.length === 0 && team?.interns?.length === 0 && team?.projectMembers?.length === 0) && (
-                   <div className="text-center py-10 px-6 border-2 border-dashed border-gray-100 dark:border-zinc-800 rounded-[2.5rem]">
-                      <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-4">{t("project_detail.unassigned")}</p>
-                      <button 
-                        onClick={() => setShowAssignModal(true)}
-                        className="text-xs font-black text-blue-600 hover:text-blue-700 transition-colors uppercase"
-                      >
-                         {t("project_detail.build_team")}
-                      </button>
-                   </div>
-                 )}
-              </div>
-           </div>
-
-           {/* Metrics Card */}
-           <div className="bg-gray-900 p-10 rounded-[3.5rem] shadow-2xl shadow-gray-900/30 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                 <Shield className="w-20 h-20" />
-              </div>
-              <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-8">{t("project_detail.initiative_health")}</h2>
-              
-              <div className="space-y-6">
-                 <div>
-                    <div className="flex justify-between text-[10px] font-black uppercase mb-2">
-                       <span>{t("project_detail.velocity")}</span>
-                       <span className="text-green-400">{t("project_detail.optimal")}</span>
-                    </div>
-                    <div className="w-full bg-white dark:bg-zinc-900/10 h-1.5 rounded-full">
-                       <div className="bg-green-400 h-full w-[85%] rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
-                    </div>
-                 </div>
-                 <div>
-                    <div className="flex justify-between text-[10px] font-black uppercase mb-2">
-                       <span>{t("project_detail.risk_level")}</span>
-                       <span className="text-blue-400">{t("project_detail.minimal")}</span>
-                    </div>
-                    <div className="w-full bg-white dark:bg-zinc-900/10 h-1.5 rounded-full">
-                       <div className="bg-blue-400 h-full w-[25%] rounded-full shadow-[0_0_10px_rgba(96,165,250,0.5)]"></div>
-                    </div>
-                 </div>
-              </div>
-              
-              <div className="mt-10 pt-10 border-t border-white/10 flex items-center justify-between">
-                 <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("project_detail.efficiency")}</div>
-                 <div className="text-2xl font-black italic">A+</div>
-              </div>
-           </div>
-        </div>
       </div>
       )}
 
