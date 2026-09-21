@@ -7,6 +7,26 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/showcase",
+        destination: "/showcase/index.html",
+      },
+      {
+        source: "/showcase/signin.html",
+        destination: "/login",
+      },
+      {
+        source: "/signin.html",
+        destination: "/login",
+      },
+      {
+        source: "/signin",
+        destination: "/login",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
