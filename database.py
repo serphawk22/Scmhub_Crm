@@ -1057,8 +1057,6 @@ class ClientResearch(SQLModel, table=True):
     business_goals: Optional[str] = Field(default=None, sa_column=Column(Text))
     key_decision_makers: Optional[str] = Field(default=None, sa_column=Column(Text))
     email_agent_data: Optional[str] = Field(default=None, sa_column=Column(Text))
-    full_report: Optional[str] = Field(default=None, sa_column=Column(Text))
-    report_status: Optional[str] = Field(default=None)  # pending | done | error
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 

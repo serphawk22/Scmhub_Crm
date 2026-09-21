@@ -4193,17 +4193,24 @@ def add_conversation_reply(client_id: int, conv_id: int, body: ConversationReply
 
 @app.post("/clients/{client_id}/full-analysis")
 def trigger_full_analysis(client_id: int, session: Session = Depends(get_session)):
-    """Trigger a full combined AI analysis: scraper + deep_investigate + radar summary. Stores result in full_report."""
+    """Trigger full AI analysis. Stores report inside email_agent_data as JSON with __report_status key."""
     cp = session.get(ClientProfile, client_id)
     if not cp:
         raise HTTPException(status_code=404, detail="Client not found")
 
-    # Mark as pending immediately
+    # Mark pending immediately using existing email_agent_data field
+    import json as _j
     cr = session.exec(select(ClientResearch).where(ClientResearch.client_id == client_id)).first()
     if not cr:
         cr = ClientResearch(client_id=client_id)
-    cr.report_status = "pending"
-    cr.full_report = None
+    existing = {}
+    try:
+        existing = _j.loads(cr.email_agent_data) if cr.email_agent_data else {}
+    except Exception:
+        existing = {}
+    existing["__report_status"] = "pending"
+    existing["__full_report"] = None
+    cr.email_agent_data = _j.dumps(existing)
     session.add(cr)
     session.commit()
 
@@ -4215,15 +4222,16 @@ def trigger_full_analysis(client_id: int, session: Session = Depends(get_session
             from modules.scraper import research_and_map_company
             from sqlmodel import Session as _S, select as _sel
             from database import ClientResearch as _CR, ClientProfile as _CP, engine as _eng
+            import json as _j2
 
-            url = cp.websiteUrl or cp.website or ""
+            url = cp.websiteUrl or ""
             company = cp.companyName or ""
             if not url and company:
                 slug = company.lower().replace(" ", "").replace(",", "").replace(".", "")
                 url = f"https://www.{slug}.com"
 
-            # Step 1: scrape
             raw_text = ""
+            service_mapping = []
             try:
                 loop = _asyncio.new_event_loop()
                 scrape = loop.run_until_complete(research_and_map_company(url))
@@ -4232,15 +4240,10 @@ def trigger_full_analysis(client_id: int, session: Session = Depends(get_session
                 service_mapping = scrape.get("service_mapping", [])
             except Exception as se:
                 print(f"[FullAnalysis] scrape failed: {se}")
-                service_mapping = []
 
-            # Step 2: deep investigate
             data = deep_investigate_company(company_name=company, website=url, scraped_text=raw_text)
 
-            # Step 3: build combined markdown report
-            report = data.get("full_markdown_report", "") or ""
-
-            # Append service mapping if available
+            report = data.get("full_markdown_report", "") or data.get("executive_verdict", "") or ""
             if service_mapping:
                 report += "\n\n## Recommended Services\n"
                 for s in service_mapping:
@@ -4253,14 +4256,16 @@ def trigger_full_analysis(client_id: int, session: Session = Depends(get_session
                 rec = sess.exec(_sel(_CR).where(_CR.client_id == client_id)).first()
                 if not rec:
                     rec = _CR(client_id=client_id)
-                rec.full_report = report
-                rec.report_status = "done"
-                rec.email_agent_data = _json.dumps(data)
+                # Merge into email_agent_data
+                merged = dict(data)
+                merged["__report_status"] = "done"
+                merged["__full_report"] = report
+                rec.email_agent_data = _j2.dumps(merged)
                 rec.company_overview = data.get("company_overview", "") or data.get("executive_verdict", "")
                 icps = data.get("ideal_customer_profiles", [])
-                rec.pain_points = _json.dumps(icps) if icps else None
-                rec.business_goals = _json.dumps(data.get("gtm_recommendations", {})) if data.get("gtm_recommendations") else None
-                rec.competitors = _json.dumps(data.get("competitive_landscape", {})) if data.get("competitive_landscape") else None
+                rec.pain_points = _j2.dumps(icps) if icps else None
+                rec.business_goals = _j2.dumps(data.get("gtm_recommendations", {})) if data.get("gtm_recommendations") else None
+                rec.competitors = _j2.dumps(data.get("competitive_landscape", {})) if data.get("competitive_landscape") else None
                 rec.updated_at = __import__('datetime').datetime.utcnow()
                 sess.add(rec)
                 sess.commit()
@@ -4270,10 +4275,16 @@ def trigger_full_analysis(client_id: int, session: Session = Depends(get_session
             traceback.print_exc()
             from sqlmodel import Session as _S2
             from database import ClientResearch as _CR2, engine as _eng2
+            import json as _j3
             with _S2(_eng2) as sess2:
                 rec2 = sess2.exec(__import__('sqlmodel').select(_CR2).where(_CR2.client_id == client_id)).first()
                 if rec2:
-                    rec2.report_status = "error"
+                    try:
+                        existing2 = _j3.loads(rec2.email_agent_data) if rec2.email_agent_data else {}
+                    except Exception:
+                        existing2 = {}
+                    existing2["__report_status"] = "error"
+                    rec2.email_agent_data = _j3.dumps(existing2)
                     sess2.add(rec2)
                     sess2.commit()
 
@@ -4283,11 +4294,16 @@ def trigger_full_analysis(client_id: int, session: Session = Depends(get_session
 
 @app.get("/clients/{client_id}/full-analysis")
 def get_full_analysis(client_id: int, session: Session = Depends(get_session)):
-    """Poll this endpoint. Returns status: pending|done|error and the full_report when done."""
+    """Poll this. Returns {status: pending|done|error|not_started, report: str|null}"""
+    import json as _j
     cr = session.exec(select(ClientResearch).where(ClientResearch.client_id == client_id)).first()
-    if not cr:
+    if not cr or not cr.email_agent_data:
         return {"status": "not_started", "report": None}
-    return {"status": cr.report_status or "not_started", "report": cr.full_report}
+    try:
+        d = _j.loads(cr.email_agent_data)
+        return {"status": d.get("__report_status", "not_started"), "report": d.get("__full_report")}
+    except Exception:
+        return {"status": "not_started", "report": None}
 
 
 @app.get("/clients/{client_id}/research")
