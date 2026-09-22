@@ -54,7 +54,7 @@ const defaultSidebarSections = [
     heading: null,
     items: [
       { id: "item-dashboard", name: "Dashboard", icon: "LayoutDashboard", href: "/", roles: ["Admin", "Employee", "Client", "Intern", "SalesManager", "Demo"] },
-      { id: "item-work-queue", name: "My Work Queue", icon: "LayoutList", href: "/work-queue", roles: ["Admin", "Demo", "SalesManager", "Employee", "ProjectMember", "Intern", "Developer"] },
+      { id: "item-work-queue", name: "My Work Queue", icon: "LayoutList", href: "/work-queue", roles: ["Demo", "Employee", "Intern"] },
       { id: "item-notifications", name: "Notifications", icon: "Bell", href: "/notifications", roles: ["Admin", "Demo", "SalesManager", "Employee"] },
     ],
   },
