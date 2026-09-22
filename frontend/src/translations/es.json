@@ -1187,6 +1187,7 @@
     "generate_ai_pitch_btn": "Generar pitch IA",
     "connecting_vapi": "Conectando con Vapi...",
     "call_via_ai": "Llamar con agente IA",
+    "done": "Listo",
     "ai_available_only": "Las llamadas IA solo están disponibles para Clientes y Leads",
     "pitch_generated_success": "¡Pitch de IA generado exitosamente!",
     "failed_generate_pitch": "Error al generar el pitch",

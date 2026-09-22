@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone, Plus, X, Clock, Loader2, Check, PhoneCall, PhoneOff, Zap,
   CalendarClock, ChevronDown, ChevronUp, Trash2, Calendar, User,
-  Mail, Mic, CheckCircle, Bell, Bot, Radio, AlertCircle,
+  Mail, Mic, CheckCircle, Bell, Bot, AlertCircle,
   Volume2, ExternalLink
 } from "lucide-react";
 import { API_BASE_URL } from "@/config";
@@ -311,7 +311,6 @@ export default function CallsPage() {
   const [aiContext, setAiContext] = useState("");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [expandedSchedId, setExpandedSchedId] = useState<number | null>(null);
-  const [aiCalling, setAiCalling] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [selectedCallIds, setSelectedCallIds] = useState<Set<number>>(new Set());
   const [selectedAiCallIds, setSelectedAiCallIds] = useState<Set<number>>(new Set());
@@ -549,42 +548,6 @@ export default function CallsPage() {
     fetchAll();
   };
 
-  const handleStartAiCall = async () => {
-    addToast("Coming soon: AI calling", "info");
-    return;
-    if (!genEntityId || !generatedPitch) return;
-    if (genType === "contact") {
-      addToast(t("calls.ai_calling_only_clients"), "warning");
-      return;
-    }
-    const phone = getEntityPhone(genType, genEntityId);
-    if (!phone) {
-      addToast(String(t("calls.no_phone_number")).replace("{type}", genType), "error", 7000);
-      return;
-    }
-    setAiCalling(true);
-    addToast("AI calling is coming soon", "info", 8000);
-    try {
-      const res = await fetch(`${API_BASE_URL}/initiate-ai-call`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entity_type: genType, entity_id: parseInt(genEntityId), generated_pitch: generatedPitch }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        addToast(data.detail || t("calls.failed_initiate_ai"), "error", 8000);
-      } else if (data.warning) {
-        addToast(t("calls.queued_warning").replace("{warning}", data.warning), "warning", 10000);
-      } else {
-        addToast(t("calls.ai_call_dispatched").replace("{name}", data.entity_name), "success", 8000);
-        setShowGenerateModal(false);
-        setActiveTab("ai-calls");
-        fetchAll();
-      }
-    } catch {
-      addToast(t("calls.network_error_server"), "error", 7000);
-    } finally { setAiCalling(false); }
-  };
 
   return (
     <>
@@ -1133,39 +1096,13 @@ export default function CallsPage() {
                         <p className="text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed whitespace-pre-wrap">{generatedPitch}</p>
                       </div>
 
-                      {/* Call via AI section — only shown after pitch is generated */}
-                      <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
+                      <div className="pt-4 border-t border-slate-100 dark:border-zinc-800">
                         <button
-                          id="start-ai-call-btn"
                           type="button"
-                          onClick={handleStartAiCall}
-                          disabled={aiCalling || !genEntityId || genType === "contact"}
-                          className={cn(
-                            "w-full py-4 rounded-2xl font-black text-sm shadow-lg transition-all flex items-center justify-center gap-2.5 text-white",
-                            "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600",
-                            "hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(139,92,246,0.4)]",
-                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
-                          )}>
-                            {aiCalling ? (
-                            <>
-                              <Radio className="w-5 h-5 animate-pulse" />
-                              {t("calls.connecting_vapi")}
-                            </>
-                          ) : (
-                            <>
-                              <Bot className="w-5 h-5" />
-                              {t("calls.call_via_ai")}
-                              {genEntityId && getEntityPhone(genType, genEntityId) && (
-                                <span className="text-white/70 font-normal text-xs ml-1">
-                                  {getEntityPhone(genType, genEntityId)}
-                                </span>
-                              )}
-                            </>
-                          )}
+                          onClick={() => { setShowGenerateModal(false); setGeneratedPitch(""); setGenEntityId(""); setAiContext(""); }}
+                          className="w-full py-3.5 rounded-2xl font-black text-sm bg-slate-900 hover:bg-slate-800 text-white transition-all flex items-center justify-center gap-2">
+                          <Check className="w-4 h-4" /> {t("calls.done")}
                         </button>
-                        {genType === "contact" && (
-                          <p className="text-xs text-slate-400 text-center mt-2 font-medium">{t("calls.ai_available_only")}</p>
-                        )}
                       </div>
                     </>
                   )}
