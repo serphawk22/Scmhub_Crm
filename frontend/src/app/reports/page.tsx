@@ -36,6 +36,45 @@ function Table({ headers, rows }: { headers: string[]; rows: React.ReactNode[][]
   return <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-zinc-800"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:bg-zinc-950"><tr>{headers.map(header => <th key={header} className="whitespace-nowrap px-4 py-3">{header}</th>)}</tr></thead><tbody className="divide-y divide-slate-100 dark:divide-zinc-800">{rows.length ? rows.map((row, index) => <tr key={index} className="hover:bg-slate-50 dark:hover:bg-zinc-800/40">{row.map((cell, cellIndex) => <td key={cellIndex} className="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-zinc-300">{cell}</td>)}</tr>) : <tr><td colSpan={headers.length} className="px-4 py-12 text-center text-sm text-slate-400">No records in this date range.</td></tr>}</tbody></table></div>;
 }
 
+function drawPdfTable(pdf: jsPDF, headers: string[], rows: string[][], startY: number) {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const left = 14;
+  const tableWidth = pageWidth - 28;
+  const columnWidth = tableWidth / headers.length;
+  const lineHeight = 4.5;
+  let y = startY;
+
+  const drawHeader = () => {
+    pdf.setFillColor(30, 64, 175);
+    pdf.setTextColor(255, 255, 255);
+    pdf.rect(left, y, tableWidth, 9, "F");
+    headers.forEach((header, index) => pdf.text(header, left + index * columnWidth + 2, y + 6));
+    pdf.setTextColor(30, 41, 59);
+    y += 9;
+  };
+
+  drawHeader();
+  rows.forEach((row, rowIndex) => {
+    const wrappedCells = row.map(cell => pdf.splitTextToSize(cell, columnWidth - 4));
+    const rowHeight = Math.max(...wrappedCells.map(lines => lines.length), 1) * lineHeight + 4;
+    if (y + rowHeight > pageHeight - 18) {
+      pdf.addPage();
+      y = 18;
+      drawHeader();
+    }
+    if (rowIndex % 2 === 0) {
+      pdf.setFillColor(241, 245, 249);
+      pdf.rect(left, y, tableWidth, rowHeight, "F");
+    }
+    wrappedCells.forEach((lines, index) => pdf.text(lines, left + index * columnWidth + 2, y + 5));
+    pdf.setDrawColor(226, 232, 240);
+    pdf.line(left, y + rowHeight, left + tableWidth, y + rowHeight);
+    y += rowHeight;
+  });
+  return y;
+}
+
 export default function ReportsPage() {
   const { role } = useRole();
   const [tab, setTab] = useState<string>("overview");
@@ -60,20 +99,56 @@ export default function ReportsPage() {
 
   const download = () => {
     if (!data) return;
-    const rows = tab === "overview" ? Object.entries(data.summary).map(([metric, value]) => [metric, value]) : ((data as any)[tab] instanceof Array ? (data as any)[tab] : Object.entries((data as any)[tab] || {}).map(([key, value]) => [key, value]));
     const pdf = new jsPDF();
+    const reportNames: Record<string, string> = Object.fromEntries(tabs);
+    const format = (value: unknown) => value == null ? "-" : typeof value === "object" ? JSON.stringify(value) : String(value);
+    let headers: string[];
+    let rows: string[][];
+    if (tab === "overview") {
+      headers = ["Metric", "Value"];
+      rows = Object.entries(data.summary).map(([key, value]) => [key.replaceAll("_", " "), format(value)]);
+    } else if (tab === "sales") {
+      headers = ["Deal", "Stage", "Value", "Owner"];
+      rows = data.sales.deals.map(deal => [format(deal.title), format(deal.stage), format(deal.value), format(deal.assigned_to)]);
+    } else if (tab === "calls") {
+      headers = ["Date", "Phone", "Agent", "Duration", "Follow-up", "Notes"];
+      rows = data.calls.map(call => [fmtDate(call.date), format(call.phone_number), format(call.assigned_to), fmtMinutes(call.duration_seconds), call.followup_needed ? format(call.followup_date || "Yes") : "No", format(call.summary)]);
+    } else if (tab === "meetings") {
+      headers = ["When", "Title", "Type", "Status", "Host", "Duration", "Location", "Outcome"];
+      rows = data.meetings.map(meeting => [fmtDate(meeting.scheduled_at), format(meeting.title), format(meeting.meeting_type), format(meeting.status), format(meeting.host), meeting.duration_minutes ? `${meeting.duration_minutes}m` : "-", format(meeting.location), format(meeting.outcome)]);
+    } else if (tab === "daily") {
+      headers = ["Date", "Leads", "Onboarded", "Deals won", "Emails", "Activities", "Calls", "Meetings", "Tasks", "Tickets", "Cases"];
+      rows = data.daily.map(item => [format(item.date), format(item.leads), format(item.clients_onboarded), format(item.deals_won), format(item.emails), format(item.activities), format(item.calls), format(item.meetings), format(item.task_entries), format(item.tickets), format(item.cases_resolved)]);
+    } else if (tab === "monthly") {
+      headers = ["Month", "Leads", "Onboarded", "Deals won", "Emails", "Calls", "Meetings"];
+      rows = data.monthly.map(item => [format(item.month), format(item.leads), format(item.clients_onboarded), format(item.deals_won), format(item.emails), format(item.calls), format(item.meetings)]);
+    } else if (tab === "staff_performance") {
+      headers = ["Staff member", "Role", "Total work", "Calls", "Meetings", "Completed", "Tickets", "Cases"];
+      rows = data.staff_performance.map(item => [format(item.name), format(item.role), format(item.total_work), format(item.calls), format(item.meetings), format(item.completed_tasks), format(item.tickets), format(item.cases)]);
+    } else if (tab === "lead_sources") {
+      headers = ["Lead source", "Leads", "Converted", "Conversion %"];
+      rows = data.lead_sources.map(item => [format(item.source), format(item.leads), format(item.converted), `${format(item.conversion_percentage)}%`]);
+    } else {
+      headers = ["Metric", "Count"];
+      rows = Object.entries(data.onboarding).map(([key, value]) => [key.replaceAll("_", " "), format(value)]);
+    }
+    pdf.setProperties({ title: `${reportNames[tab]} report` });
+    pdf.setFont("helvetica", "bold");
     pdf.setFontSize(18);
-    pdf.text(`${tab.replaceAll("_", " ")} report`, 14, 18);
+    pdf.setTextColor(15, 23, 42);
+    pdf.text(reportNames[tab] || "Report", 14, 18);
+    pdf.setFont("helvetica", "normal");
     pdf.setFontSize(10);
-    pdf.text(`${startDate} to ${endDate}`, 14, 26);
-    let y = 36;
-    rows.forEach((row: any) => {
-      const line = (Array.isArray(row) ? row : Object.values(row)).map((value: any) => String(value ?? "")).join(" | ");
-      const wrapped = pdf.splitTextToSize(line, 180);
-      if (y + wrapped.length * 6 > 285) { pdf.addPage(); y = 18; }
-      pdf.text(wrapped, 14, y);
-      y += wrapped.length * 6;
-    });
+    pdf.setTextColor(71, 85, 105);
+    pdf.text(`Reporting period: ${startDate} to ${endDate}`, 14, 26);
+    drawPdfTable(pdf, headers, rows, 36);
+    const pageCount = pdf.getNumberOfPages();
+    for (let page = 1; page <= pageCount; page += 1) {
+      pdf.setPage(page);
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text(`Page ${page} of ${pageCount}`, 14, pdf.internal.pageSize.getHeight() - 8);
+    }
     pdf.save(`${tab}-report-${startDate}-to-${endDate}.pdf`);
   };
 
