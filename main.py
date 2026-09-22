@@ -501,6 +501,10 @@ def on_startup():
             conn.execute(text('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS project_id INTEGER REFERENCES projects(id);'))
             conn.execute(text('ALTER TABLE tasks ADD COLUMN IF NOT EXISTS created_by INTEGER REFERENCES users(id);'))
             conn.execute(text('ALTER TABLE task_comments ADD COLUMN IF NOT EXISTS author_id INTEGER REFERENCES users(id);'))
+            conn.execute(text('ALTER TABLE task_sheet_entries ADD COLUMN IF NOT EXISTS time_spent_minutes INTEGER;'))
+            conn.execute(text('ALTER TABLE task_sheet_entries ADD COLUMN IF NOT EXISTS blocker TEXT;'))
+            conn.execute(text('ALTER TABLE task_sheet_entries ADD COLUMN IF NOT EXISTS follow_up_date VARCHAR(20);'))
+            conn.execute(text('ALTER TABLE task_sheet_entries ADD COLUMN IF NOT EXISTS completion_date VARCHAR(20);'))
             
             # Radar & Competitor Relationship Leads Migration
             try:
@@ -1724,6 +1728,10 @@ class TaskSheetEntryRequest(BaseModel):
     ticket_id: Optional[int] = None
     summary: str
     status: str = "Done"
+    time_spent_minutes: Optional[int] = None
+    blocker: Optional[str] = None
+    follow_up_date: Optional[str] = None
+    completion_date: Optional[str] = None
 
 
 class TaskCommentCreateRequest(BaseModel):
