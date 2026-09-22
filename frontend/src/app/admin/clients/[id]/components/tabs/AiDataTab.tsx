@@ -241,7 +241,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
         </div>
         {extractResult && (
           <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-            <CheckCircle2 size={14} /> Found {extractResult.count} services; {extractResult.marketplace} added to Marketplace.
+            <CheckCircle2 size={14} /> Services extracted and added to Marketplace.
           </div>
         )}
         {extractError && (
