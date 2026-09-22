@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Trophy, Star, Ticket, DollarSign, Camera, Download, Sparkles } from "lucide-react";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
+import { useState, useEffect } from "react";
+import { Trophy, Star, Ticket, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/config";
 import { useLanguage } from "@/context/LanguageContext";
@@ -126,66 +124,6 @@ export default function LeaderboardPage() {
   const [salesLeaderboard, setSalesLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [ticketsLeaderboard, setTicketsLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const boardRef = useRef<HTMLDivElement>(null);
-  const [revealed, setRevealed] = useState(false);
-  const [exporting, setExporting] = useState<"screenshot" | "pdf" | null>(null);
-  const [exportMessage, setExportMessage] = useState("");
-
-  const captureBoard = async (asPdf: boolean) => {
-    if (!boardRef.current || exporting) return;
-    setExporting(asPdf ? "pdf" : "screenshot");
-    setExportMessage("");
-    try {
-      setRevealed(true);
-      await new Promise(resolve => setTimeout(resolve, 650));
-      if (asPdf) {
-        const pdf = new jsPDF();
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(22);
-        pdf.text("Leaderboard Reveal", 14, 20);
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(10);
-        pdf.text(`Generated ${new Date().toLocaleDateString()}`, 14, 28);
-        let y = 40;
-        const addRow = (values: string[]) => {
-          if (y > 275) { pdf.addPage(); y = 20; }
-          pdf.setFontSize(9);
-          pdf.text(values.join(" | "), 14, y);
-          y += 7;
-        };
-        pdf.setFont("helvetica", "bold");
-        addRow(["Sales leaderboard", "Revenue", "Deals", "Meetings", "Calls"]);
-        pdf.setFont("helvetica", "normal");
-        salesBoard.forEach((entry, index) => addRow([`${index + 1}. ${entry.name}`, `$${entry.revenue_closed.toLocaleString()}`, String(entry.deals_closed), String(entry.meetings_booked), String(entry.calls_made)]));
-        y += 8;
-        pdf.setFont("helvetica", "bold");
-        addRow(["Tickets leaderboard", "Assigned", "In production", "Completed"]);
-        pdf.setFont("helvetica", "normal");
-        ticketsBoard.forEach((entry, index) => addRow([`${index + 1}. ${entry.name}`, String(entry.tickets_assigned ?? 0), String(entry.tickets_in_production ?? 0), String(entry.tickets_completed ?? 0)]));
-        pdf.save("leaderboard-reveal.pdf");
-        setExportMessage("PDF saved successfully.");
-      } else {
-        const canvas = await html2canvas(boardRef.current, { backgroundColor: "#f8fafc", scale: Math.min(window.devicePixelRatio * 2, 3), useCORS: true, logging: false });
-        const link = document.createElement("a");
-        link.download = "leaderboard-reveal.png";
-        link.href = canvas.toDataURL("image/png");
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setExportMessage("Screenshot downloaded successfully.");
-      }
-    } catch (error) {
-      console.error("Leaderboard export failed", error);
-      setExportMessage(asPdf ? "Could not save the PDF. Please try again." : "Could not capture the screenshot. Please try again.");
-    } finally {
-      setExporting(null);
-    }
-  };
-
-  const startReveal = () => {
-    setRevealed(false);
-    window.setTimeout(() => setRevealed(true), 40);
-  };
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -219,12 +157,7 @@ export default function LeaderboardPage() {
   const ticketsTop3 = ticketsBoard.slice(0, 3);
 
   return (
-    <div ref={boardRef} className={`p-6 md:p-8 max-w-7xl mx-auto space-y-14 min-h-[calc(100vh-64px)] transition-all duration-500 ${revealed ? "ring-4 ring-yellow-300/70 shadow-2xl shadow-yellow-500/20" : ""}`}>
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-yellow-200 bg-gradient-to-r from-yellow-50 via-white to-cyan-50 p-5 shadow-lg dark:border-yellow-800/40 dark:from-yellow-950/20 dark:via-zinc-900 dark:to-cyan-950/20">
-        <div className="flex items-center gap-3"><div className="rounded-2xl bg-yellow-400 p-3 text-white shadow-lg shadow-yellow-400/30"><Sparkles size={20} /></div><div><p className="text-xs font-black uppercase tracking-[0.2em] text-yellow-600">Grand Reveal</p><h1 className="text-2xl font-black text-slate-900 dark:text-white">Leaderboard Spotlight</h1></div></div>
-        <div className="flex flex-wrap items-center gap-2"><button onClick={startReveal} className="flex items-center gap-2 rounded-xl bg-yellow-500 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5"><Sparkles size={15} /> Start Reveal</button><button onClick={() => captureBoard(false)} disabled={!!exporting} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"><Camera size={15} /> {exporting === "screenshot" ? "Capturing..." : "Screenshot"}</button><button onClick={() => captureBoard(true)} disabled={!!exporting} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"><Download size={15} /> {exporting === "pdf" ? "Saving..." : "Save PDF"}</button></div>
-      </div>
-      {exportMessage && <p className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-300">{exportMessage}</p>}
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-14 min-h-[calc(100vh-64px)]">
 
       {/* ── SALES LEADERBOARD ───────────────────────────────────────── */}
       <section className="space-y-6">
@@ -237,8 +170,8 @@ export default function LeaderboardPage() {
             <p className="text-sm text-slate-500 dark:text-zinc-400">Ranked by revenue closed &amp; deals won</p>
           </div>
         </div>
-        {salesTop3.length > 0 && <div className={revealed ? "animate-[zoomIn_700ms_ease-out]" : ""}><SalesPodium top3={salesTop3} /></div>}
-        <div className={`bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden ${revealed ? "animate-[fadeInUp_700ms_ease-out]" : ""}`}>
+        {salesTop3.length > 0 && <SalesPodium top3={salesTop3} />}
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50/50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400">
@@ -301,9 +234,9 @@ export default function LeaderboardPage() {
           </div>
         </div>
         {ticketsTop3.length > 0 && ticketsTop3.some(e => (e.tickets_assigned ?? 0) > 0) && (
-          <div className={revealed ? "animate-[zoomIn_700ms_ease-out]" : ""}><TicketsPodium top3={ticketsTop3} /></div>
+          <TicketsPodium top3={ticketsTop3} />
         )}
-        <div className={`bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden ${revealed ? "animate-[fadeInUp_700ms_ease-out]" : ""}`}>
+        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50/50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400">
