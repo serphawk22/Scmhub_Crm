@@ -26,17 +26,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language") || localStorage.getItem("crm-language") as Language | null;
-    if (savedLanguage && ["en", "es"].includes(savedLanguage)) {
-      setLanguageState(savedLanguage as Language);
-    }
+    setLanguageState("en");
   }, []);
 
-  const setLanguage = (lang: Language | string) => {
-    const validLang = ["en", "es"].includes(lang) ? (lang as Language) : "en";
-    setLanguageState(validLang);
-    localStorage.setItem("language", validLang);
-    localStorage.setItem("crm-language", validLang); // Keep both in sync
+  const setLanguage = (_lang: Language | string) => {
+    setLanguageState("en");
+    localStorage.setItem("language", "en");
+    localStorage.setItem("crm-language", "en"); // Keep both in sync
   };
 
   const t = (key: string): string => {

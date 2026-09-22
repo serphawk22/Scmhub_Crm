@@ -148,8 +148,12 @@ def send_email_outlook(
         # Plain text → render it inside the branded shell too, so every email
         # (PDF notifications, orders, credentials, …) carries the SerpHawk
         # logo and clean layout instead of a bare text blob.
-        paragraphs = [p.replace("\n", "<br>") for p in re.split(r"\n\s*\n", body.strip())]
-        body = "".join(f"<p>{_escape_html(p)}</p>" for p in paragraphs if p)
+        # Escape FIRST so any HTML in the text stays inert, then convert newlines
+        # to <br> (escaping after would show the tags as literal "<br>" text).
+        paragraphs = [p.strip() for p in re.split(r"\n\s*\n", body.strip())]
+        body = "".join(
+            f"<p>{_escape_html(p).replace(chr(10), '<br>')}</p>" for p in paragraphs if p
+        )
         is_html = True
 
     if is_html:

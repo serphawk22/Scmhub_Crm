@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, CalendarDays, Download, RefreshCw, TrendingUp, Users, Target, BriefcaseBusiness, CheckCircle2 } from "lucide-react";
+import { BarChart3, CalendarDays, Download, RefreshCw, TrendingUp, Users, Target, BriefcaseBusiness, CheckCircle2, Phone, Video } from "lucide-react";
 import { API_BASE_URL } from "@/config";
 import { useRole } from "@/context/RoleContext";
 
@@ -13,12 +13,15 @@ type ReportData = {
   monthly: any[];
   staff_performance: any[];
   lead_sources: any[];
+  calls: any[];
+  meetings: any[];
   onboarding: Record<string, number>;
 };
 
 const tabs = [
-  ["overview", "Overview"], ["sales", "Sales Report"], ["daily", "Daily Report"],
-  ["monthly", "Monthly Report"], ["staff_performance", "Staff Performance"],
+  ["overview", "Overview"], ["sales", "Sales Report"], ["calls", "Calls"],
+  ["meetings", "Meetings"], ["daily", "Daily Report"], ["monthly", "Monthly Report"],
+  ["staff_performance", "Staff Performance"],
   ["lead_sources", "Lead Sources"], ["onboarding", "Client Onboarding"],
 ] as const;
 const today = new Date().toISOString().slice(0, 10);
@@ -63,7 +66,9 @@ export default function ReportsPage() {
   };
 
   const summary = data?.summary || {};
-  const staffRows = useMemo(() => (data?.staff_performance || []).map(item => [item.name, item.role, item.total_work, item.completed_tasks, item.tickets, item.cases]), [data]);
+  const staffRows = useMemo(() => (data?.staff_performance || []).map(item => [item.name, item.role, item.total_work, item.calls, item.meetings, item.completed_tasks, item.tickets, item.cases]), [data]);
+  const fmtMinutes = (seconds: number | null | undefined) => seconds == null ? "–" : ((seconds / 60) < 1 ? `${seconds}s` : `${Math.round(seconds / 60)}m`);
+  const fmtDate = (iso: string) => iso ? new Date(iso).toLocaleDateString() + " " + new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "–";
   if (role !== "Admin" && role !== "SuperAdmin" && role !== "SalesManager") return <div className="p-10 text-center font-bold text-slate-500">Reports are available to Admin and Sales Manager roles.</div>;
 
   return <div className="mx-auto max-w-[1500px] space-y-6">
@@ -71,12 +76,14 @@ export default function ReportsPage() {
     <div className="flex gap-1 overflow-x-auto rounded-2xl bg-slate-100 p-1 dark:bg-zinc-900">{tabs.map(([key, label]) => <button key={key} onClick={() => setTab(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-black transition-colors ${tab === key ? "bg-white text-indigo-600 shadow-sm dark:bg-zinc-800" : "text-slate-500"}`}>{label}</button>)}</div>
     {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">{error}</div>}
     {loading ? <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-slate-100 dark:bg-zinc-900" />)}</div> : data && <>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-8"><Stat label="Leads" value={summary.leads} icon={<TrendingUp size={18} />} tone="bg-indigo-600" /><Stat label="Clients onboarded" value={summary.clients_onboarded} icon={<Users size={18} />} tone="bg-emerald-600" /><Stat label="Total clients" value={summary.total_clients} icon={<Users size={18} />} tone="bg-sky-600" /><Stat label="Won revenue" value={summary.won_value} icon={<BriefcaseBusiness size={18} />} tone="bg-amber-600" /><Stat label="Deals won" value={summary.deals_won} icon={<CheckCircle2 size={18} />} tone="bg-teal-600" /><Stat label="Conversion" value={`${summary.conversion_percentage}%`} icon={<Target size={18} />} tone="bg-rose-600" /><Stat label="Win rate" value={`${summary.deal_win_rate}%`} icon={<BarChart3 size={18} />} tone="bg-violet-600" /><Stat label="Work items" value={(summary.activities || 0) + (summary.tickets || 0) + (summary.task_entries || 0)} icon={<BarChart3 size={18} />} tone="bg-slate-700" /></div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-8"><Stat label="Leads" value={summary.leads} icon={<TrendingUp size={18} />} tone="bg-indigo-600" /><Stat label="Clients onboarded" value={summary.clients_onboarded} icon={<Users size={18} />} tone="bg-emerald-600" /><Stat label="Total clients" value={summary.total_clients} icon={<Users size={18} />} tone="bg-sky-600" /><Stat label="Won revenue" value={summary.won_value} icon={<BriefcaseBusiness size={18} />} tone="bg-amber-600" /><Stat label="Deals won" value={summary.deals_won} icon={<CheckCircle2 size={18} />} tone="bg-teal-600" /><Stat label="Conversion" value={`${summary.conversion_percentage}%`} icon={<Target size={18} />} tone="bg-rose-600" /><Stat label="Win rate" value={`${summary.deal_win_rate}%`} icon={<BarChart3 size={18} />} tone="bg-violet-600" /><Stat label="Calls" value={summary.calls} icon={<Phone size={18} />} tone="bg-cyan-600" /><Stat label="Meetings" value={summary.meetings} icon={<CalendarDays size={18} />} tone="bg-fuchsia-600" /><Stat label="Work items" value={(summary.activities || 0) + (summary.tickets || 0) + (summary.task_entries || 0)} icon={<BarChart3 size={18} />} tone="bg-slate-700" /></div>
       {tab === "overview" && <div className="grid gap-6 lg:grid-cols-2"><div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><h2 className="mb-4 text-lg font-black dark:text-white">Report coverage</h2><p className="text-sm leading-6 text-slate-500">The selected range is <strong>{data.range.start_date}</strong> through <strong>{data.range.end_date}</strong>. Conversion is calculated from all tenant leads marked converted; activity KPIs use records created inside the selected range.</p></div><div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><h2 className="mb-4 text-lg font-black dark:text-white">Client onboarding</h2><div className="grid grid-cols-2 gap-3 text-sm"><p>Active <strong>{data.onboarding.active}</strong></p><p>Pending <strong>{data.onboarding.pending}</strong></p><p>Hold <strong>{data.onboarding.hold}</strong></p><p>New in range <strong>{data.onboarding.new_in_range}</strong></p></div></div></div>}
       {tab === "sales" && <Table headers={["Deal", "Stage", "Value", "Owner"]} rows={data.sales.deals.map(deal => [deal.title, deal.stage, deal.value, deal.assigned_to])} />}
-      {tab === "daily" && <Table headers={["Date", "Leads", "Onboarded", "Deals won", "Emails", "Activities", "Tasks", "Tickets", "Cases resolved"]} rows={data.daily.map(item => [item.date, item.leads, item.clients_onboarded, item.deals_won, item.emails, item.activities, item.task_entries, item.tickets, item.cases_resolved])} />}
-      {tab === "monthly" && <Table headers={["Month", "Leads", "Clients onboarded", "Deals won", "Emails"]} rows={data.monthly.map(item => [item.month, item.leads, item.clients_onboarded, item.deals_won, item.emails])} />}
-      {tab === "staff_performance" && <Table headers={["Staff member", "Role", "Total work", "Completed tasks", "Tickets", "Cases"]} rows={staffRows} />}
+      {tab === "calls" && <Table headers={["Date", "Phone", "Agent", "Duration", "Follow-up", "Notes"]} rows={data.calls.map((call: any) => [fmtDate(call.date), call.phone_number, call.assigned_to, fmtMinutes(call.duration_seconds), call.followup_needed ? (call.followup_date || "Yes") : "No", call.summary || "–"])} />}
+      {tab === "meetings" && <Table headers={["When", "Title", "Type", "Status", "Host", "Duration", "Location", "Outcome"]} rows={data.meetings.map((meeting: any) => [fmtDate(meeting.scheduled_at), meeting.title, meeting.meeting_type, meeting.status, meeting.host, meeting.duration_minutes ? `${meeting.duration_minutes}m` : "–", meeting.location || "–", meeting.outcome || "–"])} />}
+      {tab === "daily" && <Table headers={["Date", "Leads", "Onboarded", "Deals won", "Emails", "Activities", "Calls", "Meetings", "Tasks", "Tickets", "Cases resolved"]} rows={data.daily.map(item => [item.date, item.leads, item.clients_onboarded, item.deals_won, item.emails, item.activities, item.calls, item.meetings, item.task_entries, item.tickets, item.cases_resolved])} />}
+      {tab === "monthly" && <Table headers={["Month", "Leads", "Clients onboarded", "Deals won", "Emails", "Calls", "Meetings"]} rows={data.monthly.map(item => [item.month, item.leads, item.clients_onboarded, item.deals_won, item.emails, item.calls, item.meetings])} />}
+      {tab === "staff_performance" && <Table headers={["Staff member", "Role", "Total work", "Calls", "Meetings", "Completed tasks", "Tickets", "Cases"]} rows={staffRows} />}
       {tab === "lead_sources" && <Table headers={["Lead source", "Leads", "Converted", "Conversion %"]} rows={data.lead_sources.map(item => [item.source, item.leads, item.converted, `${item.conversion_percentage}%`])} />}
       {tab === "onboarding" && <Table headers={["Metric", "Count"]} rows={Object.entries(data.onboarding).map(([key, value]) => [key.replaceAll("_", " "), value])} />}
     </>}

@@ -21,6 +21,25 @@ function formatDuration(seconds: number | null) {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
+const DISMISSED_KEY = "crm_dismissed_unsummarized_calls";
+
+function loadDismissed(): Set<number> {
+  try {
+    const raw = localStorage.getItem(DISMISSED_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveDismissed(set: Set<number>) {
+  try {
+    localStorage.setItem(DISMISSED_KEY, JSON.stringify([...set]));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export function CallNotificationBar() {
   const { t } = useLanguage();
   const [calls, setCalls] = useState<Call[]>([]);
@@ -33,7 +52,8 @@ export function CallNotificationBar() {
     try {
       const res = await fetch(`${API_BASE_URL}/calls?unsummarized=true`);
       const data = await res.json();
-      const list: Call[] = data.calls || [];
+      const dismissedIds = loadDismissed();
+      const list: Call[] = (data.calls || []).filter((c: Call) => !dismissedIds.has(c.id));
       setCalls(list);
       if (list.length > 0 && !dismissed) {
         setCurrent(list[0]);
@@ -56,6 +76,16 @@ export function CallNotificationBar() {
     };
   }, [fetchUnsummarized]);
 
+  // Show each call only once ever: record it the moment it is displayed,
+  // so reloads / navigation / the 30s poll never bring the same popup back.
+  useEffect(() => {
+    if (!current) return;
+    const handled = loadDismissed();
+    if (handled.has(current.id)) return;
+    handled.add(current.id);
+    saveDismissed(handled);
+  }, [current]);
+
   const handleSave = async () => {
     if (!current || !summary.trim()) return;
     setSaving(true);
@@ -76,6 +106,11 @@ export function CallNotificationBar() {
   };
 
   const handleDismiss = () => {
+    if (current) {
+      const dismissedIds = loadDismissed();
+      dismissedIds.add(current.id);
+      saveDismissed(dismissedIds);
+    }
     setDismissed(true);
     setCurrent(null);
   };

@@ -9,7 +9,8 @@ interface Meeting {
   id: number; title: string; description?: string; location?: string;
   meeting_type: string; status: string;
   scheduled_at?: string; duration_minutes?: number;
-  host_name?: string; lead_name?: string; client_name?: string;
+  host_name?: string; lead_name?: string; client_name?: string; contact_name?: string;
+  client_id?: number; lead_id?: number; contact_id?: number;
   attendees?: string[]; notes?: string; outcome?: string;
   created_at: string;
 }
@@ -38,10 +39,14 @@ export default function MeetingsPage() {
   const [saving, setSaving] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [attendeeTab, setAttendeeTab] = useState<"clients" | "leads" | "contacts">("clients");
   const [form, setForm] = useState({
     title: "", description: "", location: "", meeting_type: "Meeting",
     status: "Scheduled", scheduled_at: "", duration_minutes: "",
-    attendees: "", notes: "",
+    attendees: "", notes: "", linked: "",
   });
 
   const load = () => {
@@ -52,6 +57,21 @@ export default function MeetingsPage() {
       .finally(() => setLoading(false));
   };
   useEffect(load, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/clients?per_page=1000`)
+      .then(r => r.json())
+      .then(d => setClients(Array.isArray(d.clients) ? d.clients : []))
+      .catch(() => {});
+    fetch(`${API_BASE_URL}/leads`)
+      .then(r => r.json())
+      .then(d => setLeads(Array.isArray(d.leads) ? d.leads : []))
+      .catch(() => {});
+    fetch(`${API_BASE_URL}/contacts`)
+      .then(r => r.json())
+      .then(d => setContacts(Array.isArray(d.contacts) ? d.contacts : []))
+      .catch(() => {});
+  }, []);
 
   const filtered = useMemo(() => {
     return meetings.filter(m => {
@@ -67,7 +87,7 @@ export default function MeetingsPage() {
 
   const openCreate = () => {
     setEditMeeting(null);
-    setForm({ title: "", description: "", location: "", meeting_type: "Meeting", status: "Scheduled", scheduled_at: "", duration_minutes: "", attendees: "", notes: "" });
+    setForm({ title: "", description: "", location: "", meeting_type: "Meeting", status: "Scheduled", scheduled_at: "", duration_minutes: "", attendees: "", notes: "", linked: "" });
     setShowModal(true);
   };
   const openEdit = (m: Meeting) => {
@@ -78,6 +98,7 @@ export default function MeetingsPage() {
       scheduled_at: m.scheduled_at ? m.scheduled_at.slice(0, 16) : "",
       duration_minutes: m.duration_minutes?.toString() || "",
       attendees: (m.attendees || []).join(", "), notes: m.notes || "",
+      linked: m.client_id ? `client:${m.client_id}` : m.lead_id ? `lead:${m.lead_id}` : m.contact_id ? `contact:${m.contact_id}` : "",
     });
     setShowModal(true);
   };
@@ -85,10 +106,18 @@ export default function MeetingsPage() {
   const handleSave = async () => {
     if (!form.title.trim()) return;
     setSaving(true);
+    const [linkType, linkId] = form.linked ? form.linked.split(":") : [];
+    const linkIdNum = linkId ? parseInt(linkId) : null;
     const payload = {
-      ...form,
+      title: form.title, description: form.description || null, location: form.location || null,
+      meeting_type: form.meeting_type, status: form.status,
+      scheduled_at: form.scheduled_at || null,
       duration_minutes: form.duration_minutes ? parseInt(form.duration_minutes) : null,
       attendees: form.attendees ? form.attendees.split(",").map(s => s.trim()).filter(Boolean) : [],
+      notes: form.notes || null,
+      client_id: linkType === "client" ? linkIdNum : null,
+      lead_id: linkType === "lead" ? linkIdNum : null,
+      contact_id: linkType === "contact" ? linkIdNum : null,
     };
     const url = editMeeting ? `${API_BASE_URL}/meetings/${editMeeting.id}` : `${API_BASE_URL}/meetings`;
     const method = editMeeting ? "PUT" : "POST";
@@ -102,6 +131,23 @@ export default function MeetingsPage() {
     if (!confirm(t("meetings.confirm_delete"))) return;
     await fetch(`${API_BASE_URL}/meetings/${id}`, { method: "DELETE" });
     load();
+  };
+
+  const attendeeArray = () => (form.attendees || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const isAttendee = (email: string) => !!email && attendeeArray().some((a) => a.toLowerCase() === email.toLowerCase());
+  const toggleAttendee = (email: string) => {
+    if (!email) return;
+    const current = attendeeArray();
+    const exists = current.some((a) => a.toLowerCase() === email.toLowerCase());
+    setForm((f) => ({
+      ...f,
+      attendees: exists ? current.filter((a) => a.toLowerCase() !== email.toLowerCase()).join(", ") : current.concat(email).join(", "),
+    }));
+  };
+  const attendeeItems = () => {
+    if (attendeeTab === "clients") return clients.map((c) => ({ id: c.id, name: c.companyName || c.projectName || c.contact_person || `Client #${c.id}`, email: c.email || "" }));
+    if (attendeeTab === "leads") return leads.map((l) => ({ id: l.id, name: l.company_name || `Lead #${l.id}`, email: l.email || "" }));
+    return contacts.map((c) => ({ id: c.id, name: `${c.first_name || ""} ${c.last_name || ""}`.trim() || `Contact #${c.id}`, email: c.email || "" }));
   };
 
   const handleImport = async () => {
@@ -233,10 +279,10 @@ export default function MeetingsPage() {
                   )}
                 </div>
               )}
-              {(m.client_name || m.lead_name) && (
+              {(m.client_name || m.lead_name || m.contact_name) && (
                 <div className="flex items-center gap-1.5 mb-3">
                   <Users className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-xs text-slate-500 dark:text-zinc-400">{m.client_name || m.lead_name}</span>
+                  <span className="text-xs text-slate-500 dark:text-zinc-400">{m.client_name || m.lead_name || m.contact_name}</span>
                 </div>
               )}
               <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -274,6 +320,28 @@ export default function MeetingsPage() {
                       className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-sm text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500" />
                   </div>
                 ))}
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">{t("meetings.linked_party")}</label>
+                  <select value={form.linked} onChange={e => setForm(f => ({ ...f, linked: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-sm text-slate-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-violet-500">
+                    <option value="">{t("meetings.none")}</option>
+                    <optgroup label="Clients">
+                      {clients.map(c => (
+                        <option key={`client-${c.id}`} value={`client:${c.id}`}>{c.companyName || c.projectName || c.contact_person || `Client #${c.id}`}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Leads">
+                      {leads.map(l => (
+                        <option key={`lead-${l.id}`} value={`lead:${l.id}`}>{l.company_name || `Lead #${l.id}`}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Contacts">
+                      {contacts.map(c => (
+                        <option key={`contact-${c.id}`} value={`contact:${c.id}`}>{`${c.first_name || ""} ${c.last_name || ""}`.trim() || `Contact #${c.id}`}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">{t("meetings.type")}</label>
@@ -306,6 +374,36 @@ export default function MeetingsPage() {
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">{t("meetings.attendees_label")}</label>
                   <input value={form.attendees} onChange={e => setForm(f => ({ ...f, attendees: e.target.value }))} placeholder={t("meetings.attendees_placeholder")}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-sm text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500" />
+
+                  {/* Picker: select attendees from clients / leads / contacts */}
+                  <div className="mt-2 rounded-xl border border-slate-200 dark:border-zinc-700 overflow-hidden">
+                    <div className="flex border-b border-slate-200 dark:border-zinc-700">
+                      {(["clients", "leads", "contacts"] as const).map((tab) => (
+                        <button key={tab} onClick={() => setAttendeeTab(tab)}
+                          className={`flex-1 px-2 py-2 text-xs font-bold transition-all ${attendeeTab === tab ? "bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300" : "text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800"}`}>
+                          {tab === "clients" ? "Clients" : tab === "leads" ? "Leads" : "Contacts"}
+                          <span className="ml-1 text-[10px] opacity-70">({({ clients: clients.length, leads: leads.length, contacts: contacts.length })[tab]})</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="max-h-44 overflow-y-auto p-1.5 space-y-1">
+                      {attendeeItems().length === 0 ? (
+                        <p className="text-center text-xs text-slate-400 py-4">{t("meetings.no_items")}</p>
+                      ) : attendeeItems().map((item) => {
+                        const selected = isAttendee(item.email);
+                        return (
+                          <button key={`${attendeeTab}-${item.id}`} onClick={() => toggleAttendee(item.email)} disabled={!item.email}
+                            className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs disabled:opacity-40 ${selected ? "bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800" : "bg-slate-50 dark:bg-zinc-800 border border-transparent hover:border-slate-200 dark:hover:border-zinc-700"}`}>
+                            <span className="font-bold text-slate-700 dark:text-zinc-200 truncate">{item.name}</span>
+                            <span className="flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 shrink-0">
+                              <span className="max-w-[140px] truncate">{item.email || "—"}</span>
+                              {selected ? <CheckCircle2 className="w-4 h-4 text-violet-500" /> : <Plus className="w-3.5 h-3.5" />}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">{t("meetings.notes")}</label>

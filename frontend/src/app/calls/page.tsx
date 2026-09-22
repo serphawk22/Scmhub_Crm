@@ -296,6 +296,7 @@ export default function CallsPage() {
   const [clients, setClients] = useState<any[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [teamUsers, setTeamUsers] = useState<{ id: number; name: string; email: string; role: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLogModal, setShowLogModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -322,27 +323,42 @@ export default function CallsPage() {
   };
   const removeToast = (id: number) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
+  const authHeaders = () => {
+    const headers: Record<string, string> = {};
+    try {
+      const saved = localStorage.getItem("crm_user");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.id) headers["X-User-ID"] = String(parsed.id);
+        if (parsed.tenant_id && parsed.role !== "SuperAdmin") headers["X-Tenant-ID"] = String(parsed.tenant_id);
+      }
+    } catch (e) {}
+    return headers;
+  };
+
   const fetchAll = async () => {
     try {
       const [callsRes, schedRes, aiLogsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/calls`),
-        fetch(`${API_BASE_URL}/scheduled-calls`),
-        fetch(`${API_BASE_URL}/calling-agent-logs`),
+        fetch(`${API_BASE_URL}/calls`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/scheduled-calls`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/calling-agent-logs`, { headers: authHeaders() }),
       ]);
 
       const [callsData, schedData, aiLogsData] = await Promise.all([
-        callsRes.json(),
-        schedRes.json(),
-        aiLogsRes.json(),
+        callsRes.ok ? callsRes.json().catch(() => null) : null,
+        schedRes.ok ? schedRes.json().catch(() => null) : null,
+        aiLogsRes.ok ? aiLogsRes.json().catch(() => null) : null,
       ]);
 
       console.log("📞 Calls API Response:", callsData);
       console.log("📅 Scheduled Calls API Response:", schedData);
       console.log("🤖 AI Calls API Response:", aiLogsData);
 
-      setCalls(callsData.calls || []);
-      setScheduledCalls(schedData.scheduled_calls || []);
-      setAiCallLogs(aiLogsData.calling_agent_logs || []);
+      // Only commit state from valid 2xx responses so a slow/failed poll never
+      // blanks out previously loaded data ("visible then invisible").
+      if (callsRes.ok && callsData && Array.isArray(callsData.calls)) setCalls(callsData.calls);
+      if (schedRes.ok && schedData && Array.isArray(schedData.scheduled_calls)) setScheduledCalls(schedData.scheduled_calls);
+      if (aiLogsRes.ok && aiLogsData && Array.isArray(aiLogsData.calling_agent_logs)) setAiCallLogs(aiLogsData.calling_agent_logs);
     } catch (e) {
       console.error("❌ Error fetching calls:", e);
     } finally {
@@ -352,21 +368,24 @@ export default function CallsPage() {
 
   const loadEntityLists = async () => {
     try {
-      const [clientsRes, leadsRes, contactsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/clients?per_page=100&page=1`),
-        fetch(`${API_BASE_URL}/leads`),
-        fetch(`${API_BASE_URL}/contacts`),
+      const [clientsRes, leadsRes, contactsRes, usersRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/clients?per_page=100&page=1`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/leads`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/contacts`, { headers: authHeaders() }),
+        fetch(`${API_BASE_URL}/users?role=Admin,SalesManager,Employee,ProjectMember,Intern`, { headers: authHeaders() }),
       ]);
 
-      const [clientsData, leadsData, contactsData] = await Promise.all([
-        clientsRes.json(),
-        leadsRes.json(),
-        contactsRes.json(),
+      const [clientsData, leadsData, contactsData, usersData] = await Promise.all([
+        clientsRes.ok ? clientsRes.json().catch(() => null) : null,
+        leadsRes.ok ? leadsRes.json().catch(() => null) : null,
+        contactsRes.ok ? contactsRes.json().catch(() => null) : null,
+        usersRes.ok ? usersRes.json().catch(() => null) : null,
       ]);
 
-      setClients(clientsData.clients || []);
-      setLeads(leadsData.leads || []);
-      setContacts(contactsData.contacts || []);
+      setClients((clientsData && clientsData.clients) || []);
+      setLeads((leadsData && leadsData.leads) || []);
+      setContacts((contactsData && contactsData.contacts) || []);
+      if (usersData && Array.isArray(usersData.users)) setTeamUsers(usersData.users);
     } catch (e) {
       console.error(e);
     }
@@ -419,9 +438,9 @@ export default function CallsPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE_URL}/calls`, {
+      const res = await fetch(`${API_BASE_URL}/calls`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           phone_number: logForm.phone_number,
           duration_seconds: logForm.duration_seconds ? parseInt(logForm.duration_seconds) : null,
@@ -432,6 +451,10 @@ export default function CallsPage() {
           followup_date: logForm.followup_date || null,
         }),
       });
+      if (!res.ok) {
+        addToast(t("calls.failed_log_toast") || "Failed to log call", "error");
+        return;
+      }
       setLogForm({ phone_number: "", duration_seconds: "", description: "", work_done: "", assigned_to: "", followup_needed: false, followup_date: "" });
       setShowLogModal(false);
       fetchAll();
@@ -465,9 +488,9 @@ export default function CallsPage() {
       const entityName = getEntityName(schedForm.entity_type, schedForm.entity_id);
       const entityEmail = getEntityEmail(schedForm.entity_type, schedForm.entity_id);
       let pitch = generatedPitch || null;
-      await fetch(`${API_BASE_URL}/scheduled-calls`, {
+      const res = await fetch(`${API_BASE_URL}/scheduled-calls`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           title: schedForm.title,
           scheduled_at: schedForm.scheduled_at || null,
@@ -480,11 +503,24 @@ export default function CallsPage() {
           assigned_to: schedForm.assigned_to || null,
         }),
       });
+      let data: any = null;
+      try { data = await res.json(); } catch {}
+
+      // Email confirmation UI rejected the send → do NOT schedule or close.
+      if (data && data.cancelled) {
+        addToast(t("calls.email_cancelled_toast") || "Email not sent. Call not scheduled.", "info");
+        return;
+      }
+      if (!res.ok) {
+        addToast(data?.detail || data?.message || t("calls.failed_schedule_toast") || "Failed to schedule call.", "error");
+        return;
+      }
       setSchedForm({ title: "", scheduled_at: "", entity_type: "client", entity_id: "", notes: "", assigned_to: "", generatePitch: false });
       setGeneratedPitch("");
       setShowScheduleModal(false);
       setActiveTab("scheduled");
       fetchAll();
+      addToast(t("calls.scheduled_toast") || "Call scheduled — email sent to client.", "success");
     } finally { setSubmitting(false); }
   };
 
@@ -729,7 +765,7 @@ export default function CallsPage() {
 
           {/* Scheduled Calls */}
           {activeTab === "scheduled" && (
-            <motion.div key="scheduled" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+            <motion.div key="scheduled" variants={containerVariants} initial="hidden" animate="show" exit="hidden" className="space-y-4">
               {loading ? (
                 <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>
               ) : scheduledCalls.length === 0 ? (
@@ -740,7 +776,7 @@ export default function CallsPage() {
                 </div>
               ) : (
                 scheduledCalls.map((sc) => (
-                  <motion.div key={sc.id} variants={itemVariants}
+                  <motion.div key={sc.id} variants={itemVariants} initial="hidden" animate="show"
                     className={cn("bg-white dark:bg-zinc-900/60 backdrop-blur-2xl border rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] p-6 transition-all",
                       sc.status === "Completed" ? "border-emerald-100 dark:border-emerald-900/40 opacity-75" : "border-slate-100 dark:border-zinc-800")}>
                     <div className="flex items-start gap-4">
@@ -889,9 +925,11 @@ export default function CallsPage() {
                     </div>
                     <div>
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{t("calls.assigned_to")}</label>
-                      <input type="text" placeholder={t("calls.assign_placeholder")} value={logForm.assigned_to}
-                        onChange={(e) => setLogForm({ ...logForm, assigned_to: e.target.value })}
-                        className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl font-bold text-slate-700 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-indigo-400/30" />
+                      <select value={logForm.assigned_to} onChange={(e) => setLogForm({ ...logForm, assigned_to: e.target.value })}
+                        className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl font-bold text-slate-700 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-indigo-400/30">
+                        <option value="">{t("calls.select_team_member")}</option>
+                        {teamUsers.map((u) => <option key={u.id} value={u.name}>{u.name}</option>)}
+                      </select>
                     </div>
                   </div>
                   <div>
@@ -977,26 +1015,33 @@ export default function CallsPage() {
                       </select>
                     </div>
                   </div>
-                  {schedForm.entity_id && (
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-black text-purple-600 uppercase tracking-widest">{t("calls.ai_pitch")}</p>
-                        <button type="button" onClick={handleGeneratePitchInSched} disabled={generating}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-xs transition-all disabled:opacity-50">
-                          {generating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                          {generating ? t("calls.generating") : generatedPitch ? t("calls.regenerate") : t("calls.generate_pitch")}
-                        </button>
+                  {schedForm.entity_id && (() => {
+                    const em = getEntityEmail(schedForm.entity_type, schedForm.entity_id);
+                    return em ? (
+                      <div className="flex items-start gap-2 p-3 bg-sky-50 dark:bg-sky-950/20 rounded-xl border border-sky-100 dark:border-sky-900/40">
+                        <Mail className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                        <p className="text-xs text-sky-700 dark:text-sky-300 font-medium break-all">
+                          {t("calls.notify_email").replace("{email}", em)}
+                        </p>
                       </div>
-                      {generatedPitch ? (
-                        <div className="bg-white/70 dark:bg-zinc-900/50 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
-                          <textarea rows={8} value={generatedPitch} onChange={(e) => setGeneratedPitch(e.target.value)}
-                            className="w-full text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed bg-transparent outline-none resize-y" />
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-500 dark:text-zinc-400">{t("calls.click_generate")}</p>
-                      )}
-                    </div>
-                  )}
+                    ) : null;
+                  })()}
+                  <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-3">
+                    <p className="text-xs font-black text-purple-600 uppercase tracking-widest">{t("calls.ai_pitch")}</p>
+                    <button type="button" onClick={handleGeneratePitchInSched} disabled={generating || !schedForm.entity_id}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50">
+                      {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                      {generating ? t("calls.generating") : generatedPitch ? t("calls.regenerate") : t("calls.generate_pitch")}
+                    </button>
+                    {generatedPitch ? (
+                      <div className="bg-white/70 dark:bg-zinc-900/50 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
+                        <textarea rows={8} value={generatedPitch} onChange={(e) => setGeneratedPitch(e.target.value)}
+                          className="w-full text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed bg-transparent outline-none resize-y" />
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 dark:text-zinc-400">{!schedForm.entity_id ? t("calls.select_entity_first") : t("calls.click_generate")}</p>
+                    )}
+                  </div>
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{t("calls.notes")}</label>
                     <textarea rows={2} placeholder={t("calls.notes_placeholder")} value={schedForm.notes}
@@ -1005,9 +1050,11 @@ export default function CallsPage() {
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{t("calls.assign_to")}</label>
-                    <input type="text" placeholder={t("calls.assign_placeholder")} value={schedForm.assigned_to}
-                      onChange={(e) => setSchedForm({ ...schedForm, assigned_to: e.target.value })}
-                      className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl font-bold text-slate-700 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-indigo-400/30" />
+                    <select value={schedForm.assigned_to} onChange={(e) => setSchedForm({ ...schedForm, assigned_to: e.target.value })}
+                      className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl font-bold text-slate-700 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-indigo-400/30">
+                      <option value="">{t("calls.select_team_member")}</option>
+                      {teamUsers.map((u) => <option key={u.id} value={u.name}>{u.name}</option>)}
+                    </select>
                   </div>
                   <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/30">
                     <Bell className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />

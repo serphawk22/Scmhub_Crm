@@ -16,8 +16,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useState, useEffect, useCallback } from "react";
 import { API_BASE_URL } from "@/config";
-import { useTranslation } from "react-i18next";
-import { useLanguage, Language } from "@/context/LanguageContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 // --- DND Kit Imports ---
 import {
@@ -517,44 +516,8 @@ export function Sidebar({ role }: SidebarProps) {
     return v === k ? item.name : v;
   };
 
-  // ── Language Toggle ──
-  const { i18n } = useTranslation();
-  const { t, setLanguage } = useLanguage();
-  const [activeLang, setActiveLang] = useState<"en" | "es">("en");
-
-  const switchLanguage = useCallback((lang: "en" | "es") => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem("crm-language", lang);
-    setLanguage(lang as Language);
-    setActiveLang(lang);
-
-    if (lang === "en") {
-      // Set flag BEFORE reload — sync script in <head> reads this and adds
-      // 'notranslate' to <html> BEFORE GT loads, so GT never retranslates.
-      sessionStorage.setItem("crm_gt_restore_en", "1");
-      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
-      window.location.reload();
-      return;
-    }
-
-    // Switching TO Spanish:
-    // Remove notranslate so GT is allowed to translate the page.
-    document.documentElement.classList.remove("notranslate");
-    document.documentElement.removeAttribute("translate");
-
-    const triggerGT = (attempts = 0) => {
-      const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-      if (select) {
-        select.value = lang;
-        select.dispatchEvent(new Event("change"));
-      } else if (attempts < 25) {
-        setTimeout(() => triggerGT(attempts + 1), 100);
-      }
-    };
-    triggerGT();
-  }, [i18n, setLanguage]);
+  // ── Language (English only) ──
+  const { t } = useLanguage();
 
   return (
     <>
@@ -613,61 +576,23 @@ export function Sidebar({ role }: SidebarProps) {
           </AnimatePresence>
         </div>
 
-        {/* ── LANGUAGE TOGGLE (top-left, below branding) ── */}
+        {/* ── THEME TOGGLE (top-left, below branding) ── */}
         <div className={cn("shrink-0 pb-1.5", collapsed ? "flex flex-col items-center gap-2 px-2" : "px-3")}>
-          {collapsed ? (
-            <>
-              {/* Collapsed: single flag, click cycles EN ↔ ES */}
-              <button
-                onClick={() => switchLanguage(activeLang === "en" ? "es" : "en")}
-                title={activeLang === "en" ? t("sidebar.switch_es") : t("sidebar.switch_en")}
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-lg hover:bg-white/10 transition-all"
-              >
-                {activeLang === "en" ? "🇺🇸" : "🇪🇸"}
-              </button>
-              
-              {/* Collapsed: Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all"
-              >
-                {theme === "dark" ? <Sun className="w-4 h-4 text-yellow-500" /> : <Moon className="w-4 h-4 text-indigo-500" />}
-              </button>
-            </>
-          ) : (
-            // Expanded: full pill toggle
-            <div
-              className="flex items-center gap-0.5 p-0.5 rounded-xl border"
-              style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-            >
-              <button
-                onClick={() => switchLanguage("en")}
-                title={t("sidebar.switch_en")}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black transition-all duration-200",
-                  activeLang === "en" ? "bg-white shadow-sm" : "hover:opacity-70"
-                )}
-                style={activeLang === "en" ? { color: "var(--accent)" } : { color: "var(--text-secondary)" }}
-              >
-                <span className="text-[12px] leading-none">🇺🇸</span>
-                <span>EN</span>
-              </button>
-
-              <button
-                onClick={() => switchLanguage("es")}
-                title={t("sidebar.switch_es")}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black transition-all duration-200",
-                  activeLang === "es" ? "bg-white shadow-sm" : "hover:opacity-70"
-                )}
-                style={activeLang === "es" ? { color: "var(--accent)" } : { color: "var(--text-secondary)" }}
-              >
-                <span className="text-[12px] leading-none">🇪🇸</span>
-                <span>ES</span>
-              </button>
-            </div>
-          )}
+          <button
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className={cn(
+              "flex items-center justify-center transition-all hover:bg-white/10 rounded-xl",
+              collapsed ? "w-8 h-8" : "w-full px-3 py-1.5 gap-1.5"
+            )}
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 text-yellow-500" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+            {!collapsed && (
+              <span className="text-[10px] font-black" style={{ color: "var(--text-secondary)" }}>
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* ── SEARCH BAR ── */}

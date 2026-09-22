@@ -176,7 +176,10 @@ def _add_tenant_filter(execute_state):
 @event.listens_for(SASession, "before_flush")
 def _auto_assign_tenant_id(session, flush_context, instances):
     tenant_id = current_tenant_id.get()
-    if tenant_id is None:
+    # Only stamp valid tenants. -1 is a sentinel used by the middleware for
+    # unauthenticated requests (hides all rows on read); stamping it on a write
+    # causes a ForeignKeyViolation. None means no tenant context (e.g. SuperAdmin).
+    if not tenant_id or tenant_id < 1:
         return
         
     global_tables = [
@@ -204,6 +207,19 @@ def _audit_log_changes(session, flush_context):
         user_id = current_salesperson_id.get()
     except Exception:
         pass
+
+    # Validate the acting user actually exists before writing audit rows.
+    # A stale/deleted user id (e.g. header sent user id 35 that no longer exists)
+    # would violate audit_logs_user_id_fkey and roll back the ENTIRE transaction.
+    if user_id:
+        try:
+            from database import User
+            from sqlmodel import select
+            exists = session.execute(select(User.id).where(User.id == user_id)).first()
+            if exists is None:
+                user_id = None
+        except Exception:
+            user_id = None
         
     tenant_id = current_tenant_id.get()
     audit_entries = []
@@ -350,6 +366,13 @@ def _require_roles(session: Session, allowed_roles):
     if role == "SuperAdmin" or (user.email or "").lower() == "admin@serphawk.com" or role in allowed_roles:
         return user
     raise HTTPException(status_code=403, detail="Forbidden")
+
+def _current_user(session: Session) -> Optional[User]:
+    """Return the authenticated User for this request, or None if not authenticated."""
+    uid = current_salesperson_id.get()
+    if not uid:
+        return None
+    return session.get(User, uid) if session else None
 
 from modules.api_tracker import current_client_id, current_salesperson_id, current_endpoint, patch_openai
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -583,27 +606,31 @@ def on_startup():
             harshith.role = "Admin"
             session.add(harshith)
             
-        admin = session.exec(select(User).where(User.email == "admin@serphawk.com")).first()
-        if admin:
-            admin.password = _hash_password("Admin123!")
-            session.add(admin)
-            
-        sm = session.exec(select(User).where(User.email == "varsh@gmail.com")).first()
-        if sm:
-            sm.password = _hash_password("Admin123!")
-            session.add(sm)
-            
-        emp = session.exec(select(User).where(User.email == "varshit@gmail.com")).first()
-        if emp:
-            emp.password = _hash_password("Admin123!")
-            session.add(emp)
+        # Provision canonical accounts if they're missing (e.g. when the DB was
+        # re-seeded and the app's expected logins no longer exist). Idempotent:
+        # existing accounts just get their password reset.
+        default_tenant = session.exec(select(Tenant.id).order_by(Tenant.id).limit(1)).first()
 
-        # Dedicated Demo-role account used by the frontend demo login button.
-        # Reset its password on startup so the demo always works.
-        demo = session.exec(select(User).where(User.email == "demo@serphawk.com")).first()
-        if demo:
-            demo.password = _hash_password("DemoPass123!")
-            session.add(demo)
+        def _ensure_user(email: str, name: str, role: str, password: str):
+            u = session.exec(select(User).where(User.email == email)).first()
+            if u is None:
+                new_user = User(
+                    name=name,
+                    email=email,
+                    password=_hash_password(password),
+                    role=role,
+                    tenant_id=default_tenant if (default_tenant and default_tenant > 0) else 1,
+                )
+                session.add(new_user)
+                print(f"Provisioned missing account: {email} ({role})")
+            else:
+                u.password = _hash_password(password)
+                session.add(u)
+
+        _ensure_user("admin@serphawk.com", "Admin", "Admin", "Admin123!")
+        _ensure_user("demo@serphawk.com", "Demo", "Demo", "DemoPass123!")
+        _ensure_user("varsh@gmail.com", "Varshith", "Admin", "Admin123!")
+        _ensure_user("varshit@gmail.com", "Varshit", "Employee", "Admin123!")
 
         session.commit()
         session.close()
@@ -2927,6 +2954,11 @@ def list_clients(
     if tenant_id and tenant_id != 1:
         q = q.where(ClientProfile.tenant_id == tenant_id)
         count_q = count_q.where(ClientProfile.tenant_id == tenant_id)
+
+    caller = _current_user(session)
+    if caller and _normalize_role(caller.role) == "SalesManager":
+        q = q.where(ClientProfile.assignedEmployeeId == caller.id)
+        count_q = count_q.where(ClientProfile.assignedEmployeeId == caller.id)
         
     if status and status != "All":
         count_q = count_q.where(ClientProfile.status == status)
@@ -2941,6 +2973,8 @@ def list_clients(
         count_q = count_q.where(cond)
     if assigned_employee_id is not None:
         count_q = count_q.where(ClientProfile.assignedEmployeeId == assigned_employee_id)
+    if caller and _normalize_role(caller.role) == "SalesManager":
+        count_q = count_q.where(ClientProfile.assignedEmployeeId == caller.id)
 
     total = session.exec(count_q).one()
     clients = session.exec(q.order_by(ClientProfile.id.desc()).offset((page - 1) * per_page).limit(per_page)).all()
@@ -3297,6 +3331,9 @@ def export_clients_csv(session: Session = Depends(get_session)):
     q = select(ClientProfile)
     if tenant_id and tenant_id > 0:
         q = q.where(ClientProfile.tenant_id == tenant_id)
+    caller = _current_user(session)
+    if caller and _normalize_role(caller.role) == "SalesManager":
+        q = q.where(ClientProfile.assignedEmployeeId == caller.id)
     clients_list = session.exec(q.order_by(ClientProfile.id.asc())).all()
 
     # Build employee lookup
@@ -3583,6 +3620,9 @@ def get_client(client_id: int, session: Session = Depends(get_session)):
     cp = session.get(ClientProfile, client_id)
     if not cp:
         raise HTTPException(status_code=404, detail="Client not found")
+    caller = _current_user(session)
+    if caller and _normalize_role(caller.role) == "SalesManager" and cp.assignedEmployeeId != caller.id:
+        raise HTTPException(status_code=403, detail="You can only view clients assigned to you")
     return {"client": _client_dict(cp, session)}
 
 class SimulateCallRequest(BaseModel):
@@ -5236,6 +5276,7 @@ def reports_summary(
     conversations = [conversation for conversation in scoped(ConversationLog) if _in_report_range(conversation.created_at, start, end)]
     tickets = [ticket for ticket in scoped(ProjectTicket) if _in_report_range(ticket.created_at, start, end)]
     cases = [case for case in scoped(Case) if _in_report_range(case.created_at, start, end)]
+    meetings = [meeting for meeting in scoped(Meeting) if meeting.scheduled_at and _in_report_range(meeting.scheduled_at, start, end)]
     task_entries = [entry for entry in scoped(TaskSheetEntry) if start <= date.fromisoformat(entry.work_date) <= end]
     users = {user.id: user for user in scoped(User)}
 
@@ -5260,11 +5301,12 @@ def reports_summary(
         if not user_id:
             return None
         user = users.get(user_id)
-        bucket = staff.setdefault(user_id, {"user_id": user_id, "name": name or (user.name if user else "Unknown"), "role": user.role if user else "Unknown", "activities": 0, "calls": 0, "emails": 0, "tickets": 0, "cases": 0, "task_entries": 0, "completed_tasks": 0})
+        bucket = staff.setdefault(user_id, {"user_id": user_id, "name": name or (user.name if user else "Unknown"), "role": user.role if user else "Unknown", "activities": 0, "calls": 0, "emails": 0, "tickets": 0, "cases": 0, "meetings": 0, "task_entries": 0, "completed_tasks": 0})
         return bucket
 
     for item in activities:
-        staff_bucket(item.userId)["activities"] += 1
+        if item.userId:
+            staff_bucket(item.userId)["activities"] += 1
     for item in calls:
         if item.assigned_to:
             bucket = staff_bucket(next((u.id for u in users.values() if u.name and u.name == item.assigned_to), None), item.assigned_to)
@@ -5272,24 +5314,35 @@ def reports_summary(
                 bucket["calls"] += 1
     for item in emails:
         lead = next((lead for lead in all_leads if lead.email == item.to_email), None)
-        staff_bucket(lead.owner_id if lead else None)["emails"] += 1
+        bucket = staff_bucket(lead.owner_id if lead else None)
+        if bucket:
+            bucket["emails"] += 1
     for item in tickets:
         owner = next((u for u in users.values() if (u.name or "").lower() == (item.current_owner or "").lower() or str(u.id) == (item.current_owner or "")), None)
-        staff_bucket(owner.id if owner else None)["tickets"] += 1
+        bucket = staff_bucket(owner.id if owner else None)
+        if bucket:
+            bucket["tickets"] += 1
     for item in cases:
-        staff_bucket(item.assigned_to)["cases"] += 1
+        bucket = staff_bucket(item.assigned_to)
+        if bucket:
+            bucket["cases"] += 1
+    for item in meetings:
+        bucket = staff_bucket(item.host_id)
+        if bucket:
+            bucket["meetings"] += 1
     for item in task_entries:
         bucket = staff_bucket(item.user_id, "Unknown")
-        bucket["task_entries"] += 1
-        if item.status.lower() in ("done", "completed"):
-            bucket["completed_tasks"] += 1
+        if bucket:
+            bucket["task_entries"] += 1
+            if item.status.lower() in ("done", "completed"):
+                bucket["completed_tasks"] += 1
     for bucket in staff.values():
-        bucket["total_work"] = sum(bucket[key] for key in ("activities", "calls", "emails", "tickets", "cases", "task_entries"))
+        bucket["total_work"] = sum(bucket[key] for key in ("activities", "calls", "emails", "tickets", "cases", "meetings", "task_entries"))
 
     daily: dict[str, dict] = {}
     for offset in range((end - start).days + 1):
         day = (start + timedelta(days=offset)).isoformat()
-        daily[day] = {"date": day, "leads": 0, "clients_onboarded": 0, "deals_won": 0, "emails": 0, "activities": 0, "task_entries": 0, "tickets": 0, "cases_resolved": 0}
+        daily[day] = {"date": day, "leads": 0, "clients_onboarded": 0, "deals_won": 0, "emails": 0, "activities": 0, "calls": 0, "meetings": 0, "task_entries": 0, "tickets": 0, "cases_resolved": 0}
     for lead in leads: daily[lead.created_at.date().isoformat()]["leads"] += 1
     for client in clients:
         user = users.get(client.userId) if client.userId else None
@@ -5297,6 +5350,8 @@ def reports_summary(
     for deal in won_deals: daily[deal.created_at.date().isoformat()]["deals_won"] += 1
     for email in emails: daily[email.sent_at.date().isoformat()]["emails"] += 1
     for activity in activities: daily[activity.createdAt.date().isoformat()]["activities"] += 1
+    for call in calls: daily[call.createdAt.date().isoformat()]["calls"] += 1
+    for meeting in meetings: daily[meeting.scheduled_at.date().isoformat()]["meetings"] += 1
     for entry in task_entries: daily[date.fromisoformat(entry.work_date).isoformat()]["task_entries"] += 1
     for ticket in tickets: daily[ticket.created_at.date().isoformat()]["tickets"] += 1
     for case in cases:
@@ -5305,12 +5360,14 @@ def reports_summary(
     onboarded = [client for client in clients if client.userId and users.get(client.userId) and _in_report_range(users[client.userId].createdAt, start, end)]
     return {
         "range": {"start_date": start.isoformat(), "end_date": end.isoformat()},
-        "summary": {"leads": len(leads), "clients_onboarded": len(onboarded), "total_clients": len(clients), "deals_created": len(deals), "deals_won": len(won_deals), "pipeline_value": round(sum(deal.value or 0 for deal in deals if deal.stage not in ("Closed Lost",)), 2), "won_value": round(sum(deal.value or 0 for deal in won_deals), 2), "emails": len(emails), "activities": len(activities), "calls": len(calls), "tickets": len(tickets), "task_entries": len(task_entries), "cases_resolved": sum(1 for case in cases if case.status in ("Resolved", "Closed")), "conversion_percentage": conversion_percentage, "deal_win_rate": win_rate},
+        "summary": {"leads": len(leads), "clients_onboarded": len(onboarded), "total_clients": len(clients), "deals_created": len(deals), "deals_won": len(won_deals), "pipeline_value": round(sum(deal.value or 0 for deal in deals if deal.stage not in ("Closed Lost",)), 2), "won_value": round(sum(deal.value or 0 for deal in won_deals), 2), "emails": len(emails), "activities": len(activities), "calls": len(calls), "meetings": len(meetings), "tickets": len(tickets), "task_entries": len(task_entries), "cases_resolved": sum(1 for case in cases if case.status in ("Resolved", "Closed")), "conversion_percentage": conversion_percentage, "deal_win_rate": win_rate},
         "sales": {"deals": [{"id": deal.id, "title": deal.title, "value": deal.value, "stage": deal.stage, "assigned_to": users.get(deal.assigned_to).name if deal.assigned_to and users.get(deal.assigned_to) else "Unassigned"} for deal in deals], "won_value": round(sum(deal.value or 0 for deal in won_deals), 2)},
         "daily": list(daily.values()),
-        "monthly": [{"month": month, "leads": sum(item["leads"] for item in daily.values() if item["date"][:7] == month), "clients_onboarded": sum(item["clients_onboarded"] for item in daily.values() if item["date"][:7] == month), "deals_won": sum(item["deals_won"] for item in daily.values() if item["date"][:7] == month), "emails": sum(item["emails"] for item in daily.values() if item["date"][:7] == month)} for month in sorted({item["date"][:7] for item in daily.values()})],
+        "monthly": [{"month": month, "leads": sum(item["leads"] for item in daily.values() if item["date"][:7] == month), "clients_onboarded": sum(item["clients_onboarded"] for item in daily.values() if item["date"][:7] == month), "deals_won": sum(item["deals_won"] for item in daily.values() if item["date"][:7] == month), "emails": sum(item["emails"] for item in daily.values() if item["date"][:7] == month), "calls": sum(item["calls"] for item in daily.values() if item["date"][:7] == month), "meetings": sum(item["meetings"] for item in daily.values() if item["date"][:7] == month)} for month in sorted({item["date"][:7] for item in daily.values()})],
         "staff_performance": sorted(staff.values(), key=lambda item: item["total_work"], reverse=True),
         "lead_sources": sorted(source_map.values(), key=lambda item: item["leads"], reverse=True),
+        "calls": [{"id": call.id, "date": call.createdAt.isoformat(), "phone_number": call.phone_number, "assigned_to": call.assigned_to or "Unassigned", "duration_seconds": call.duration_seconds, "summary": call.summary, "followup_needed": call.followup_needed, "followup_date": call.followup_date} for call in calls],
+        "meetings": [{"id": meeting.id, "scheduled_at": meeting.scheduled_at.isoformat(), "title": meeting.title, "meeting_type": meeting.meeting_type, "status": meeting.status, "host": users.get(meeting.host_id).name if meeting.host_id and users.get(meeting.host_id) else "Unassigned", "duration_minutes": meeting.duration_minutes, "location": meeting.location, "outcome": meeting.outcome} for meeting in meetings],
         "onboarding": {"total_clients": len(clients), "new_in_range": len(onboarded), "active": sum(1 for client in clients if client.status == "Active"), "pending": sum(1 for client in clients if client.status == "Pending"), "hold": sum(1 for client in clients if client.status == "Hold")},
     }
 
@@ -5838,7 +5895,21 @@ class ScheduledCallCreateRequest(BaseModel):
     notes: Optional[str] = None
     assigned_to: Optional[str] = None
 
-def _sched_dict(s: ScheduledCall) -> dict:
+def _sched_dict(s: ScheduledCall, session: Session = None) -> dict:
+    phone = None
+    try:
+        if session is not None:
+            if s.entity_type == "client" and s.entity_id:
+                cp = session.get(ClientProfile, s.entity_id)
+                phone = cp.phone if cp else None
+            elif s.entity_type == "lead" and s.entity_id:
+                lead = session.get(Lead, s.entity_id)
+                phone = lead.phone if lead else None
+            elif s.entity_type == "contact" and s.entity_id:
+                contact = session.get(Contact, s.entity_id)
+                phone = contact.mobile_number if contact else None
+    except Exception:
+        phone = None
     return {
         "id": s.id,
         "title": s.title,
@@ -5847,6 +5918,7 @@ def _sched_dict(s: ScheduledCall) -> dict:
         "entity_id": s.entity_id,
         "entity_name": s.entity_name,
         "entity_email": s.entity_email,
+        "phone_number": phone,
         "pitch": s.pitch,
         "notes": s.notes,
         "assigned_to": s.assigned_to,
@@ -5857,7 +5929,30 @@ def _sched_dict(s: ScheduledCall) -> dict:
 @app.get("/scheduled-calls")
 def list_scheduled_calls(session: Session = Depends(get_session)):
     items = session.exec(select(ScheduledCall).order_by(ScheduledCall.scheduled_at.asc())).all()
-    return {"scheduled_calls": [_sched_dict(s) for s in items]}
+    return {"scheduled_calls": [_sched_dict(s, session) for s in items]}
+
+def _resolve_tenant_id(session) -> Optional[int]:
+    """Return a valid, insertable tenant_id for this request.
+
+    Priority: active tenant context (set from the authenticated user by the
+    middleware) -> the authenticated user's own tenant -> the default tenant.
+    Never returns the -1 sentinel (unauthenticated) so writes cannot crash on
+    the tenants foreign key.
+    """
+    t_id = current_tenant_id.get()
+    if t_id and t_id > 0:
+        return t_id
+    uid = current_salesperson_id.get()
+    if uid:
+        try:
+            u = session.get(User, uid)
+            if u and u.tenant_id and u.tenant_id > 0:
+                return u.tenant_id
+        except Exception:
+            pass
+    default = session.exec(select(Tenant.id).order_by(Tenant.id).limit(1)).first()
+    return default if default and default > 0 else None
+
 
 @app.post("/scheduled-calls")
 def create_scheduled_call(body: ScheduledCallCreateRequest, session: Session = Depends(get_session)):
@@ -5878,25 +5973,61 @@ def create_scheduled_call(body: ScheduledCallCreateRequest, session: Session = D
         pitch=body.pitch,
         notes=body.notes,
         assigned_to=body.assigned_to,
+        tenant_id=_resolve_tenant_id(session),
     )
     session.add(sc)
     session.commit()
-    session.refresh(sc)
+    # Unauthenticated requests run with current_tenant_id == -1, which makes the
+    # ORM tenant filter hide every row (and would make post-commit reloads fail
+    # with "Instance ... has been deleted" / "Could not refresh instance"). Reset
+    # the context to None for the reload so the committed row is always returned.
+    tok = current_tenant_id.set(None)
+    try:
+        sc = session.exec(
+            select(ScheduledCall).where(ScheduledCall.id == sc.id)
+        ).first()
+    finally:
+        current_tenant_id.reset(tok)
 
     # Send email notification if entity_email provided
     if body.entity_email:
         try:
+            from modules.email_sender import _escape_html
             dt_str = dt.strftime("%Y-%m-%d %H:%M") if dt else "TBD"
-            pitch_section = f"\n\n📋 Pitch Prepared:\n{body.pitch}" if body.pitch else ""
             subject = f"📞 Call Scheduled: {body.title}"
+
+            pitch_html = ""
+            if body.pitch:
+                escaped_pitch = _escape_html(body.pitch).replace("\n", "<br>")
+                pitch_html = (
+                    '<div style="margin:18px 0 4px;padding:16px 20px;background:#fbf7ff;'
+                    'border:1px solid #e9defa;border-radius:12px;">'
+                    '<p style="margin:0 0 8px;color:#7c3aed;font-size:12px;font-weight:700;'
+                    'letter-spacing:0.5px;text-transform:uppercase;">Your AI-Prepared Pitch</p>'
+                    f'<p style="margin:0;color:#374151;font-size:14px;line-height:1.75;">{escaped_pitch}</p>'
+                    '</div>'
+                )
+
             content = (
-                f"Hello {body.entity_name or ''},\n\n"
-                f"A call has been scheduled for you.\n\n"
-                f"📅 Date & Time: {dt_str}\n"
-                f"📌 Topic: {body.title}\n"
-                f"{pitch_section}\n\n"
-                f"Our team will reach out at the scheduled time.\n\n"
-                f"Thanks,\nSerpHawk CRM"
+                f'<p style="margin:0 0 14px;color:#475569;font-size:14px;line-height:1.7;">'
+                f'Hi {_escape_html(body.entity_name or "there")},</p>'
+                f'<p style="margin:0 0 18px;color:#475569;font-size:14px;line-height:1.7;">'
+                f'A call has been scheduled for you. Here are the details:</p>'
+                '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+                'style="margin:4px 0 20px;border:1px solid #e6e9f0;border-radius:12px;overflow:hidden;">'
+                f'<tr><td style="padding:12px 16px;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;">'
+                f'Date &amp; Time</td><td style="padding:12px 16px;color:#0f172a;font-size:14px;font-weight:600;">'
+                f'{_escape_html(dt_str)}</td></tr>'
+                f'<tr><td style="padding:12px 16px;background:#ffffff;border-top:1px solid #eef1f7;'
+                f'color:#64748b;font-size:13px;font-weight:600;">Topic</td>'
+                f'<td style="padding:12px 16px;border-top:1px solid #eef1f7;color:#0f172a;font-size:14px;font-weight:600;">'
+                f'{_escape_html(body.title)}</td></tr>'
+                '</table>'
+                f'{pitch_html}'
+                f'<p style="margin:14px 0 0;color:#475569;font-size:14px;line-height:1.7;">'
+                f'Our team will reach out at the scheduled time. If you have any questions, feel free to reply to this email.</p>'
+                f'<p style="margin:18px 0 0;color:#475569;font-size:14px;line-height:1.7;">'
+                f'Best regards,<br><strong>SerpHawk Team</strong></p>'
             )
             _send_notification_email(body.entity_email, subject, content)
         except Exception as e:
@@ -5906,11 +6037,11 @@ def create_scheduled_call(body: ScheduledCallCreateRequest, session: Session = D
     try:
         from modules.whatsapp import send_ai_polished_whatsapp_message
         base_url = "https://crm-seo.allytechcourses.com"
-        send_ai_polished_whatsapp_message("Scheduled Call Created", _sched_dict(sc), f"{base_url}/calls")
+        send_ai_polished_whatsapp_message("Scheduled Call Created", _sched_dict(sc, session), f"{base_url}/calls")
     except Exception as e:
         print("WhatsApp Error:", e)
         
-    return {"scheduled_call": _sched_dict(sc)}
+    return {"scheduled_call": _sched_dict(sc, session)}
 
 @app.put("/scheduled-calls/{sc_id}")
 def update_scheduled_call(sc_id: int, body: Dict[str, Any], session: Session = Depends(get_session)):
@@ -5928,11 +6059,11 @@ def update_scheduled_call(sc_id: int, body: Dict[str, Any], session: Session = D
     try:
         from modules.whatsapp import send_ai_polished_whatsapp_message
         base_url = "https://crm-seo.allytechcourses.com"
-        send_ai_polished_whatsapp_message("Scheduled Call Updated", _sched_dict(sc), f"{base_url}/calls")
+        send_ai_polished_whatsapp_message("Scheduled Call Updated", _sched_dict(sc, session), f"{base_url}/calls")
     except Exception as e:
         print("WhatsApp Error:", e)
         
-    return {"scheduled_call": _sched_dict(sc)}
+    return {"scheduled_call": _sched_dict(sc, session)}
 
 @app.delete("/scheduled-calls/{sc_id}")
 def delete_scheduled_call(sc_id: int, session: Session = Depends(get_session)):
@@ -11508,6 +11639,10 @@ class MeetingUpdateRequest(BaseModel):
     status: Optional[str] = None
     scheduled_at: Optional[str] = None
     duration_minutes: Optional[int] = None
+    host_id: Optional[int] = None
+    lead_id: Optional[int] = None
+    client_id: Optional[int] = None
+    contact_id: Optional[int] = None
     attendees: Optional[List[str]] = None
     notes: Optional[str] = None
     outcome: Optional[str] = None
@@ -11516,6 +11651,7 @@ def _meeting_dict(m: Meeting, session: Session) -> dict:
     host = session.get(User, m.host_id) if m.host_id else None
     lead = session.get(Lead, m.lead_id) if m.lead_id else None
     client = session.get(ClientProfile, m.client_id) if m.client_id else None
+    contact = session.get(Contact, m.contact_id) if m.contact_id else None
     return {
         "id": m.id, "title": m.title, "description": m.description,
         "location": m.location, "meeting_type": m.meeting_type,
@@ -11525,6 +11661,8 @@ def _meeting_dict(m: Meeting, session: Session) -> dict:
         "host_id": m.host_id, "host_name": host.name if host else None,
         "lead_id": m.lead_id, "lead_name": lead.company_name if lead else None,
         "client_id": m.client_id, "client_name": client.companyName if client else None,
+        "contact_id": m.contact_id,
+        "contact_name": f"{contact.first_name} {contact.last_name or ''}".strip() if contact else None,
         "attendees": m.attendees or [],
         "notes": m.notes, "outcome": m.outcome,
         "created_at": m.created_at.isoformat(),

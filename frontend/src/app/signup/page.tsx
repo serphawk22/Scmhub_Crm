@@ -15,7 +15,6 @@ import "@/i18n/config";
 
 const SIGNUP_LANGUAGES = [
   { code: "en", nativeName: "English", name: "English", flag: "🇺🇸" },
-  { code: "es", nativeName: "Español", name: "Spanish", flag: "🇪🇸" },
 ] as const;
 
 function SignupLanguageSwitcher() {

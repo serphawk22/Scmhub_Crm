@@ -61,7 +61,10 @@ export function emailTriggerInfo(
   } else if (method === "POST" && path === "/scheduled-calls") {
     if (!body.entity_email) return null;
     to = nim(body.entity_email);
-    note = "Notify the contact about the scheduled call.";
+    subject = nim(body.title) ? `📞 Call Scheduled: ${body.title}` : null;
+    note = body.pitch
+      ? "Notify this contact about the scheduled call. The email will include the AI pitch."
+      : "Notify this contact about the scheduled call.";
   } else if (method === "POST" && path === "/invoices") {
     if (!body.client_id && !body.lead_id && !body.contact_id) return null;
     note = "Send this invoice to the linked client/lead.";

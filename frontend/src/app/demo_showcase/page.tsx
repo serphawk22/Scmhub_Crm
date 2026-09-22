@@ -979,12 +979,6 @@ export default function DemoShowcase() {
               style={{ padding: "6px 14px", borderRadius: 6, border: `1px solid ${border}`, background: "transparent", color: fg, fontSize: 11, fontWeight: 600, cursor: "pointer", letterSpacing: "-0.01em" }}>
               {t("demo_showcase.start_tour")}
             </button>
-            {/* Language toggle */}
-            <button onClick={() => setLanguage(lang === "en" ? "es" : "en")}
-              style={{ width: 60, height: 28, borderRadius: 14, border: `1px solid ${border}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", padding: "0 4px", position: "relative", transition: "all 0.3s" }}>
-              <div style={{ position: "absolute", left: lang === "en" ? 4 : 34, width: 18, height: 18, borderRadius: "50%", background: fg, transition: "left 0.3s cubic-bezier(0.34,1.56,0.64,1)" }} />
-              <span style={{ position: "absolute", left: lang === "en" ? 26 : 6, fontSize: 8, fontWeight: 800, color: fg, letterSpacing: "0.03em" }}>{lang === "en" ? "ES" : "EN"}</span>
-            </button>
             {/* Theme toggle */}
             <button onClick={() => setTheme(t2 => t2 === "dark" ? "light" : "dark")}
               style={{ width: 60, height: 28, borderRadius: 14, border: `1px solid ${border}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", padding: "0 4px", position: "relative", transition: "all 0.3s" }}>
@@ -1236,9 +1230,6 @@ export default function DemoShowcase() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 16 }}>
-          <button onClick={() => setLanguage(lang === "en" ? "es" : "en")} style={{ fontSize: 11, color: muted, background: "transparent", border: "none", cursor: "pointer" }}>
-            {lang === "en" ? "Ver en Español" : "View in English"}
-          </button>
           <button onClick={() => setTheme(t2 => t2 === "dark" ? "light" : "dark")} style={{ fontSize: 11, color: muted, background: "transparent", border: "none", cursor: "pointer" }}>
             {theme === "dark" ? t("demo_showcase.switch_to_white") : t("demo_showcase.switch_to_black")}
           </button>
