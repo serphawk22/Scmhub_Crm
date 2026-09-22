@@ -16,7 +16,6 @@ import { ClientSidebar } from "@/components/ClientSidebar";
 import { SyncProvider } from "@/context/SyncContext";
 import { GlobalLoader } from "@/components/GlobalLoader";
 import { usePathname } from "next/navigation";
-import { CallNotificationBar } from "@/components/CallNotificationBar";
 import { DeveloperHeader } from "@/components/DeveloperHeader";
 import SpaceAtmosphere from "@/components/SpaceAtmosphere";
 import TelemetryTracker from "@/components/TelemetryTracker";
@@ -47,7 +46,6 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="client-shell relative w-full min-h-screen bg-transparent text-white" style={{ color: "var(--text-primary)" }}>
       <ClientSidebar />
-      <CallNotificationBar />
       <main className={`min-h-screen transition-all duration-300 pt-6 px-4 md:px-6 ${collapsed ? "ml-[72px]" : "ml-[220px]"}`}>
         {children}
       </main>
@@ -155,7 +153,6 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <div className="admin-shell min-h-screen" style={{ background: "var(--background)" }}>
           <Sidebar role={role} />
           <AdminMainContent>
-            <CallNotificationBar />
             {children}
           </AdminMainContent>
           {showChatbot && <Chatbot />}

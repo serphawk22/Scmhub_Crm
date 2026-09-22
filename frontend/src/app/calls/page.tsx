@@ -302,7 +302,7 @@ export default function CallsPage() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [logForm, setLogForm] = useState({ phone_number: "", duration_seconds: "", description: "", work_done: "", assigned_to: "", followup_needed: false, followup_date: "" });
-  const [schedForm, setSchedForm] = useState({ title: "", scheduled_at: "", entity_type: "client", entity_id: "", notes: "", assigned_to: "", generatePitch: false });
+  const [schedForm, setSchedForm] = useState({ title: "", scheduled_at: "", entity_type: "client", entity_id: "", notes: "", assigned_to: "" });
   const [submitting, setSubmitting] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generatedPitch, setGeneratedPitch] = useState("");
@@ -461,33 +461,12 @@ export default function CallsPage() {
     } finally { setSubmitting(false); }
   };
 
-  const handleGeneratePitchInSched = async () => {
-    if (!schedForm.entity_id) return;
-    setGenerating(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/${schedForm.entity_type}s/${schedForm.entity_id}/simulate-call`, { method: "POST" });
-      if (res.ok) { 
-        const data = await res.json(); 
-        setGeneratedPitch(data.pitch || ""); 
-        addToast(t("calls.pitch_generated_toast"), "success");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        addToast(err.detail || t("calls.failed_generate_pitch"), "error");
-      }
-    } catch (e) { 
-      console.error(e); 
-      addToast(t("calls.network_error_pitch"), "error");
-    }
-    finally { setGenerating(false); }
-  };
-
   const handleScheduleCall = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const entityName = getEntityName(schedForm.entity_type, schedForm.entity_id);
       const entityEmail = getEntityEmail(schedForm.entity_type, schedForm.entity_id);
-      let pitch = generatedPitch || null;
       const res = await fetch(`${API_BASE_URL}/scheduled-calls`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
@@ -498,7 +477,6 @@ export default function CallsPage() {
           entity_id: schedForm.entity_id ? parseInt(schedForm.entity_id) : null,
           entity_name: entityName,
           entity_email: entityEmail,
-          pitch,
           notes: schedForm.notes || null,
           assigned_to: schedForm.assigned_to || null,
         }),
@@ -515,8 +493,7 @@ export default function CallsPage() {
         addToast(data?.detail || data?.message || t("calls.failed_schedule_toast") || "Failed to schedule call.", "error");
         return;
       }
-      setSchedForm({ title: "", scheduled_at: "", entity_type: "client", entity_id: "", notes: "", assigned_to: "", generatePitch: false });
-      setGeneratedPitch("");
+      setSchedForm({ title: "", scheduled_at: "", entity_type: "client", entity_id: "", notes: "", assigned_to: "" });
       setShowScheduleModal(false);
       setActiveTab("scheduled");
       fetchAll();
@@ -976,7 +953,7 @@ export default function CallsPage() {
               className="fixed inset-0 bg-slate-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
               <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
                 className="bg-white dark:bg-zinc-900/95 backdrop-blur-2xl rounded-[2rem] border border-slate-200 dark:border-zinc-700 shadow-2xl w-full max-w-xl p-8 relative max-h-[90vh] overflow-y-auto">
-                <button onClick={() => { setShowScheduleModal(false); setGeneratedPitch(""); }} className="absolute top-6 right-6 text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+                <button onClick={() => setShowScheduleModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
                 <h2 className="text-2xl font-black text-slate-800 dark:text-zinc-100 mb-6 flex items-center gap-3">
                   <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><CalendarClock className="w-5 h-5" /></div>
                   {t("calls.schedule_a_call")}
@@ -1006,7 +983,7 @@ export default function CallsPage() {
                     </div>
                     <div>
                       <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{t("calls.select_entity").replace("{entity}", schedForm.entity_type)}</label>
-                      <select value={schedForm.entity_id} onChange={(e) => { setSchedForm({ ...schedForm, entity_id: e.target.value }); setGeneratedPitch(""); }}
+                      <select value={schedForm.entity_id} onChange={(e) => setSchedForm({ ...schedForm, entity_id: e.target.value })}
                         className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl font-bold text-slate-700 dark:text-zinc-200 outline-none focus:ring-2 focus:ring-indigo-400/30">
                         <option value="">{t("calls.select_placeholder")}</option>
                         {schedForm.entity_type === "client" && clients.map((c) => <option key={c.id} value={c.id}>{c.companyName || c.projectName || c.email}</option>)}
@@ -1026,22 +1003,6 @@ export default function CallsPage() {
                       </div>
                     ) : null;
                   })()}
-                  <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 rounded-2xl border border-purple-100 dark:border-purple-900/40 space-y-3">
-                    <p className="text-xs font-black text-purple-600 uppercase tracking-widest">{t("calls.ai_pitch")}</p>
-                    <button type="button" onClick={handleGeneratePitchInSched} disabled={generating || !schedForm.entity_id}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50">
-                      {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                      {generating ? t("calls.generating") : generatedPitch ? t("calls.regenerate") : t("calls.generate_pitch")}
-                    </button>
-                    {generatedPitch ? (
-                      <div className="bg-white/70 dark:bg-zinc-900/50 rounded-xl p-4 border border-purple-100 dark:border-purple-900/30">
-                        <textarea rows={8} value={generatedPitch} onChange={(e) => setGeneratedPitch(e.target.value)}
-                          className="w-full text-sm text-slate-700 dark:text-zinc-200 font-medium leading-relaxed bg-transparent outline-none resize-y" />
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-500 dark:text-zinc-400">{!schedForm.entity_id ? t("calls.select_entity_first") : t("calls.click_generate")}</p>
-                    )}
-                  </div>
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">{t("calls.notes")}</label>
                     <textarea rows={2} placeholder={t("calls.notes_placeholder")} value={schedForm.notes}
@@ -1124,17 +1085,10 @@ export default function CallsPage() {
                     </div>
                   )}
 
-                  {genEntityId && genType !== "contact" && (
-                    <div className={cn(
-                      "flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold",
-                      getEntityPhone(genType, genEntityId)
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                        : "bg-amber-50 text-amber-700 border border-amber-100"
-                    )}>
+                  {genEntityId && genType !== "contact" && getEntityPhone(genType, genEntityId) && (
+                    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
                       <Phone className="w-3.5 h-3.5 shrink-0" />
-                      {getEntityPhone(genType, genEntityId)
-                        ? `Phone on file: ${getEntityPhone(genType, genEntityId)}`
-                        : `No phone number on file for this ${genType} — add one to enable AI calling`}
+                      Phone on file: {getEntityPhone(genType, genEntityId)}
                     </div>
                   )}
 
@@ -1181,12 +1135,6 @@ export default function CallsPage() {
 
                       {/* Call via AI section — only shown after pitch is generated */}
                       <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
-                        <div className="flex items-start gap-3 mb-4 p-3 bg-violet-50 dark:bg-violet-950/20 rounded-xl border border-violet-100 dark:border-violet-900/30">
-                          <Bot className="w-4 h-4 text-violet-600 shrink-0 mt-0.5" />
-                          <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
-                            The AI agent will call your {genType} using this pitch via Vapi. The full conversation transcript and recording will be saved to the CRM and your team will be notified.
-                          </p>
-                        </div>
                         <button
                           id="start-ai-call-btn"
                           type="button"

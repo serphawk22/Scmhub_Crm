@@ -3656,9 +3656,9 @@ def simulate_client_call(client_id: int, req: Optional[SimulateCallRequest] = No
     email = cp.user.email if cp.user else ""
     keywords = ", ".join(cp.targetKeywords) if cp.targetKeywords else ""
 
-    prompt = f"""You are an expert sales representative for "SERP Hawk" (an elite SEO and Digital Marketing Agency).
+    prompt = f"""You are an expert sales representative for "CrmHub" (an elite SEO and Digital Marketing Agency).
 Your task is to write a highly tailored, direct sales script to be read over the phone to this specific client. 
-DO NOT use generic placeholders like "[Your Name]" or "[Your Company]" - assume the persona of a SERP Hawk sales rep.
+DO NOT use a personal name. When the salesperson introduces themselves, write it exactly as "[your Sales Executive]" — never invent or use any real or random personal name.
 
 Client Profile:
 Company/Project: {cp.companyName or cp.projectName or 'Unknown'}
@@ -3675,7 +3675,7 @@ Recent Activity with them:
 Instructions:
 1. Write the exact word-for-word script that the sales person will read on the call.
 2. Directly reference their specific company name, their services/keywords, and especially any past notes or activities.
-3. Pitch SERP Hawk's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
+3. Pitch CrmHub's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
 4. Make it conversational, persuasive, and professional.
 5. Structure it logically but seamlessly.
 6. Output ONLY the spoken script as natural dialogue. Do NOT include markdown headings like **Introduction** or **Value Proposition**. It should read exactly like a transcript of someone speaking. Do not add any meta-commentary."""
@@ -13379,9 +13379,9 @@ def simulate_lead_call(lead_id: int, req: Optional[SimulateCallRequest] = None, 
     industry = lead.industry or "Unknown Industry"
     notes = lead.notes or "No prior notes."
     
-    prompt = f"""You are an expert sales representative for "SERP Hawk" (an elite SEO and Digital Marketing Agency).
+    prompt = f"""You are an expert sales representative for "CrmHub" (an elite SEO and Digital Marketing Agency).
 Your task is to write a highly tailored, direct sales script to be read over the phone to this specific lead. 
-DO NOT use generic placeholders like "[Your Name]" or "[Your Company]" - assume the persona of a SERP Hawk sales rep.
+DO NOT use a personal name. When the salesperson introduces themselves, write it exactly as "[your Sales Executive]" — never invent or use any real or random personal name.
 
 Lead Profile:
 Company Name: {client_name}
@@ -13398,7 +13398,7 @@ Recent Activity:
 Instructions:
 1. Write the exact word-for-word script that the sales person will read on the call.
 2. Directly reference their specific company name, their industry, and any past notes or activities.
-3. Pitch SERP Hawk's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
+3. Pitch CrmHub's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
 4. Make it conversational, persuasive, and professional.
 5. Structure it logically but seamlessly.
 6. Output ONLY the spoken script as natural dialogue. Do NOT include markdown headings like **Introduction** or **Value Proposition**. It should read exactly like a transcript of someone speaking. Do not add any meta-commentary."""
@@ -13455,9 +13455,9 @@ def simulate_contact_call(contact_id: int, req: Optional[SimulateCallRequest] = 
     designation = contact.designation or "Unknown Title"
     notes = contact.notes or "No prior notes."
     
-    prompt = f"""You are an expert sales representative for "SERP Hawk" (an elite SEO and Digital Marketing Agency).
+    prompt = f"""You are an expert sales representative for "CrmHub" (an elite SEO and Digital Marketing Agency).
 Your task is to write a highly tailored, direct sales script to be read over the phone to this specific contact. 
-DO NOT use generic placeholders like "[Your Name]" or "[Your Company]" - assume the persona of a SERP Hawk sales rep.
+DO NOT use a personal name. When the salesperson introduces themselves, write it exactly as "[your Sales Executive]" — never invent or use any real or random personal name.
 
 Contact Profile:
 Name: {client_name}
@@ -13472,7 +13472,7 @@ Notes from our CRM:
 Instructions:
 1. Write the exact word-for-word script that the sales person will read on the call.
 2. Directly reference their specific name, their role/title, and any past notes.
-3. Pitch SERP Hawk's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
+3. Pitch CrmHub's services (e.g. SEO, link building, digital marketing) as the solution to their specific needs.
 4. Make it conversational, persuasive, and professional.
 5. Structure it logically but seamlessly.
 6. Output ONLY the spoken script as natural dialogue. Do NOT include markdown headings like **Introduction** or **Value Proposition**. It should read exactly like a transcript of someone speaking. Do not add any meta-commentary."""
