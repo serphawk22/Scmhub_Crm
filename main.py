@@ -1182,7 +1182,9 @@ def send_manual(body: SendManualRequest, session: Session = Depends(get_session)
     from datetime import datetime
 
     # Determine action string
-    if body.action_type == "Gmail":
+    if body.action_type == "Draft":
+        action_str = "Draft email saved"
+    elif body.action_type == "Gmail":
         action_str = "Outreach via Gmail"
     elif body.action_type == "WhatsApp":
         action_str = "Outreach via WhatsApp"
@@ -1213,7 +1215,8 @@ def send_manual(body: SendManualRequest, session: Session = Depends(get_session)
         session.commit()
         session.refresh(lead)
     else:
-        lead.status = "Contacted"
+        if body.action_type != "Draft":
+            lead.status = "Contacted"
         if body.phone_number:
             lead.phone = body.phone_number
         if body.website_url:
@@ -1269,6 +1272,7 @@ def send_manual(body: SendManualRequest, session: Session = Depends(get_session)
         recommended_services=body.recommended_services or "",
         draft_json=_draft_json_payload,
         manual=body.manual if body.manual is not None else True,
+        status="Draft" if body.action_type == "Draft" else "Sent",
         sent_at=datetime.utcnow(),
     )
     session.add(sent_email)
@@ -1341,6 +1345,8 @@ def send_manual(body: SendManualRequest, session: Session = Depends(get_session)
             log_action = f"Sent outreach via WhatsApp to {body.phone_number}"
         elif body.action_type == "System Auto":
             log_action = f"Automated outreach email sent to {body.to_email}"
+        elif body.action_type == "Draft":
+            log_action = f"Draft email saved for {body.to_email}"
         else:
             log_action = f"Manual outreach email sent to {body.to_email}"
 
@@ -5252,7 +5258,7 @@ def reports_summary(
     end_date: Optional[str] = None,
     session: Session = Depends(get_session),
 ):
-    _require_roles(session, ["Admin", "SalesManager"])
+    _require_roles(session, ["Admin"])
     today = datetime.utcnow().date()
     start = _report_date(start_date, today - timedelta(days=29))
     end = _report_date(end_date, today)
