@@ -298,7 +298,7 @@ export default function LeadSidebarPanel({
                     <div className="mb-3 flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
                       <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
                       <p className="text-[10px] font-bold text-emerald-700">
-                        Found {extractResult.count} services · {extractResult.marketplace} added to Marketplace
+                        Services extracted.
                       </p>
                     </div>
                   )}

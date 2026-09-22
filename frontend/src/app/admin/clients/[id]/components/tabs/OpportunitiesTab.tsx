@@ -384,7 +384,7 @@ export default function OpportunitiesTab({ client, timeline, serviceRequests, re
               <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                 <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
                 <p className="text-xs font-bold text-emerald-700">
-                  Found {extractResult.count} services · {extractResult.marketplace} added to Marketplace
+                  Services extracted.
                 </p>
               </div>
             )}
