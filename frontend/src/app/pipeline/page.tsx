@@ -226,7 +226,7 @@ export default function PipelinePage() {
                       className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm cursor-grab active:cursor-grabbing hover:border-indigo-300 hover:shadow-md transition-all group"
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-slate-800 dark:text-zinc-100 line-clamp-1" title={deal.title}>{deal.title}</h4>
+                        <h4 className="min-w-0 flex-1 break-words whitespace-normal pr-2 font-semibold leading-5 text-slate-800 dark:text-zinc-100" title={deal.title}>{deal.title}</h4>
                         <button type="button" onClick={() => openEditDeal(deal)} title="Edit deal" className="text-slate-400 hover:text-indigo-600 dark:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -235,7 +235,7 @@ export default function PipelinePage() {
                         </button>
                       </div>
                       
-                      <div className="text-sm text-slate-500 dark:text-zinc-400 mb-3 flex items-center gap-1.5 line-clamp-1">
+                      <div className="min-w-0 text-sm text-slate-500 dark:text-zinc-400 mb-3 flex items-start gap-1.5 break-words whitespace-normal">
                         <MapPin className="w-3.5 h-3.5" />
                         {deal.client_name}
                       </div>
@@ -245,7 +245,7 @@ export default function PipelinePage() {
                           <DollarSign className="w-4 h-4" />
                           {deal.value.toLocaleString()}
                         </div>
-                        {deal.assigned_name && <p className="mt-2 text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
+                        {deal.assigned_name && <p className="mt-2 max-w-[45%] break-words text-right text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
                         {deal.expected_close_date && (
                           <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
                             <Calendar className="w-3.5 h-3.5" />
