@@ -556,13 +556,6 @@ export function Sidebar({ role }: SidebarProps) {
                   <span className="block text-[10px] font-medium truncate" style={{ color: "var(--text-secondary)" }}>{t("sidebar.corporate_hq")}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={toggleTheme}
-                    className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                    title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                  >
-                    {theme === "dark" ? <Sun className="w-3.5 h-3.5 text-yellow-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-500" />}
-                  </button>
                   <button 
                     onClick={() => setIsEditMode(!isEditMode)} 
                     className={cn("p-1.5 rounded-lg transition-colors", isEditMode ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50" : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")}

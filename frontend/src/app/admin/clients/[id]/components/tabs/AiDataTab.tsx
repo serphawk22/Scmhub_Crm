@@ -155,7 +155,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
             <Brain size={20} />
             <div>
               <h2 className="text-base font-black tracking-tight">AI DATA</h2>
-              <p className="text-xs text-indigo-100">Website intelligence powered by your scraper and GPT-4o</p>
+              <p className="text-xs text-indigo-100">Website intelligence powered by your scraper and AI</p>
             </div>
           </div>
           <button
@@ -174,7 +174,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
             <Loader2 size={20} className="shrink-0 animate-spin" />
             <div>
               <p className="text-sm font-bold">Extracting company information...</p>
-              <p className="text-xs text-indigo-600">Scraping the website and asking GPT-4o to organize the full company profile. This can take a few minutes.</p>
+              <p className="text-xs text-indigo-600">Scraping the website and organizing the full company profile. This can take a few minutes.</p>
             </div>
           </div>
         )}

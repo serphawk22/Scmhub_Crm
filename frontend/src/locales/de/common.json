@@ -457,7 +457,7 @@
   },
   "aiCopilot": {
     "title": "KI-Vertriebs-Copilot",
-    "poweredBy": "GPT-4o",
+    "poweredBy": "AI-Assistent",
     "subtitle": "Analysiert Notizen, Gespräche und Aktivitäten",
     "analyzeClient": "Kunden Analysieren",
     "reAnalyze": "Erneut Analysieren",

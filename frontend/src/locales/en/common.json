@@ -470,7 +470,7 @@
   },
   "aiCopilot": {
     "title": "AI Sales Copilot",
-    "poweredBy": "GPT-4o",
+    "poweredBy": "AI Assistant",
     "subtitle": "Analyzes notes, conversations & activity",
     "analyzeClient": "Analyze Client",
     "reAnalyze": "Re-Analyze",
