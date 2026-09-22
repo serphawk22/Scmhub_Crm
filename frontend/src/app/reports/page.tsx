@@ -152,13 +152,45 @@ export default function ReportsPage() {
     pdf.save(`${tab}-report-${startDate}-to-${endDate}.pdf`);
   };
 
+  const downloadFullReport = () => {
+    if (!data) return;
+    const pdf = new jsPDF();
+    const format = (value: unknown) => value == null ? "-" : typeof value === "object" ? JSON.stringify(value) : String(value);
+    const sections: Array<{ title: string; headers: string[]; rows: string[][] }> = [
+      { title: "Overview", headers: ["Metric", "Value"], rows: Object.entries(data.summary).map(([key, value]) => [key.replaceAll("_", " "), format(value)]) },
+      { title: "Sales Report", headers: ["Deal", "Stage", "Value", "Owner"], rows: data.sales.deals.map(deal => [format(deal.title), format(deal.stage), format(deal.value), format(deal.assigned_to)]) },
+      { title: "Calls", headers: ["Date", "Phone", "Agent", "Duration", "Follow-up", "Notes"], rows: data.calls.map(call => [fmtDate(call.date), format(call.phone_number), format(call.assigned_to), fmtMinutes(call.duration_seconds), call.followup_needed ? format(call.followup_date || "Yes") : "No", format(call.summary)]) },
+      { title: "Meetings", headers: ["When", "Title", "Type", "Status", "Host", "Duration", "Location", "Outcome"], rows: data.meetings.map(meeting => [fmtDate(meeting.scheduled_at), format(meeting.title), format(meeting.meeting_type), format(meeting.status), format(meeting.host), meeting.duration_minutes ? `${meeting.duration_minutes}m` : "-", format(meeting.location), format(meeting.outcome)]) },
+      { title: "Daily Report", headers: ["Date", "Leads", "Onboarded", "Deals won", "Emails", "Activities", "Calls", "Meetings", "Tasks", "Tickets", "Cases"], rows: data.daily.map(item => [format(item.date), format(item.leads), format(item.clients_onboarded), format(item.deals_won), format(item.emails), format(item.activities), format(item.calls), format(item.meetings), format(item.task_entries), format(item.tickets), format(item.cases_resolved)]) },
+      { title: "Monthly Report", headers: ["Month", "Leads", "Onboarded", "Deals won", "Emails", "Calls", "Meetings"], rows: data.monthly.map(item => [format(item.month), format(item.leads), format(item.clients_onboarded), format(item.deals_won), format(item.emails), format(item.calls), format(item.meetings)]) },
+      { title: "Staff Performance", headers: ["Staff", "Role", "Total work", "Calls", "Meetings", "Completed", "Tickets", "Cases"], rows: data.staff_performance.map(item => [format(item.name), format(item.role), format(item.total_work), format(item.calls), format(item.meetings), format(item.completed_tasks), format(item.tickets), format(item.cases)]) },
+      { title: "Lead Sources", headers: ["Source", "Leads", "Converted", "Conversion %"], rows: data.lead_sources.map(item => [format(item.source), format(item.leads), format(item.converted), `${format(item.conversion_percentage)}%`]) },
+      { title: "Client Onboarding", headers: ["Metric", "Count"], rows: Object.entries(data.onboarding).map(([key, value]) => [key.replaceAll("_", " "), format(value)]) },
+    ];
+    sections.forEach((section, index) => {
+      if (index > 0) pdf.addPage();
+      pdf.setFont("helvetica", "bold"); pdf.setFontSize(18); pdf.setTextColor(15, 23, 42);
+      pdf.text(section.title, 14, 18);
+      pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); pdf.setTextColor(71, 85, 105);
+      pdf.text(`Reporting period: ${startDate} to ${endDate}`, 14, 26);
+      drawPdfTable(pdf, section.headers, section.rows, 36);
+    });
+    const pageCount = pdf.getNumberOfPages();
+    for (let page = 1; page <= pageCount; page += 1) {
+      pdf.setPage(page); pdf.setFontSize(8); pdf.setTextColor(100, 116, 139);
+      pdf.text(`Page ${page} of ${pageCount}`, 14, pdf.internal.pageSize.getHeight() - 8);
+    }
+    pdf.setProperties({ title: "Complete sales report" });
+    pdf.save(`complete-sales-report-${startDate}-to-${endDate}.pdf`);
+  };
+
   const summary = data?.summary || {};
   const staffRows = useMemo(() => (data?.staff_performance || []).map(item => [item.name, item.role, item.total_work, item.calls, item.meetings, item.completed_tasks, item.tickets, item.cases]), [data]);
   const fmtMinutes = (seconds: number | null | undefined) => seconds == null ? "–" : ((seconds / 60) < 1 ? `${seconds}s` : `${Math.round(seconds / 60)}m`);
   const fmtDate = (iso: string) => iso ? new Date(iso).toLocaleDateString() + " " + new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "–";
   if (role !== "Admin" && role !== "SuperAdmin") return <div className="p-10 text-center font-bold text-slate-500">Reports are available to administrators only.</div>;
   return <div className="mx-auto max-w-[1500px] space-y-6">
-    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Decision center</p><h1 className="text-3xl font-black text-slate-900 dark:text-white">Reports</h1><p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">One consistent view of sales, delivery, staff output, sources, and onboarding.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900"><CalendarDays size={16} className="text-indigo-500" /><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} /></label><span className="text-slate-400">to</span><input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900" /><button onClick={load} className="rounded-xl bg-indigo-600 p-2.5 text-white" title="Refresh"><RefreshCw size={17} /></button><button onClick={download} disabled={!data} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"><Download size={16} /> Download PDF</button></div></div>
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Decision center</p><h1 className="text-3xl font-black text-slate-900 dark:text-white">Reports</h1><p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">One consistent view of sales, delivery, staff output, sources, and onboarding.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900"><CalendarDays size={16} className="text-indigo-500" /><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} /></label><span className="text-slate-400">to</span><input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900" /><button onClick={load} className="rounded-xl bg-indigo-600 p-2.5 text-white" title="Refresh"><RefreshCw size={17} /></button><button onClick={download} disabled={!data} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"><Download size={16} /> Download PDF</button><button onClick={downloadFullReport} disabled={!data} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"><Download size={16} /> Full Sales Report</button></div></div>
     <div className="flex gap-1 overflow-x-auto rounded-2xl bg-slate-100 p-1 dark:bg-zinc-900">{tabs.map(([key, label]) => <button key={key} onClick={() => setTab(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-black transition-colors ${tab === key ? "bg-white text-indigo-600 shadow-sm dark:bg-zinc-800" : "text-slate-500"}`}>{label}</button>)}</div>
     {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">{error}</div>}
     {loading ? <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-slate-100 dark:bg-zinc-900" />)}</div> : data && <>

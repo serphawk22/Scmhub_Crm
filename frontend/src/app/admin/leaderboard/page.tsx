@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Trophy, Star, Ticket, DollarSign } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Trophy, Star, Ticket, DollarSign, Camera, Download, Sparkles } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/config";
 import { useLanguage } from "@/context/LanguageContext";
@@ -124,6 +126,26 @@ export default function LeaderboardPage() {
   const [salesLeaderboard, setSalesLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [ticketsLeaderboard, setTicketsLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const captureBoard = async (asPdf: boolean) => {
+    if (!boardRef.current) return;
+    setRevealed(true);
+    await new Promise(resolve => setTimeout(resolve, 450));
+    const canvas = await html2canvas(boardRef.current, { backgroundColor: "#f8fafc", scale: 2, useCORS: true });
+    const image = canvas.toDataURL("image/png");
+    if (asPdf) {
+      const pdf = new jsPDF({ orientation: canvas.width > canvas.height ? "landscape" : "portrait", unit: "px", format: [canvas.width, canvas.height] });
+      pdf.addImage(image, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save("leaderboard-reveal.pdf");
+    } else {
+      const link = document.createElement("a");
+      link.download = "leaderboard-reveal.png";
+      link.href = image;
+      link.click();
+    }
+  };
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -157,7 +179,11 @@ export default function LeaderboardPage() {
   const ticketsTop3 = ticketsBoard.slice(0, 3);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-14 min-h-[calc(100vh-64px)]">
+    <div ref={boardRef} className={`p-6 md:p-8 max-w-7xl mx-auto space-y-14 min-h-[calc(100vh-64px)] transition-all duration-500 ${revealed ? "ring-4 ring-yellow-300/70 shadow-2xl shadow-yellow-500/20" : ""}`}>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-yellow-200 bg-gradient-to-r from-yellow-50 via-white to-cyan-50 p-5 shadow-lg dark:border-yellow-800/40 dark:from-yellow-950/20 dark:via-zinc-900 dark:to-cyan-950/20">
+        <div className="flex items-center gap-3"><div className="rounded-2xl bg-yellow-400 p-3 text-white shadow-lg shadow-yellow-400/30"><Sparkles size={20} /></div><div><p className="text-xs font-black uppercase tracking-[0.2em] text-yellow-600">Grand Reveal</p><h1 className="text-2xl font-black text-slate-900 dark:text-white">Leaderboard Spotlight</h1></div></div>
+        <div className="flex items-center gap-2"><button onClick={() => captureBoard(false)} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5"><Camera size={15} /> Screenshot</button><button onClick={() => captureBoard(true)} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5"><Download size={15} /> Save PDF</button></div>
+      </div>
 
       {/* ── SALES LEADERBOARD ───────────────────────────────────────── */}
       <section className="space-y-6">

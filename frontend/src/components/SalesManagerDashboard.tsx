@@ -125,63 +125,6 @@ export function SalesManagerDashboard({ stats, name }: { stats: SalesManagerStat
         <div className="rounded-2xl border bg-white dark:bg-zinc-900 p-5"><p className="text-xs font-bold text-slate-400 uppercase">Deal Win Rate</p><p className="text-2xl font-black dark:text-white">{stats.metrics?.deal_win_rate || 0}%</p></div>
       </motion.div>
 
-      {/* Recent Activity */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white dark:bg-zinc-900 rounded-3xl p-8 shadow-xl shadow-slate-200/20 dark:shadow-none border border-slate-100 dark:border-zinc-800"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-3">
-            Recent Sales Activity
-          </h3>
-          <Link href="/activities" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1 group">
-            View all <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        {stats.recent_activity && stats.recent_activity.length > 0 ? (
-          <div className="space-y-6">
-            {stats.recent_activity.map((activity, i) => (
-              <div key={i} className="flex items-start gap-4">
-                <div className={`mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                  activity.type === 'Call' 
-                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
-                    : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
-                }`}>
-                  {activity.type === 'Call' ? <PhoneCall className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
-                </div>
-                <div className="flex-1 bg-slate-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-slate-100 dark:border-zinc-800/80 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                    <p className="font-bold text-slate-800 dark:text-zinc-100">{activity.title}</p>
-                    <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 bg-white dark:bg-zinc-900 px-2 py-1 rounded-md border border-slate-200 dark:border-zinc-700 w-fit">
-                      {formatDate(activity.date)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
-                      {activity.type}
-                    </span>
-                    <span className="text-slate-300 dark:text-zinc-600">•</span>
-                    <span className={`text-xs font-bold uppercase tracking-wider ${
-                      activity.status === 'Completed' ? 'text-emerald-500' : 'text-amber-500'
-                    }`}>
-                      {activity.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-slate-50 dark:bg-zinc-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-700">
-            <Target className="w-12 h-12 text-slate-300 dark:text-zinc-600 mx-auto mb-3" />
-            <p className="text-slate-500 dark:text-zinc-400 font-medium">No recent activities found.</p>
-            <p className="text-sm text-slate-400 dark:text-zinc-500 mt-1">Make a call or schedule a meeting to see it here.</p>
-          </div>
-        )}
-      </motion.div>
     </div>
   );
 }
