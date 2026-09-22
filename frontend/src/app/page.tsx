@@ -213,7 +213,7 @@ export default function HomePage() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) {
-      window.location.href = "/showcase/index.html";
+      router.replace("/login");
       return;
     }
     if (role === "Employee") {

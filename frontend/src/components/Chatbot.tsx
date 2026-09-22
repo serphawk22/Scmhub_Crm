@@ -17,8 +17,38 @@ const QUICK_ACTIONS: QuickAction[] = [
   { label: 'Add Client', icon: <UserPlus className="w-3.5 h-3.5 text-emerald-500" />, route: '/clients?action=add' },
   { label: 'Email Agent', icon: <Mail className="w-3.5 h-3.5 text-blue-500" />, route: '/email-agent' },
   { label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5 text-indigo-500" />, route: '/' },
-  { label: 'Marketplace', icon: <ShoppingBag className="w-3.5 h-3.5 text-amber-500" />, route: '/admin/marketplace' },
+  { label: 'Deals', icon: <Briefcase className="w-3.5 h-3.5 text-emerald-500" />, route: '/pipeline' },
+  { label: 'Reports', icon: <TrendingUp className="w-3.5 h-3.5 text-cyan-500" />, route: '/reports' },
+  { label: 'Leaderboard', icon: <TrendingUp className="w-3.5 h-3.5 text-yellow-500" />, route: '/admin/leaderboard' },
+  { label: 'Team Directory', icon: <Users className="w-3.5 h-3.5 text-indigo-500" />, route: '/teams' },
+  { label: 'Task Sheet', icon: <FolderOpen className="w-3.5 h-3.5 text-emerald-500" />, route: '/task-sheet' },
 ];
+
+const ROLE_ROUTES: Record<string, Array<{ label: string; route: string }>> = {
+  Admin: [
+    { label: 'Dashboard', route: '/' }, { label: 'Leads', route: '/leads' }, { label: 'Contacts', route: '/contacts' }, { label: 'Clients', route: '/clients' }, { label: 'Deals', route: '/pipeline' }, { label: 'Projects', route: '/projects' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Reports', route: '/reports' }, { label: 'Meetings', route: '/meetings' }, { label: 'Calls', route: '/calls' }, { label: 'Team Directory', route: '/teams' }, { label: 'Leaderboard', route: '/admin/leaderboard' }, { label: 'Email Agent', route: '/email-agent' }, { label: 'Cases', route: '/support/cases' },
+  ],
+  SuperAdmin: [
+    { label: 'Dashboard', route: '/' }, { label: 'Leads', route: '/leads' }, { label: 'Contacts', route: '/contacts' }, { label: 'Clients', route: '/clients' }, { label: 'Deals', route: '/pipeline' }, { label: 'Projects', route: '/projects' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Reports', route: '/reports' }, { label: 'Meetings', route: '/meetings' }, { label: 'Calls', route: '/calls' }, { label: 'Team Directory', route: '/teams' }, { label: 'Leaderboard', route: '/admin/leaderboard' }, { label: 'Email Agent', route: '/email-agent' }, { label: 'Cases', route: '/support/cases' },
+  ],
+  SalesManager: [
+    { label: 'Dashboard', route: '/' }, { label: 'Leads', route: '/leads' }, { label: 'Contacts', route: '/contacts' }, { label: 'Clients', route: '/clients' }, { label: 'Deals', route: '/pipeline' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Meetings', route: '/meetings' }, { label: 'Calls', route: '/calls' }, { label: 'Leaderboard', route: '/admin/leaderboard' }, { label: 'Email Agent', route: '/email-agent' }, { label: 'Cases', route: '/support/cases' },
+  ],
+  ProjectMember: [
+    { label: 'Dashboard', route: '/' }, { label: 'Projects', route: '/projects' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Cases', route: '/support/cases' },
+  ],
+  Developer: [
+    { label: 'Dashboard', route: '/' }, { label: 'Projects', route: '/projects' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Cases', route: '/support/cases' },
+  ],
+  Employee: [
+    { label: 'Dashboard', route: '/' }, { label: 'Projects', route: '/projects' }, { label: 'Task Sheet', route: '/task-sheet' }, { label: 'Email Agent', route: '/email-agent' }, { label: 'Cases', route: '/support/cases' },
+  ],
+};
+
+const routeAllowed = (route: string, allowedRoutes: string[]) => {
+  const cleanRoute = route.split('?')[0];
+  return allowedRoutes.some(allowed => cleanRoute === allowed || (allowed !== '/' && cleanRoute.startsWith(`${allowed}/`)));
+};
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,8 +64,12 @@ export function Chatbot() {
   const [sessionId, setSessionId] = useState<string>('');
   const [isListening, setIsListening] = useState(false);
 
-  // ── GATE: Only Admin and Demo can see the chatbot ──────────────────
-  const isAllowed = role === 'Admin' || role === 'Demo';
+  const allowedSections = ROLE_ROUTES[role] || ROLE_ROUTES.Employee;
+  const allowedRoutes = allowedSections.map(section => section.route);
+  const visibleQuickActions = QUICK_ACTIONS.filter(action => routeAllowed(action.route, allowedRoutes));
+  const sectionGuide = allowedSections.map(section => `${section.label}: ${section.route}`).join(', ');
+  const currentSection = allowedSections.find(section => pathname === section.route || (section.route !== '/' && pathname?.startsWith(`${section.route}/`)));
+  const isAllowed = role !== 'Client' && !!role;
 
   useEffect(() => {
     let storedSession: string;
@@ -55,7 +89,7 @@ export function Chatbot() {
 
   const handleCommand = async (text: string) => {
     // Quick navigation shortcut
-    const action = QUICK_ACTIONS.find(a => a.label === text);
+    const action = visibleQuickActions.find(a => a.label === text);
     if (action) {
       setMessages(prev => [...prev,
         { role: 'user', text },
@@ -77,14 +111,20 @@ export function Chatbot() {
           current_route: pathname,
           chat_history: messages.map(m => `${m.role}: ${m.text}`).join('\n') + `\nuser: ${text}`,
           session_id: sessionId,
-          user_role: role
+          user_role: role,
+          allowed_sections: sectionGuide,
+          current_section: currentSection?.label || 'Dashboard'
         })
       });
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'bot', text: data.reply || "I've processed your request.", action: data.action_taken }]);
 
       if (data.action_taken === 'navigate' && data.route) {
-        setTimeout(() => router.push(data.route), 1500);
+        if (routeAllowed(data.route, allowedRoutes)) {
+          setTimeout(() => router.push(data.route), 1500);
+        } else {
+          setMessages(prev => [...prev, { role: 'bot', text: "I can only take you to sections available in your sidebar. Ask me about one of those sections and I’ll guide you." }]);
+        }
       } else if (data.action_taken && !['trigger_whatsapp', 'navigate'].includes(data.action_taken)) {
         window.dispatchEvent(new Event('refresh-client-data'));
       }
@@ -188,7 +228,7 @@ export function Chatbot() {
           <div className="px-4 py-3 bg-white dark:bg-zinc-900 shrink-0 border-t border-slate-100 dark:border-zinc-800">
             <p className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-2">Quick Navigate</p>
             <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-              {QUICK_ACTIONS.map((action) => (
+              {visibleQuickActions.map((action) => (
                 <button
                   key={action.label}
                   onClick={() => handleCommand(action.label)}

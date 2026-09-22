@@ -457,7 +457,7 @@
   },
   "aiCopilot": {
     "title": "Copilota Vendite IA",
-    "poweredBy": "GPT-4o",
+    "poweredBy": "Assistente IA",
     "subtitle": "Analizza note, conversazioni e attività",
     "analyzeClient": "Analizza Cliente",
     "reAnalyze": "Ri-Analizza",

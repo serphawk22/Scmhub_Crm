@@ -111,7 +111,7 @@ export default function AiCopilotPanelLead({ leadId, client }: AiCopilotPanelLea
             <Brain size={18} className="text-white" />
             <span className="font-black text-sm text-white">{language === 'es' ? 'Copiloto IA de Ventas' : 'AI Sales Copilot'}</span>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white dark:bg-zinc-900/20 text-white">GPT-4o</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white dark:bg-zinc-900/20 text-white">AI Assistant</span>
         </div>
         <p className="text-xs text-violet-200 mt-1">{language === 'es' ? 'Analiza notas, conversaciones y actividad' : 'Analyzes notes, conversations & activity'}</p>
       </div>

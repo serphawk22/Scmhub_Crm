@@ -457,7 +457,7 @@
   },
   "aiCopilot": {
     "title": "Copilote Commercial IA",
-    "poweredBy": "GPT-4o",
+    "poweredBy": "Assistant IA",
     "subtitle": "Analyse les notes, conversations et activités",
     "analyzeClient": "Analyser le Client",
     "reAnalyze": "Ré-Analyser",
