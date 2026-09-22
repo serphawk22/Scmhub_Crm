@@ -654,7 +654,8 @@ export default function LeadDetailsPage() {
       const res = await fetch(`${API_BASE_URL}/leads/${id}`);
       if (!res.ok) throw new Error("Failed to load lead");
       const data = await res.json();
-      setLead(data.client || data);
+      const leadData = data.client || data;
+      setLead({ ...leadData, assignedEmployeeId: leadData.assignedEmployeeId || leadData.owner_id || null });
     } catch (e) { console.error(e); }
   }, [id]);
 
@@ -677,7 +678,10 @@ export default function LeadDetailsPage() {
         fetchJson(`${API_BASE_URL}/leads/${id}/research`),
       ]);
 
-      if (leadRes.status === 'fulfilled') setLead(leadRes.value.client || leadRes.value);
+      if (leadRes.status === 'fulfilled') {
+        const leadData = leadRes.value.client || leadRes.value;
+        setLead({ ...leadData, assignedEmployeeId: leadData.assignedEmployeeId || leadData.owner_id || null });
+      }
       if (empRes.status === 'fulfilled') setEmployees(empRes.value.users || []);
       if (actRes.status === 'fulfilled') setActivities(actRes.value.activities || []);
       if (emailRes.status === 'fulfilled') setEmails(emailRes.value.emails || []);

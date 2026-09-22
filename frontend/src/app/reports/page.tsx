@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BarChart3, CalendarDays, Download, RefreshCw, TrendingUp, Users, Target, BriefcaseBusiness, CheckCircle2, Phone, Video } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { API_BASE_URL } from "@/config";
 import { useRole } from "@/context/RoleContext";
 
@@ -60,19 +61,29 @@ export default function ReportsPage() {
   const download = () => {
     if (!data) return;
     const rows = tab === "overview" ? Object.entries(data.summary).map(([metric, value]) => [metric, value]) : ((data as any)[tab] instanceof Array ? (data as any)[tab] : Object.entries((data as any)[tab] || {}).map(([key, value]) => [key, value]));
-    const csv = rows.map((row: any) => (Array.isArray(row) ? row : Object.values(row)).map((value: any) => `"${String(value ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${tab}-report-${startDate}-to-${endDate}.csv`; anchor.click(); URL.revokeObjectURL(url);
+    const pdf = new jsPDF();
+    pdf.setFontSize(18);
+    pdf.text(`${tab.replaceAll("_", " ")} report`, 14, 18);
+    pdf.setFontSize(10);
+    pdf.text(`${startDate} to ${endDate}`, 14, 26);
+    let y = 36;
+    rows.forEach((row: any) => {
+      const line = (Array.isArray(row) ? row : Object.values(row)).map((value: any) => String(value ?? "")).join(" | ");
+      const wrapped = pdf.splitTextToSize(line, 180);
+      if (y + wrapped.length * 6 > 285) { pdf.addPage(); y = 18; }
+      pdf.text(wrapped, 14, y);
+      y += wrapped.length * 6;
+    });
+    pdf.save(`${tab}-report-${startDate}-to-${endDate}.pdf`);
   };
 
   const summary = data?.summary || {};
   const staffRows = useMemo(() => (data?.staff_performance || []).map(item => [item.name, item.role, item.total_work, item.calls, item.meetings, item.completed_tasks, item.tickets, item.cases]), [data]);
   const fmtMinutes = (seconds: number | null | undefined) => seconds == null ? "–" : ((seconds / 60) < 1 ? `${seconds}s` : `${Math.round(seconds / 60)}m`);
   const fmtDate = (iso: string) => iso ? new Date(iso).toLocaleDateString() + " " + new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "–";
-  if (role !== "Admin" && role !== "SuperAdmin" && role !== "SalesManager") return <div className="p-10 text-center font-bold text-slate-500">Reports are available to Admin and Sales Manager roles.</div>;
-
+  if (role !== "Admin" && role !== "SuperAdmin") return <div className="p-10 text-center font-bold text-slate-500">Reports are available to administrators only.</div>;
   return <div className="mx-auto max-w-[1500px] space-y-6">
-    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Decision center</p><h1 className="text-3xl font-black text-slate-900 dark:text-white">Reports</h1><p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">One consistent view of sales, delivery, staff output, sources, and onboarding.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900"><CalendarDays size={16} className="text-indigo-500" /><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} /></label><span className="text-slate-400">to</span><input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900" /><button onClick={load} className="rounded-xl bg-indigo-600 p-2.5 text-white" title="Refresh"><RefreshCw size={17} /></button><button onClick={download} disabled={!data} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"><Download size={16} /> Export CSV</button></div></div>
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[0.2em] text-indigo-500">Decision center</p><h1 className="text-3xl font-black text-slate-900 dark:text-white">Reports</h1><p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">One consistent view of sales, delivery, staff output, sources, and onboarding.</p></div><div className="flex flex-wrap items-center gap-2"><label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900"><CalendarDays size={16} className="text-indigo-500" /><input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} /></label><span className="text-slate-400">to</span><input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold dark:border-zinc-800 dark:bg-zinc-900" /><button onClick={load} className="rounded-xl bg-indigo-600 p-2.5 text-white" title="Refresh"><RefreshCw size={17} /></button><button onClick={download} disabled={!data} className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"><Download size={16} /> Download PDF</button></div></div>
     <div className="flex gap-1 overflow-x-auto rounded-2xl bg-slate-100 p-1 dark:bg-zinc-900">{tabs.map(([key, label]) => <button key={key} onClick={() => setTab(key)} className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-black transition-colors ${tab === key ? "bg-white text-indigo-600 shadow-sm dark:bg-zinc-800" : "text-slate-500"}`}>{label}</button>)}</div>
     {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-bold text-rose-700">{error}</div>}
     {loading ? <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-slate-100 dark:bg-zinc-900" />)}</div> : data && <>

@@ -244,6 +244,18 @@ export function ResultCard({ historyId, result, companyName, companyUrl, onSendM
   const [savingFollowUp, setSavingFollowUp] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
 
+  const handleSaveDraft = async () => {
+    if (!toEmail.trim()) { setSendError("Please provide a recipient email address in the 'To:' field."); return; }
+    setSending(true);
+    setSendError(null);
+    try {
+      await onSendManually(getUpdatedResult(), companyName, companyUrl, true, "Draft");
+      setSendSuccess("Draft saved");
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : "Failed to save draft");
+    } finally { setSending(false); }
+  };
+
   const formatBody = (body: any) => {
     if (typeof body !== 'string') return "";
     return body.replace(/<br\s*\/?>/gi, '\n');
@@ -683,6 +695,14 @@ export function ResultCard({ historyId, result, companyName, companyUrl, onSendM
                     </motion.div>
                     Mail Sent Automatically via AI
                   </div>
+                  <button
+                    onClick={handleSaveDraft}
+                    disabled={sending || !!sendSuccess}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-100 font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all disabled:opacity-50"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Save as Draft
+                  </button>
                   <button
                     onClick={handleSendViaSystem}
                     disabled={sending || !!sendSuccess}

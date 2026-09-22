@@ -26,6 +26,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractResult, setExtractResult] = useState<{ count: number; marketplace: number } | null>(null);
   const [extractError, setExtractError] = useState('');
+  const [services, setServices] = useState<any[]>([]);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resourcePath = `${API_BASE_URL}/${resourceType}/${clientId}`;
 
@@ -40,7 +41,10 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
     const response = await fetch(resourceType === 'clients' ? `${resourcePath}/full-analysis` : `${resourcePath}/research`);
     if (!response.ok) return null;
     const data = await response.json();
-    if (resourceType === 'clients') return data;
+    if (resourceType === 'clients') {
+      setServices(data.extracted_services || data.services_offered || data.ai_data?.extracted_services || []);
+      return data;
+    }
 
     const research = data.research || {};
     let agentData = research.email_agent_data;
@@ -48,6 +52,7 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
       try { agentData = JSON.parse(agentData); } catch { agentData = null; }
     }
     const report = agentData?.full_markdown_report || (Object.keys(research).length > 0 ? JSON.stringify(research, null, 2) : null);
+    setServices(agentData?.extracted_services || agentData?.product_portfolio || research.extracted_services || []);
     return report ? { status: 'done', report } : { status: 'pending' };
   }, [resourcePath, resourceType]);
 
@@ -196,6 +201,23 @@ export default function AiDataTab({ clientId, websiteUrl, onClientRefresh, resou
           </div>
         )}
       </section>
+
+      {services.length > 0 && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-black text-slate-800">Extracted Services</h3>
+            <span className="text-xs font-bold text-slate-400">{services.length} detected</span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {services.map((service: any, index: number) => (
+              <div key={`${service.name || service.service_name || service}-${index}`} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="text-sm font-bold text-slate-800">{typeof service === 'string' ? service : service.name || service.service_name}</p>
+                {(service.brief || service.description || service.why_relevant) && <p className="mt-1 text-xs text-slate-500">{service.brief || service.description || service.why_relevant}</p>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">

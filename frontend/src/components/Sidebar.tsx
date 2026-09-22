@@ -143,7 +143,7 @@ function SortableSection({ section, role, pathname, collapsed, isEditMode, onRen
   };
 
   const visibleItems = section.items
-    .filter((item: any) => role === 'SuperAdmin' || item.roles.includes(role))
+    .filter((item: any) => (role === 'SuperAdmin' || item.roles.includes(role)) && !(item.id === 'item-reports' && !['Admin', 'SuperAdmin'].includes(role)))
     .filter((item: any) => !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   if (visibleItems.length === 0) return null;
