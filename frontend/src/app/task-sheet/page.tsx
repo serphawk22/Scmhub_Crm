@@ -17,6 +17,10 @@ interface Entry {
   ticket_name?: string;
   summary: string;
   status: string;
+  time_spent_minutes?: number;
+  blocker?: string;
+  follow_up_date?: string;
+  completion_date?: string;
   updated_at: string;
 }
 
@@ -30,7 +34,7 @@ export default function TaskSheetPage() {
   const [date, setDate] = useState(today());
   const [editing, setEditing] = useState<Entry | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ area: "Development", project_id: "", summary: "", status: "Done" });
+  const [form, setForm] = useState({ area: "Development", project_id: "", summary: "", status: "Completed", time_spent_minutes: "", blocker: "", follow_up_date: "", completion_date: today() });
   const [message, setMessage] = useState("");
 
   const load = async () => {
@@ -50,13 +54,13 @@ export default function TaskSheetPage() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ area: role === "SalesManager" ? "Sales" : "Development", project_id: "", summary: "", status: "Done" });
+    setForm({ area: role === "SalesManager" ? "Sales" : "Development", project_id: "", summary: "", status: "Completed", time_spent_minutes: "", blocker: "", follow_up_date: "", completion_date: today() });
     setShowForm(true);
   };
 
   const openEdit = (entry: Entry) => {
     setEditing(entry);
-    setForm({ area: entry.area, project_id: String(entry.project_id || ""), summary: entry.summary, status: entry.status });
+    setForm({ area: entry.area, project_id: String(entry.project_id || ""), summary: entry.summary, status: entry.status === "Done" ? "Completed" : entry.status, time_spent_minutes: entry.time_spent_minutes ? String(entry.time_spent_minutes) : "", blocker: entry.blocker || "", follow_up_date: entry.follow_up_date || "", completion_date: entry.completion_date || "" });
     setShowForm(true);
   };
 
@@ -70,6 +74,10 @@ export default function TaskSheetPage() {
       project_id: form.project_id ? Number(form.project_id) : null,
       summary: form.summary.trim(),
       status: form.status,
+      time_spent_minutes: form.time_spent_minutes ? Number(form.time_spent_minutes) : null,
+      blocker: form.status === "Blocked" ? form.blocker.trim() || null : null,
+      follow_up_date: form.follow_up_date || null,
+      completion_date: form.status === "Completed" ? (form.completion_date || today()) : null,
     };
     const response = await fetch(`${API_BASE_URL}/task-sheet${editing ? `/${editing.id}` : ""}`, {
       method: editing ? "PUT" : "POST",
@@ -87,8 +95,8 @@ export default function TaskSheetPage() {
   };
 
   const download = () => {
-    const columns = ["Date", "Person", "Area", "Project", "Status", "Work done", "Updated"];
-    const rows = entries.map((entry) => [entry.work_date, entry.user_name, entry.area, entry.project_name || "", entry.status, entry.summary, entry.updated_at]);
+    const columns = ["Date", "Person", "Area", "Project", "Status", "Work done", "Time (min)", "Blocker", "Follow-up", "Completed", "Updated"];
+    const rows = entries.map((entry) => [entry.work_date, entry.user_name, entry.area, entry.project_name || "", entry.status, entry.summary, entry.time_spent_minutes || "", entry.blocker || "", entry.follow_up_date || "", entry.completion_date || "", entry.updated_at]);
     const csv = [columns, ...rows].map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -120,15 +128,17 @@ export default function TaskSheetPage() {
       {message && <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700">{message}</p>}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div className="grid grid-cols-[1.1fr_1fr_1.2fr_2fr_0.8fr_80px] gap-4 border-b border-slate-100 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:border-zinc-800">
-          <span>Date</span><span>Person</span><span>Area / project</span><span>Work completed</span><span>Status</span><span />
+          <span>Date</span><span>Person</span><span>Area / project</span><span>Work completed</span><span>Status</span><span>Time</span><span>Follow-up / blocker</span><span />
         </div>
         {entries.length === 0 ? <div className="px-5 py-16 text-center text-sm font-semibold text-slate-400">No task-sheet entries for this date.</div> : entries.map(entry => (
-          <div key={entry.id} className="grid grid-cols-[1.1fr_1fr_1.2fr_2fr_0.8fr_80px] gap-4 border-b border-slate-100 px-5 py-4 text-sm last:border-0 dark:border-zinc-800">
+          <div key={entry.id} className="grid grid-cols-[1.1fr_1fr_1.2fr_2fr_0.8fr_0.7fr_1.4fr_80px] gap-4 border-b border-slate-100 px-5 py-4 text-sm last:border-0 dark:border-zinc-800">
             <span className="font-bold text-slate-700 dark:text-zinc-200">{entry.work_date}</span>
             <span className="text-slate-600 dark:text-zinc-300">{entry.user_name}</span>
             <span><strong className="block text-slate-800 dark:text-white">{entry.area}</strong><small className="text-slate-400">{entry.project_name || "General work"}</small></span>
             <span className="text-slate-600 dark:text-zinc-300">{entry.summary}</span>
             <span className="font-bold text-emerald-600">{entry.status}</span>
+            <span className="text-slate-600 dark:text-zinc-300">{entry.time_spent_minutes ? `${entry.time_spent_minutes} min` : "-"}</span>
+            <span className="text-xs text-slate-500">{entry.status === "Blocked" ? `Blocked: ${entry.blocker || "-"}` : entry.follow_up_date ? `Follow-up: ${entry.follow_up_date}` : entry.completion_date ? `Completed: ${entry.completion_date}` : "-"}</span>
             <button onClick={() => openEdit(entry)} className="flex items-center gap-1 text-xs font-bold text-indigo-600"><Edit3 size={14} /> Edit</button>
           </div>
         ))}
@@ -136,9 +146,12 @@ export default function TaskSheetPage() {
 
       {showForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"><form onSubmit={save} className="w-full max-w-lg space-y-5 rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
         <div className="flex items-center justify-between"><h2 className="text-xl font-black dark:text-white">{editing ? "Edit entry" : "Add today's work"}</h2><button type="button" onClick={() => setShowForm(false)}><X /></button></div>
-        <div className="grid grid-cols-2 gap-4"><label className="text-xs font-bold text-slate-500">Area<select value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm"><option>Development</option><option>Sales</option><option>QA</option><option>Support</option><option>General</option></select></label><label className="text-xs font-bold text-slate-500">Status<select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm"><option>Done</option><option>In progress</option><option>Blocked</option></select></label></div>
+        <div className="grid grid-cols-2 gap-4"><label className="text-xs font-bold text-slate-500">Area<select value={form.area} onChange={e => setForm({ ...form, area: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm"><option>Development</option><option>Sales</option><option>QA</option><option>Support</option><option>General</option></select></label><label className="text-xs font-bold text-slate-500">Completion<select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm"><option>Completed</option><option>In progress</option><option>Blocked</option></select></label></div>
         <label className="block text-xs font-bold text-slate-500">Project<select value={form.project_id} onChange={e => setForm({ ...form, project_id: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm"><option value="">General work</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
         <label className="block text-xs font-bold text-slate-500">What did you do?<textarea required rows={5} value={form.summary} onChange={e => setForm({ ...form, summary: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm" placeholder="Describe the work, result, or blocker..." /></label>
+        <div className="grid grid-cols-2 gap-4"><label className="text-xs font-bold text-slate-500">Time spent (minutes)<input type="number" min="0" value={form.time_spent_minutes} onChange={e => setForm({ ...form, time_spent_minutes: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm" placeholder="120" /></label><label className="text-xs font-bold text-slate-500">Completion date<input type="date" value={form.completion_date} onChange={e => setForm({ ...form, completion_date: e.target.value })} disabled={form.status !== "Completed"} className="mt-1 w-full rounded-xl border p-3 text-sm disabled:bg-slate-100" /></label></div>
+        {form.status === "Blocked" && <label className="block text-xs font-bold text-rose-600">Blocker<textarea required rows={3} value={form.blocker} onChange={e => setForm({ ...form, blocker: e.target.value })} className="mt-1 w-full rounded-xl border border-rose-200 p-3 text-sm" placeholder="What is blocking completion?" /></label>}
+        {form.status !== "Completed" && <label className="block text-xs font-bold text-slate-500">Follow-up date<input type="date" value={form.follow_up_date} onChange={e => setForm({ ...form, follow_up_date: e.target.value })} className="mt-1 w-full rounded-xl border p-3 text-sm" /></label>}
         <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white"><Save size={16} /> {editing ? "Save changes" : "Save today's entry"}</button>
       </form></div>}
     </div>

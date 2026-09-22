@@ -851,6 +851,10 @@ class TaskSheetEntry(SQLModel, table=True):
     ticket_id: Optional[int] = Field(default=None, foreign_key="project_tickets.id")
     summary: str = Field(sa_column=Column(Text))
     status: str = Field(default="Done", max_length=50)
+    time_spent_minutes: Optional[int] = Field(default=None)
+    blocker: Optional[str] = Field(default=None, sa_column=Column(Text))
+    follow_up_date: Optional[str] = Field(default=None, index=True)
+    completion_date: Optional[str] = Field(default=None, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
