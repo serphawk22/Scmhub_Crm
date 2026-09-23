@@ -13206,6 +13206,49 @@ def _notify_admins(session, tenant_id, title, message, notif_type="info", link=N
         session.add(n)
     session.commit()
 
+
+def _send_new_case_email(case: Case, session: Session) -> bool:
+    """Send the complete new-case details to the support notification list."""
+    recipients = [
+        "varshithrallabandi31@gmail.com",
+        "varshith@serphawk.com",
+        "crm@serphawk.in",
+        "vkanjali@serphawk.in",
+    ]
+    sender, password, smtp_server, smtp_port = _quote_smtp_sender(session)
+    if not sender or not password:
+        print("[New case email skipped] SMTP not configured")
+        return False
+
+    assignee = session.get(User, case.assigned_to) if case.assigned_to else None
+    body = "\n".join([
+        f"Case number: {case.case_number or case.id}",
+        f"Subject: {case.subject}",
+        f"Description: {case.description or '-'}",
+        f"Urgency: {case.priority}",
+        f"Status: {case.status}",
+        f"Category: {case.category or '-'}",
+        f"Case type: {case.case_type or '-'}",
+        f"Related URL: {case.url or '-'}",
+        f"Assigned to: {assignee.name if assignee else '-'}",
+        f"Created date: {case.created_at.isoformat()}",
+    ])
+    try:
+        from modules.email_sender import send_email_outlook
+        send_email_outlook(
+            ", ".join(recipients),
+            "scmhub new case",
+            body,
+            sender,
+            password,
+            smtp_server=smtp_server or "mail.serphawk.in",
+            smtp_port=int(smtp_port or 587),
+        )
+        return True
+    except Exception as exc:
+        print(f"[New case email failed] {exc}")
+        return False
+
 @app.post("/cases")
 def create_case(body: CaseCreateRequest, session: Session = Depends(get_session)):
     import random, string
@@ -13242,6 +13285,10 @@ def create_case(body: CaseCreateRequest, session: Session = Depends(get_session)
         )
     except Exception:
         pass
+    try:
+        _send_new_case_email(c, session)
+    except Exception as exc:
+        print(f"[New case email notification failed] {exc}")
     return {"case": _case_dict(c, session)}
 
 @app.get("/cases/{case_id}")
