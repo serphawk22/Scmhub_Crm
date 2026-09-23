@@ -136,7 +136,7 @@ def send_email_outlook(
     `imap_server` is not provided it is derived from `smtp_server`.
     """
     msg = MIMEMultipart("mixed")
-    msg["From"] = sender_email
+    msg["From"] = f"SCMHub Logistics <{sender_email}>"
     msg["To"] = to_email
     msg["Subject"] = subject
     msg["Date"] = formatdate(localtime=True)
@@ -249,8 +249,8 @@ def branded_email(title, body_html, hero_accent="#2563eb"):
         <!-- Footer -->
         <tr>
           <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e6e9f0;text-align:center;">
-            <p style="margin:0;color:#7b8794;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">SerpHawk CRM</p>
-            <p style="margin:6px 0 0;color:#94a3b8;font-size:11px;line-height:1.6;">This is an automated email from SerpHawk CRM. If you have questions, reply to this message or contact your account manager.</p>
+            <p style="margin:0;color:#7b8794;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">SCMHub Logistics</p>
+            <p style="margin:6px 0 0;color:#94a3b8;font-size:11px;line-height:1.6;">This is an automated email from SCMHub Logistics. If you have questions, reply to this message or contact your account manager.</p>
             <p style="margin:8px 0 0;color:#94a3b8;font-size:10px;line-height:1.5;">If this email looks unusual, you can safely ignore it. Check your spam folder if a message you expected is missing.</p>
           </td>
         </tr>

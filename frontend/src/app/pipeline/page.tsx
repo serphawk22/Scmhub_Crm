@@ -35,6 +35,7 @@ export default function PipelinePage() {
   const [error, setError] = useState<string | null>(null);
 
   const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
+  const [sortBy, setSortBy] = useState<"latest" | "oldest" | "highest_value" | "lowest_value" | "stale">("latest");
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
@@ -154,8 +155,19 @@ export default function PipelinePage() {
     setShowAddModal(true);
   };
 
+  const sortedDeals = [...deals].sort((a, b) => {
+    if (sortBy === "highest_value") return (b.value || 0) - (a.value || 0);
+    if (sortBy === "lowest_value") return (a.value || 0) - (b.value || 0);
+    if (sortBy === "oldest") return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+    if (sortBy === "stale") {
+      const age = (deal: Deal) => Date.now() - new Date(deal.created_at || 0).getTime();
+      return age(b) - age(a);
+    }
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  });
+
   const dealsByStage = STAGES.reduce((acc, stage) => {
-    acc[stage] = deals.filter(d => d.stage === stage);
+    acc[stage] = sortedDeals.filter(d => d.stage === stage);
     return acc;
   }, {} as Record<string, Deal[]>);
 
@@ -178,6 +190,13 @@ export default function PipelinePage() {
             </div>
             
             <div className="flex items-center gap-4">
+              <select value={sortBy} onChange={event => setSortBy(event.target.value as typeof sortBy)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200" aria-label="Sort deals">
+                <option value="latest">Latest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="highest_value">Highest value</option>
+                <option value="lowest_value">Lowest value</option>
+                <option value="stale">Stale longest</option>
+              </select>
               <div className="bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm flex flex-col items-end">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("pipeline.total_pipeline")}</span>
                 <span className="text-lg font-bold text-slate-800 dark:text-zinc-100">${totalValue.toLocaleString()}</span>
