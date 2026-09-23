@@ -56,7 +56,6 @@ export function BottomNav() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/login');
   };
 
   return (

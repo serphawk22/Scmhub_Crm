@@ -49,7 +49,6 @@ export function ClientSidebar() {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/login");
   };
 
   const initial = user?.name?.charAt(0).toUpperCase() || "S";

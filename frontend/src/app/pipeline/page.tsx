@@ -235,19 +235,19 @@ export default function PipelinePage() {
                         </button>
                       </div>
                       
-                      <div className="min-w-0 text-sm text-slate-500 dark:text-zinc-400 mb-3 flex items-start gap-1.5 break-words whitespace-normal">
-                        <MapPin className="w-3.5 h-3.5" />
-                        {deal.client_name}
+                      <div className="min-w-0 text-sm text-slate-500 dark:text-zinc-400 mb-3 flex items-start gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span className="min-w-0 break-words whitespace-normal">{deal.client_name}</span>
                       </div>
                       
-                        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-zinc-800">
-                        <div className="flex items-center gap-1 text-emerald-600 font-semibold text-sm">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                        <div className="flex shrink-0 items-center gap-1 text-emerald-600 font-semibold text-sm">
                           <DollarSign className="w-4 h-4" />
                           {deal.value.toLocaleString()}
                         </div>
-                        {deal.assigned_name && <p className="mt-2 max-w-[45%] break-words text-right text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
+                        {deal.assigned_name && <p className="min-w-0 flex-1 break-words text-right text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
                         {deal.expected_close_date && (
-                          <div className="flex items-center gap-1 text-xs text-slate-400 font-medium">
+                          <div className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-slate-400 font-medium">
                             <Calendar className="w-3.5 h-3.5" />
                             {new Date(deal.expected_close_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                           </div>

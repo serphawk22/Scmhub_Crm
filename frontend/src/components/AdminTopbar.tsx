@@ -411,7 +411,7 @@ export function AdminTopbar() {
                 
                 <div className="py-2" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-secondary)" }}>
                   <button
-                    onClick={() => { logout(); router.push("/login"); }}
+                    onClick={() => { logout(); setUserMenuOpen(false); }}
                     className="flex items-center gap-3 w-full px-4 py-2 text-[13px] font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-100/50 transition-all"
                   >
                     <LogOut className="w-4 h-4" /> {t("auth.logout")}

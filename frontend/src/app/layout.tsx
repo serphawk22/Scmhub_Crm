@@ -134,7 +134,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
             </div>
             <span className="font-bold text-slate-800 dark:text-white text-sm">Supplier Portal</span>
           </div>
-          <a href="/login" onClick={() => { localStorage.removeItem("crm_user"); }}
+          <a href="/" onClick={() => { localStorage.removeItem("crm_user"); }}
             className="text-xs font-semibold text-slate-500 hover:text-red-500 transition-colors">
             Sign Out
           </a>

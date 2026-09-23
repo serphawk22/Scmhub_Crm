@@ -188,7 +188,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('crm_user');
-    router.replace('/login');
+    router.replace('/');
   };
 
   return (
