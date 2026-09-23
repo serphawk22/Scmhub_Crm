@@ -26,6 +26,25 @@ interface RoleContextType {
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
+function readStoredUser(): User | null {
+  if (typeof window === 'undefined') return null;
+
+  const savedUser = localStorage.getItem('crm_user');
+  if (!savedUser) return null;
+
+  try {
+    const parsedUser = JSON.parse(savedUser);
+    if (parsedUser?.id && parsedUser?.email && parsedUser?.role) {
+      return parsedUser;
+    }
+  } catch {
+    // Clear malformed client state below.
+  }
+
+  localStorage.removeItem('crm_user');
+  return null;
+}
+
 if (typeof window !== 'undefined' && !(window as any)._fetchPatched) {
   (window as any)._fetchPatched = true;
   const originalFetch = window.fetch;
@@ -99,12 +118,7 @@ if (typeof window !== 'undefined' && !(window as any)._fetchPatched) {
     
     // If we get a 401 from an internal API (other than the login endpoint itself)
     if (response.status === 401 && isInternalApi && typeof resource === 'string' && !resource.endsWith('/login')) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('crm_user');
-        if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
-        }
-      }
+      console.warn(`[API] Unauthorized request: ${resource}`);
     }
     
     return response;
@@ -119,9 +133,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('crm_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const storedUser = readStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
       setIsAuthenticated(true);
     }
     setLoading(false);
