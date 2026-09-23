@@ -87,7 +87,8 @@ export default function ReportsPage() {
   const load = async () => {
     setLoading(true); setError("");
     try {
-      const response = await fetch(`${API_BASE_URL}/reports/summary?start_date=${startDate}&end_date=${endDate}`);
+      const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
+      const response = await fetch(`${API_BASE_URL}/reports/summary?${params.toString()}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.detail || "Unable to load reports");
       setData(payload);
@@ -95,7 +96,9 @@ export default function ReportsPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { if (role) load(); }, [role]);
+  useEffect(() => {
+    if (role && startDate && endDate && startDate <= endDate) load();
+  }, [role, startDate, endDate]);
 
   const download = () => {
     if (!data) return;
