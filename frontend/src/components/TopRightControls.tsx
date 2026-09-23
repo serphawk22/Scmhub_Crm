@@ -125,7 +125,7 @@ export default function TopRightControls() {
               
               <div className="py-2 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
                 <button
-                  onClick={() => { logout(); router.push("/login"); }}
+                  onClick={() => { logout(); setUserMenuOpen(false); }}
                   className="flex items-center gap-3 w-full px-4 py-2 text-[13px] font-medium text-rose-500 hover:text-rose-600 hover:bg-rose-100/50 transition-all cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" /> Logout
