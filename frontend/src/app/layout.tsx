@@ -25,6 +25,7 @@ import TopRightControls from "@/components/TopRightControls";
 import GoogleProviderWrapper from "@/components/GoogleProviderWrapper";
 import { GlobalLimitModal } from "@/components/GlobalLimitModal";
 import { NotificationProvider } from "@/context/NotificationContext";
+import GlobalFooter from "@/components/GlobalFooter";
 
 function AdminMainContent({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
@@ -246,6 +247,7 @@ export default function RootLayout({
                     <TelemetryTracker />
                     <SpaceAtmosphere />
                     <AppContent>{children}</AppContent>
+                    <GlobalFooter />
                     <OmniSearch />
                     <QuickAddFab />
                     <GlobalLimitModal />
