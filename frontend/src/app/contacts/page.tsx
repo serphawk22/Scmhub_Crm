@@ -140,24 +140,19 @@ export default function ContactsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<any>(null);
   
-  const [leads, setLeads] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
   const emptyForm = {
     id: null,
     first_name: "", last_name: "", email: "", mobile_number: "", designation: "", department: "", linkedin_url: "", twitter_url: "",
-    assignment_type: "none",
-    client_id: "", lead_id: "", parent_contact_id: null
+    parent_contact_id: null
   };
   const [form, setForm] = useState<any>(emptyForm);
 
   useEffect(() => {
     fetchContacts();
     fetchAllContactsFlat();
-    fetch(`${API_BASE_URL}/leads`).then(r => r.json()).then(data => setLeads(data.leads || []));
-    fetch(`${API_BASE_URL}/clients`).then(r => r.json()).then(data => setClients(data.clients || []));
   }, []);
 
   const fetchContacts = async (query = "") => {
@@ -228,9 +223,6 @@ export default function ContactsPage() {
       department: contact.department || "",
       linkedin_url: contact.linkedin_url || "",
       twitter_url: contact.twitter_url || "",
-      assignment_type: contact.client_id ? "client" : contact.lead_id ? "lead" : "none",
-      client_id: contact.client_id || "",
-      lead_id: contact.lead_id || "",
       parent_contact_id: contact.parent_contact_id || null
     });
     setShowModal(true);
@@ -425,37 +417,6 @@ export default function ContactsPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 block">{t("contacts.assignment_options")}</label>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <label className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer text-slate-900 dark:text-white">
-                      <input type="radio" name="assignment" checked={form.assignment_type === 'none'} onChange={() => setForm({...form, assignment_type: 'none'})} /> {t("contacts.standalone")}
-                    </label>
-                    <label className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer text-slate-900 dark:text-white">
-                      <input type="radio" name="assignment" checked={form.assignment_type === 'create_lead'} onChange={() => setForm({...form, assignment_type: 'create_lead'})} /> {t("contacts.create_new_lead")}
-                    </label>
-                    <label className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer text-slate-900 dark:text-white">
-                      <input type="radio" name="assignment" checked={form.assignment_type === 'lead'} onChange={() => setForm({...form, assignment_type: 'lead'})} /> {t("contacts.assign_to_lead")}
-                    </label>
-                    <label className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer text-slate-900 dark:text-white">
-                      <input type="radio" name="assignment" checked={form.assignment_type === 'client'} onChange={() => setForm({...form, assignment_type: 'client'})} /> {t("contacts.assign_to_client")}
-                    </label>
-                  </div>
-
-                  {form.assignment_type === 'lead' && (
-                    <select value={form.lead_id} onChange={e => setForm({...form, lead_id: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white">
-                      <option value="">{t("contacts.select_lead")}</option>
-                      {leads.map(l => <option key={l.id} value={l.id}>{l.company_name}</option>)}
-                    </select>
-                  )}
-                  {form.assignment_type === 'client' && (
-                    <select value={form.client_id} onChange={e => setForm({...form, client_id: e.target.value})} className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white">
-                      <option value="">{t("contacts.select_client")}</option>
-                      {clients.map(c => <option key={c.id} value={c.id}>{c.companyName || c.projectName || c.email}</option>)}
-                    </select>
-                  )}
-                </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1.5 block">{t("contacts.linkedin_url")}</label>
@@ -483,10 +444,6 @@ export default function ContactsPage() {
                     twitter_url: form.twitter_url,
                     parent_contact_id: form.parent_contact_id
                   };
-                  if (form.assignment_type === 'create_lead') payload.create_new_lead = true;
-                  if (form.assignment_type === 'lead' && form.lead_id) payload.lead_id = parseInt(form.lead_id);
-                  if (form.assignment_type === 'client' && form.client_id) payload.client_id = parseInt(form.client_id);
-                  
                   try {
                     const method = form.id ? "PUT" : "POST";
                     const url = form.id ? `${API_BASE_URL}/contacts/${form.id}` : `${API_BASE_URL}/contacts`;
