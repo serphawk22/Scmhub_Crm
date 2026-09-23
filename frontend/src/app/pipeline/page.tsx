@@ -240,18 +240,20 @@ export default function PipelinePage() {
                         <span className="min-w-0 break-words whitespace-normal">{deal.client_name}</span>
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
-                        <div className="flex shrink-0 items-center gap-1 text-emerald-600 font-semibold text-sm">
+                      <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                        <div className="flex items-center gap-1 text-emerald-600 font-semibold text-sm">
                           <DollarSign className="w-4 h-4" />
                           {deal.value.toLocaleString()}
                         </div>
-                        {deal.assigned_name && <p className="min-w-0 flex-1 break-words text-right text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
-                        {deal.expected_close_date && (
-                          <div className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-slate-400 font-medium">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {new Date(deal.expected_close_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                          </div>
-                        )}
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                          {deal.assigned_name && <p className="min-w-[72px] flex-1 break-words text-left text-[10px] font-bold text-indigo-500">Owner: {deal.assigned_name}</p>}
+                          {deal.expected_close_date && (
+                            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap text-xs text-slate-400 font-medium">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {new Date(deal.expected_close_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
