@@ -42,6 +42,7 @@ interface AdminStats {
   chartLabels: string[]; activityChart: number[]; emailChart: number[]; callChart: number[];
   revenueData: { name: string; revenue: number; expenses: number }[];
   pipelineData: { stage: string; count: number }[];
+  projectsData: { id: number; name: string; status: string; progress: number; ticket_total: number; ticket_done: number; ticket_in_progress: number }[];
   revenue: number; pipelineValue: number;
   totalQuotesValue: number; acceptedQuotesValue: number; totalQuotesCount: number; acceptedQuotesCount: number;
   totalSalesOrdersValue: number; fulfilledSalesOrdersValue: number; totalSalesOrdersCount: number; fulfilledSalesOrdersCount: number;

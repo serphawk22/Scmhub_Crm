@@ -5087,7 +5087,22 @@ def list_projects(member_id: Optional[int] = None, session: Session = Depends(ge
                (p.internIds and member_id in p.internIds):
                 filtered.append(p)
         projects = filtered
-    return {"projects": [_project_dict(p) for p in projects]}
+
+    # Compute real ticket-based progress for each project
+    result = []
+    for p in projects:
+        tickets = session.exec(
+            select(ProjectTicket).where(ProjectTicket.project_id == p.id)
+        ).all()
+        total = len(tickets)
+        done = sum(1 for t in tickets if t.date_release_prod or t.current_state in ("Prod Release", "Given to QA", "In Dev"))
+        ticket_progress = round((done / total) * 100) if total > 0 else (p.progress or 0)
+        d = _project_dict(p)
+        d["progress"] = ticket_progress
+        d["ticket_total"] = total
+        d["ticket_done"] = sum(1 for t in tickets if t.date_release_prod or t.current_state == "Prod Release")
+        result.append(d)
+    return {"projects": result}
 
 
 @app.post("/projects")
@@ -6633,7 +6648,27 @@ def dashboard_stats(
     hold_clients = len(
         session.exec(select(ClientProfile).where(ClientProfile.status == "Hold")).all()
     )
-    total_projects = len(session.exec(select(Project)).all())
+    all_projects_list = session.exec(select(Project)).all()
+    total_projects = len(all_projects_list)
+    # Build project progress list with real ticket-based progress
+    projects_with_progress = []
+    for proj in all_projects_list:
+        proj_tickets = session.exec(
+            select(ProjectTicket).where(ProjectTicket.project_id == proj.id)
+        ).all()
+        t_total = len(proj_tickets)
+        t_done = sum(1 for t in proj_tickets if t.date_release_prod or t.current_state == "Prod Release")
+        t_in_progress = sum(1 for t in proj_tickets if t.current_state in ("In Dev", "Given to QA"))
+        real_progress = round((t_done / t_total) * 100) if t_total > 0 else (proj.progress or 0)
+        projects_with_progress.append({
+            "id": proj.id,
+            "name": proj.name,
+            "status": proj.status,
+            "progress": real_progress,
+            "ticket_total": t_total,
+            "ticket_done": t_done,
+            "ticket_in_progress": t_in_progress,
+        })
     total_employees = len(
         session.exec(select(User).where(User.role == "Employee").where(User.tenant_id == current_tenant_id.get())).all()
     )
@@ -6777,6 +6812,7 @@ def dashboard_stats(
         "pending": pending_clients,
         "hold": hold_clients,
         "totalProjects": total_projects,
+        "projectsData": projects_with_progress,
         "totalEmployees": total_employees,
         "totalInterns": total_interns,
         "totalActivities": total_activities,

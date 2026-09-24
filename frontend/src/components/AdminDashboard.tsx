@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Send, Briefcase, Target, Activity, Phone, GraduationCap, ArrowUpRight, CheckCircle2, TrendingUp, DollarSign, Timer, AlertTriangle, Sparkles, Loader2, Printer, Plus, ChevronUp, ChevronDown, Bot, X, MapPin, Zap, Mail, Globe, Trophy, Lightbulb, BarChart2 } from "lucide-react";
+import { Users, Send, Briefcase, Target, Activity, Phone, GraduationCap, ArrowUpRight, CheckCircle2, TrendingUp, DollarSign, Timer, AlertTriangle, Sparkles, Loader2, Printer, Plus, ChevronUp, ChevronDown, Bot, X, MapPin, Zap, Mail, Globe, Trophy, Lightbulb, BarChart2, FolderKanban } from "lucide-react";
 import Link from "next/link";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell, RadialBarChart, RadialBar } from "recharts";
 import { cn } from "@/lib/utils";
@@ -472,6 +472,60 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
           </div>
         </div>
       </motion.div>
+
+      {/* PROJECTS PROGRESS */}
+      {adminStats?.projectsData?.length > 0 && (
+        <motion.div variants={itemVariants} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-[var(--border)] flex justify-between items-center bg-[var(--sidebar-hover)]/30">
+            <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <FolderKanban className="w-5 h-5 text-sky-500" /> Projects Progress
+            </h3>
+            <Link href="/projects" className="text-xs font-semibold text-[var(--primary)] hover:underline flex items-center gap-1">
+              View All <ArrowUpRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {adminStats.projectsData.map((proj) => {
+              const statusColor: Record<string, string> = {
+                Planning: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+                "In Progress": "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
+                Completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+                "On Hold": "bg-slate-100 text-slate-600 dark:bg-zinc-700 dark:text-zinc-300",
+              };
+              const barColor = proj.progress >= 100 ? "bg-emerald-500" : proj.progress >= 50 ? "bg-blue-500" : "bg-amber-500";
+              return (
+                <Link key={proj.id} href={`/projects/${proj.id}`} className="group block p-4 border border-[var(--border)] rounded-xl hover:border-sky-400/50 hover:shadow-md transition-all">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <p className="text-sm font-bold text-[var(--text-primary)] leading-tight line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">{proj.name}</p>
+                    <span className={`shrink-0 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColor[proj.status] ?? "bg-slate-100 text-slate-600"}`}>
+                      {proj.status}
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="mb-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">Progress</span>
+                      <span className="text-xs font-black text-[var(--text-primary)]">{proj.progress}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${barColor}`}
+                        style={{ width: `${proj.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                  {/* Ticket counts */}
+                  <div className="flex items-center gap-3 text-[10px] font-semibold text-[var(--text-secondary)] mt-2">
+                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-emerald-500" />{proj.ticket_done} done</span>
+                    <span className="flex items-center gap-1"><Timer className="w-3 h-3 text-amber-500" />{proj.ticket_in_progress} active</span>
+                    <span className="flex items-center gap-1 ml-auto opacity-60">{proj.ticket_total} total</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* TEAM ENGAGEMENT & ACTIVITY */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
