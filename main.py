@@ -6677,6 +6677,7 @@ def dashboard_stats(
     def _billing_value(row):
         return getattr(row, "grand_total", None) or getattr(row, "total", None) or 0
 
+    all_deals = session.exec(select(Deal)).all()
     revenue_data = []
     today = datetime.utcnow()
     for i in range(5, -1, -1):
@@ -6698,22 +6699,21 @@ def dashboard_stats(
             v = getattr(row, "created_at", None)
             return bool(v and month_start <= v < month_end)
         
-        # Money in: quotes + paid invoices + sales orders created this month.
+        # Money in: quotes + paid invoices + sales orders + Closed Won deals
         rev = (
             sum(_billing_value(q) for q in all_quotes if _in_month(q))
             + sum(_billing_value(inv) for inv in all_invoices if inv.status == "Paid" and _in_month(inv))
             + sum(_billing_value(o) for o in all_sales_orders if _in_month(o))
+            + sum(d.value or 0 for d in all_deals if d.stage == "Closed Won" and _in_month(d))
         )
         # Money out: purchase orders created this month.
         exp = sum(_billing_value(po) for po in all_purchase_orders if _in_month(po))
         revenue_data.append({"name": calendar.month_abbr[target_month], "revenue": rev, "expenses": exp})
         
+    deal_stages = ["Lead", "Discovery", "Demo", "Negotiation", "Closed Won", "Closed Lost"]
     pipeline_data = [
-        {"stage": "Prospecting", "count": pending_clients},
-        {"stage": "Qualification", "count": len([r for r in all_service_reqs if r.status == "Pending"])},
-        {"stage": "Proposal", "count": len([r for r in all_service_reqs if r.status == "Quoted"])},
-        {"stage": "Negotiation", "count": len([r for r in all_service_reqs if r.status == "In Progress"])},
-        {"stage": "Closed Won", "count": len([r for r in all_service_reqs if r.status == "Accepted"])},
+        {"stage": stage, "count": sum(1 for d in all_deals if d.stage == stage)}
+        for stage in deal_stages
     ]
 
     recent_activities = session.exec(
@@ -6721,8 +6721,11 @@ def dashboard_stats(
     ).all()
 
     all_proposals = session.exec(select(Proposal)).all()
-    total_revenue = sum(inv.total or 0 for inv in all_invoices if inv.status == "Paid")
-    total_pipeline_value = sum(p.total_value or 0 for p in all_proposals if p.status not in ("Accepted", "Declined"))
+    # Revenue: paid invoices + won deal values
+    won_deals_revenue = sum(d.value or 0 for d in all_deals if d.stage == "Closed Won")
+    total_revenue = sum(inv.total or 0 for inv in all_invoices if inv.status == "Paid") + won_deals_revenue
+    # Pipeline value: all active (non-lost) deals
+    total_pipeline_value = sum(d.value or 0 for d in all_deals if d.stage not in ("Closed Lost",))
 
     total_quotes_value = sum(_billing_value(q) for q in all_quotes)
     accepted_quotes_value = sum(_billing_value(q) for q in all_quotes if q.status == "Accepted")
