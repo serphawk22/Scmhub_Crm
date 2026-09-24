@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Send, Briefcase, Target, Activity, Phone, GraduationCap, ArrowUpRight, CheckCircle2, TrendingUp, DollarSign, Timer, AlertTriangle, Sparkles, Loader2, Printer, Plus, ChevronUp, ChevronDown, Bot, X, MapPin, Zap, Mail, Globe, Trophy, Lightbulb, BarChart2 } from "lucide-react";
 import Link from "next/link";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell, RadialBarChart, RadialBar } from "recharts";
 import { cn } from "@/lib/utils";
 
 import { useEffect, useState } from "react";
@@ -238,20 +238,6 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
       {/* CALL PITCH WIDGET */}
       <CallPitchWidget />
 
-      {/* QUICK LINKS GRID */}
-      <motion.div variants={itemVariants} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm h-max">
-        <div className="p-5 border-b border-[var(--border)]">
-          <h3 className="font-bold text-[var(--text-primary)]">{t("admin_dashboard.quick_links")}</h3>
-        </div>
-        <div className="p-5 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {NAV_CARDS.filter((c: any) => c.roles.includes(role || "Admin") && !c.title.includes("Pipeline")).map((card: any) => (
-            <Link key={card.href} href={card.href} className="p-4 border border-[var(--border)] rounded-xl hover:border-[var(--primary)] hover:bg-[var(--sidebar-hover)] transition-all group flex flex-col items-center justify-center text-center gap-3">
-              <card.icon className="w-7 h-7 text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors" />
-              <span className="text-xs font-bold text-[var(--text-primary)]">{card.title}</span>
-            </Link>
-          ))}
-        </div>
-      </motion.div>
 
       {/* FINANCIAL & PIPELINE CHARTS */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -327,6 +313,162 @@ export function AdminDashboard({ adminStats, NAV_CARDS, language, isDemo }: any)
                 <p className="text-sm font-medium">{t("admin_dashboard.no_pipeline_data")}</p>
               </div>
             )}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* DEALS & REPORTS SECTION */}
+      <motion.div variants={itemVariants} className="space-y-4">
+        {/* Section Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <BarChart2 className="w-5 h-5 text-violet-500" />
+            Deals &amp; Reports
+          </h2>
+          <span className="text-xs font-semibold px-2.5 py-1 bg-violet-500/10 text-violet-600 rounded-md">Live Data</span>
+        </div>
+
+        {/* Deal KPI mini-cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            {
+              label: "Total Deals",
+              value: adminStats?.pipelineData?.reduce((sum: number, d: any) => sum + (d.count || 0), 0) ?? 0,
+              icon: Target,
+              color: "text-violet-500",
+              bg: "bg-violet-50 dark:bg-violet-500/10",
+            },
+            {
+              label: "Won Deals",
+              value: adminStats?.pipelineData?.find((d: any) => /won|closed/i.test(d.stage))?.count ?? 0,
+              icon: CheckCircle2,
+              color: "text-emerald-500",
+              bg: "bg-emerald-50 dark:bg-emerald-500/10",
+            },
+            {
+              label: "Pipeline Value",
+              value: adminStats?.pipelineValue != null ? `$${adminStats.pipelineValue.toLocaleString()}` : "$0",
+              icon: DollarSign,
+              color: "text-indigo-500",
+              bg: "bg-indigo-50 dark:bg-indigo-500/10",
+            },
+            {
+              label: "Win Rate",
+              value: (() => {
+                const total = adminStats?.pipelineData?.reduce((s: number, d: any) => s + (d.count || 0), 0) || 0;
+                const won = adminStats?.pipelineData?.find((d: any) => /won|closed/i.test(d.stage))?.count || 0;
+                return total > 0 ? `${Math.round((won / total) * 100)}%` : "—";
+              })(),
+              icon: TrendingUp,
+              color: "text-amber-500",
+              bg: "bg-amber-50 dark:bg-amber-500/10",
+            },
+          ].map((kpi, idx) => (
+            <div key={idx} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex items-center gap-3 shadow-sm">
+              <div className={`p-2.5 rounded-xl ${kpi.bg}`}>
+                <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-0.5">{kpi.label}</p>
+                <p className="text-xl font-black text-[var(--text-primary)]">{String(kpi.value)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Deals by Stage — Bar Chart */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm overflow-hidden flex flex-col h-[320px]">
+            <div className="p-5 border-b border-[var(--border)] flex justify-between items-center bg-[var(--sidebar-hover)]/30">
+              <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-violet-500" /> Deals by Stage
+              </h3>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-violet-500/10 text-violet-600 rounded-md">Pipeline Breakdown</span>
+            </div>
+            <div className="p-4 flex-1 w-full h-full min-h-0">
+              {adminStats?.pipelineData?.length ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={adminStats.pipelineData} margin={{ top: 5, right: 15, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="stage" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-secondary)", fontWeight: 600 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-secondary)" }} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderRadius: "8px", color: "var(--text-primary)", fontSize: "12px", fontWeight: "bold" }}
+                    />
+                    <Bar dataKey="count" name="Deals" radius={[4, 4, 0, 0]} barSize={32}>
+                      {adminStats.pipelineData.map((_: any, index: number) => {
+                        const COLORS = ["#6366f1", "#3b82f6", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
+                        return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-[var(--text-secondary)]">
+                  <AlertTriangle className="w-8 h-8 mb-2 opacity-50" />
+                  <p className="text-sm font-medium">No deal stage data available</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Deal Distribution — Donut / Pie Chart */}
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-sm overflow-hidden flex flex-col h-[320px]">
+            <div className="p-5 border-b border-[var(--border)] flex justify-between items-center bg-[var(--sidebar-hover)]/30">
+              <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <Target className="w-4 h-4 text-indigo-500" /> Deal Distribution
+              </h3>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-indigo-500/10 text-indigo-600 rounded-md">% Share by Stage</span>
+            </div>
+            <div className="p-4 flex-1 w-full h-full min-h-0 flex items-center">
+              {adminStats?.pipelineData?.length ? (
+                <div className="flex w-full h-full items-center gap-4">
+                  <ResponsiveContainer width="55%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={adminStats.pipelineData}
+                        dataKey="count"
+                        nameKey="stage"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius="50%"
+                        outerRadius="80%"
+                        paddingAngle={3}
+                      >
+                        {adminStats.pipelineData.map((_: any, index: number) => {
+                          const COLORS = ["#6366f1", "#3b82f6", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
+                          return <Cell key={`cell-pie-${index}`} fill={COLORS[index % COLORS.length]} />;
+                        })}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderRadius: "8px", color: "var(--text-primary)", fontSize: "12px", fontWeight: "bold" }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Legend */}
+                  <div className="flex-1 flex flex-col gap-2 overflow-y-auto max-h-full pr-1">
+                    {adminStats.pipelineData.map((d: any, index: number) => {
+                      const COLORS = ["#6366f1", "#3b82f6", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6"];
+                      const total = adminStats.pipelineData.reduce((s: number, x: any) => s + (x.count || 0), 0);
+                      const pct = total > 0 ? Math.round((d.count / total) * 100) : 0;
+                      return (
+                        <div key={index} className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                          <span className="text-[11px] font-semibold text-[var(--text-primary)] flex-1 truncate">{d.stage}</span>
+                          <span className="text-[11px] font-bold text-[var(--text-secondary)] shrink-0">{d.count} <span className="text-[10px]">({pct}%)</span></span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-[var(--text-secondary)]">
+                  <AlertTriangle className="w-8 h-8 mb-2 opacity-50" />
+                  <p className="text-sm font-medium">No distribution data available</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
